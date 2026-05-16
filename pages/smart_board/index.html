@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0d1b35;
+  height:100vh;display:flex;flex-direction:column;
+  font-family:'Nunito',sans-serif;
+  overflow:hidden;user-select:none;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+#header{
+  background:#141C6E;
+  display:flex;align-items:center;
+  padding:0 16px;height:52px;
+  border-bottom:3px solid #000;
+  gap:10px;flex-shrink:0;
+}
+#header-title{
+  font-family:'Fredoka One',cursive;
+  font-size:22px;color:#FFD700;
+  letter-spacing:1.5px;flex:1;
+  text-shadow:1px 1px 0 #000;
+}
+.hdr-btn{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.1);
+  border:2px solid rgba(255,255,255,.22);
+  color:white;font-family:'Fredoka One',cursive;font-size:13px;
+  padding:5px 13px;border-radius:8px;cursor:pointer;
+  transition:background .12s,transform .1s;white-space:nowrap;
+}
+.hdr-btn:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
+.hdr-btn:active{transform:translateY(1px)}
+#btn-undo  svg{color:#AADDFF}
+#btn-clear svg{color:#FFAAAA}
+#btn-save  svg{color:#AAFFAA}
+
+/* ── TOOLBAR ─────────────────────────────────────────────── */
+#toolbar{
+  background:#1a2480;
+  display:flex;align-items:center;
+  padding:0 10px;height:56px;
+  border-bottom:2px solid #000;
+  gap:5px;flex-shrink:0;overflow-x:auto;
+}
+.tb-sep{width:2px;height:36px;background:rgba(255,255,255,.2);margin:0 3px;flex-shrink:0}
+
+.tool-btn{
+  width:40px;height:40px;
+  background:rgba(255,255,255,.08);
+  border:2px solid transparent;border-radius:8px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:white;flex-shrink:0;
+  transition:background .1s,transform .1s,border-color .1s;
+  position:relative;
+}
+.tool-btn:hover{background:rgba(255,255,255,.18)}
+.tool-btn.active{
+  border-color:#FFF;background:rgba(255,255,255,.24);transform:scale(1.1);
+}
+.tool-btn svg{width:22px;height:22px;fill:currentColor}
+
+/* Color palette */
+#color-palette{
+  display:grid;grid-template-columns:repeat(10,22px);
+  grid-template-rows:repeat(2,22px);
+  gap:2px;flex-shrink:0;
+}
+.cswatch{
+  width:22px;height:22px;border-radius:3px;cursor:pointer;
+  border:2px solid rgba(0,0,0,.3);
+  transition:transform .1s;
+}
+.cswatch:hover{transform:scale(1.2);z-index:2;position:relative}
+.cswatch.active{
+  border:2.5px solid #FFF;outline:1.5px solid #000;
+  transform:scale(1.25);z-index:2;position:relative;
+}
+#color-custom{
+  width:22px;height:44px;border:none;padding:0;
+  cursor:pointer;background:none;border-radius:3px;
+  flex-shrink:0;outline:2px solid rgba(255,255,255,.4);
+}
+
+/* Stroke sizes */
+#size-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 2px}
+.size-btn{
+  background:#CCC;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;
+  transition:transform .1s,border-color .1s;flex-shrink:0;
+}
+.size-btn:hover{transform:scale(1.2)}
+.size-btn.active{border-color:#FFD700;transform:scale(1.18)}
+.size-s{width:8px;height:8px}
+.size-m{width:14px;height:14px}
+.size-l{width:22px;height:22px}
+
+/* Background selector */
+#bg-select{
+  background:rgba(255,255,255,.1);
+  border:2px solid rgba(255,255,255,.3);
+  color:white;font-family:'Nunito',sans-serif;
+  font-size:12px;font-weight:800;
+  padding:5px 8px;border-radius:8px;cursor:pointer;flex-shrink:0;
+}
+#bg-select option{color:#000;background:white}
+
+/* ── BOARD AREA ──────────────────────────────────────────── */
+#board-wrap{
+  flex:1;position:relative;overflow:hidden;
+  background:#ffffff;
+}
+#board-wrap.bg-white  {background:#ffffff}
+#board-wrap.bg-dark   {background:#1e3320}
+#board-wrap.bg-grid   {
+  background-color:#ffffff;
+  background-image:
+    linear-gradient(rgba(100,150,200,.22) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(100,150,200,.22) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+#board-wrap.bg-lined  {
+  background-color:#ffffff;
+  background-image:repeating-linear-gradient(
+    transparent,transparent 29px,rgba(100,150,210,.32) 29px,rgba(100,150,210,.32) 30px);
+}
+#board{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  touch-action:none;
+}
+#board-wrap.cur-cross {cursor:crosshair}
+#board-wrap.cur-eraser{cursor:cell}
+#board-wrap.cur-text  {cursor:text}
+#board-wrap.cur-fill  {cursor:crosshair}
+
+/* Text input overlay */
+#text-input{
+  position:absolute;display:none;
+  border:2px dashed rgba(120,160,255,.7);
+  background:rgba(255,255,255,.06);
+  outline:none;border-radius:4px;
+  padding:2px 6px;min-width:90px;
+  font-family:'Nunito',sans-serif;font-weight:700;
+  z-index:10;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div id="header-title">🖊 Smart Board</div>
+  <button class="hdr-btn" id="btn-undo"  onclick="undo()">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#AADDFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h10a5 5 0 0 1 0 10H7"/><polyline points="7 3 3 7 7 11"/></svg>
+    Undo
+  </button>
+  <button class="hdr-btn" id="btn-clear" onclick="clearBoard()">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFAAAA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    Clear
+  </button>
+  <button class="hdr-btn" id="btn-save"  onclick="saveBoard()">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#AAFFAA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Save PNG
+  </button>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+
+  <!-- Tool buttons -->
+  <div class="tool-btn active" id="t-pen"    title="Pen (P)"       onclick="setTool('pen')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  </div>
+  <div class="tool-btn" id="t-eraser" title="Eraser (E)"    onclick="setTool('eraser')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l10-10 7 7-1.5 1.5"/><path d="M6.0 11.0 l7 7"/></svg>
+  </div>
+  <div class="tool-btn" id="t-rect"   title="Rectangle (R)" onclick="setTool('rect')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+  </div>
+  <div class="tool-btn" id="t-circle" title="Circle (C)"    onclick="setTool('circle')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+  </div>
+  <div class="tool-btn" id="t-line"   title="Line (L)"      onclick="setTool('line')">
+    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+  </div>
+  <div class="tool-btn" id="t-text"   title="Text (T)"      onclick="setTool('text')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm4 5h8v2H8zm2 5h4v2h-4z"/></svg>
+  </div>
+  <div class="tool-btn" id="t-fill"   title="Fill (F)"      onclick="setTool('fill')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15a1.49 1.49 0 0 0 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z"/></svg>
+  </div>
+
+  <div class="tb-sep"></div>
+
+  <!-- Color palette -->
+  <div id="color-palette"></div>
+  <input type="color" id="color-custom" title="Custom color" value="#000000">
+
+  <div class="tb-sep"></div>
+
+  <!-- Stroke sizes -->
+  <div id="size-btns">
+    <div class="size-btn size-s active" title="Thin (4px)"   onclick="setSize(4,this)"></div>
+    <div class="size-btn size-m"        title="Medium (10px)" onclick="setSize(10,this)"></div>
+    <div class="size-btn size-l"        title="Thick (20px)"  onclick="setSize(20,this)"></div>
+  </div>
+
+  <div class="tb-sep"></div>
+
+  <!-- Background -->
+  <select id="bg-select" onchange="setBg(this.value)">
+    <option value="white">⬜ White</option>
+    <option value="dark">🌲 Chalkboard</option>
+    <option value="grid"># Grid</option>
+    <option value="lined">≡ Lined</option>
+  </select>
+
+</div>
+
+<!-- BOARD -->
+<div id="board-wrap" class="bg-white cur-cross">
+  <canvas id="board"></canvas>
+  <input id="text-input" type="text" placeholder="Type here…" autocomplete="off" spellcheck="false">
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+const S = {
+  tool:'pen', color:'#000000', size:4, bg:'white',
+  drawing:false, startX:0, startY:0,
+  snapshot:null, undoStack:[], MAX_UNDO:30,
+};
+
+// ── CANVAS ───────────────────────────────────────────────────────────────────
+const wrap  = document.getElementById('board-wrap');
+const board = document.getElementById('board');
+const ctx   = board.getContext('2d');
+
+function initCanvas() {
+  board.width  = wrap.clientWidth;
+  board.height = wrap.clientHeight;
+  resetCtx();
+}
+
+function resetCtx() {
+  ctx.lineCap   = 'round';
+  ctx.lineJoin  = 'round';
+  ctx.lineWidth = S.size;
+  ctx.strokeStyle = S.color;
+  ctx.fillStyle   = S.color;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+window.addEventListener('resize', () => {
+  const snap = ctx.getImageData(0, 0, board.width, board.height);
+  board.width  = wrap.clientWidth;
+  board.height = wrap.clientHeight;
+  resetCtx();
+  ctx.putImageData(snap, 0, 0);
+});
+window.addEventListener('load', initCanvas);
+
+// ── PALETTE ───────────────────────────────────────────────────────────────────
+const COLORS = [
+  '#000000','#444444','#888888','#FFFFFF','#8B0000','#CC0000','#FF4500','#FF8C00','#FFD700','#228B22',
+  '#006400','#006699','#0033CC','#4B0082','#9400D3','#FF0099','#FF77AA','#D2691E','#8B4513','#00CCEE',
+];
+
+const paletteEl = document.getElementById('color-palette');
+COLORS.forEach(hex => {
+  const sw = document.createElement('div');
+  sw.className = 'cswatch';
+  sw.style.background = hex;
+  if (hex === '#FFFFFF') sw.style.border = '2px solid #999';
+  sw.title = hex;
+  sw.addEventListener('click', () => pickColor(hex, sw));
+  paletteEl.appendChild(sw);
+});
+paletteEl.children[0].classList.add('active'); // black default
+
+const customPicker = document.getElementById('color-custom');
+customPicker.addEventListener('input', () => {
+  document.querySelectorAll('.cswatch').forEach(s => s.classList.remove('active'));
+  applyColor(customPicker.value);
+});
+
+function pickColor(hex, el) {
+  document.querySelectorAll('.cswatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  customPicker.value = hex;
+  applyColor(hex);
+}
+
+function applyColor(hex) {
+  S.color = hex;
+  ctx.strokeStyle = hex;
+  ctx.fillStyle   = hex;
+  // update text input color
+  const ti = document.getElementById('text-input');
+  ti.style.color = hex;
+}
+
+// ── TOOLS ─────────────────────────────────────────────────────────────────────
+function setTool(name) {
+  S.tool = name;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('t-' + name).classList.add('active');
+  // cursor
+  wrap.className = wrap.className.replace(/cur-\w+/g,'').trim();
+  const curMap = { pen:'cross', eraser:'eraser', rect:'cross', circle:'cross',
+                   line:'cross', text:'text', fill:'fill' };
+  wrap.classList.add('cur-' + (curMap[name] || 'cross'));
+  hideText();
+}
+
+// ── SIZE ──────────────────────────────────────────────────────────────────────
+function setSize(px, btn) {
+  S.size = px;
+  ctx.lineWidth = px;
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── BACKGROUND ────────────────────────────────────────────────────────────────
+function setBg(val) {
+  S.bg = val;
+  wrap.className = wrap.className.replace(/bg-\w+/g,'').trim();
+  wrap.classList.add('bg-' + val);
+}
+
+// ── UNDO / CLEAR ──────────────────────────────────────────────────────────────
+function pushUndo() {
+  S.undoStack.push(ctx.getImageData(0, 0, board.width, board.height));
+  if (S.undoStack.length > S.MAX_UNDO) S.undoStack.shift();
+}
+
+function undo() {
+  hideText();
+  if (!S.undoStack.length) return;
+  ctx.putImageData(S.undoStack.pop(), 0, 0);
+}
+
+function clearBoard() {
+  hideText();
+  pushUndo();
+  ctx.clearRect(0, 0, board.width, board.height);
+}
+
+// ── SAVE PNG ──────────────────────────────────────────────────────────────────
+function saveBoard() {
+  const tmp  = document.createElement('canvas');
+  tmp.width  = board.width;
+  tmp.height = board.height;
+  const tc   = tmp.getContext('2d');
+
+  const bgFill = {white:'#ffffff', dark:'#1e3320', grid:'#ffffff', lined:'#ffffff'};
+  tc.fillStyle = bgFill[S.bg] || '#ffffff';
+  tc.fillRect(0, 0, tmp.width, tmp.height);
+
+  if (S.bg === 'grid') {
+    tc.strokeStyle = 'rgba(100,150,200,.22)';
+    tc.lineWidth = 1;
+    for (let x = 0; x < tmp.width;  x += 30){ tc.beginPath(); tc.moveTo(x,0); tc.lineTo(x,tmp.height); tc.stroke(); }
+    for (let y = 0; y < tmp.height; y += 30){ tc.beginPath(); tc.moveTo(0,y); tc.lineTo(tmp.width,y);  tc.stroke(); }
+  } else if (S.bg === 'lined') {
+    tc.strokeStyle = 'rgba(100,150,210,.32)';
+    tc.lineWidth = 1;
+    for (let y = 30; y < tmp.height; y += 30){ tc.beginPath(); tc.moveTo(0,y); tc.lineTo(tmp.width,y); tc.stroke(); }
+  }
+
+  tc.drawImage(board, 0, 0);
+  const a = document.createElement('a');
+  a.download = 'smart-board.png';
+  a.href = tmp.toDataURL('image/png');
+  a.click();
+}
+
+// ── POINTER HELPERS ───────────────────────────────────────────────────────────
+function getXY(e) {
+  const r = board.getBoundingClientRect();
+  if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+// ── DRAWING EVENTS ────────────────────────────────────────────────────────────
+board.addEventListener('mousedown',  onDown);
+board.addEventListener('mousemove',  onMove);
+board.addEventListener('mouseup',    onUp);
+board.addEventListener('mouseleave', onUp);
+board.addEventListener('touchstart', e => { e.preventDefault(); onDown(e); }, {passive:false});
+board.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e); }, {passive:false});
+board.addEventListener('touchend',   e => { e.preventDefault(); onUp(e);   }, {passive:false});
+
+function onDown(e) {
+  const {x,y} = getXY(e);
+
+  if (S.tool === 'text') { showText(x,y); return; }
+  if (S.tool === 'fill') { pushUndo(); floodFill(Math.round(x), Math.round(y)); return; }
+
+  pushUndo();
+  S.drawing = true;
+  S.startX = x; S.startY = y;
+  ctx.globalCompositeOperation = 'source-over';
+
+  if (S.tool === 'pen') {
+    ctx.lineWidth = S.size;
+    ctx.strokeStyle = S.color;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  } else if (S.tool === 'eraser') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = S.size * 3;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  } else {
+    // shape — snapshot for live preview
+    S.snapshot = ctx.getImageData(0, 0, board.width, board.height);
+    ctx.strokeStyle = S.color;
+    ctx.lineWidth   = S.size;
+  }
+}
+
+function onMove(e) {
+  if (!S.drawing) return;
+  const {x,y} = getXY(e);
+
+  if (S.tool === 'pen' || S.tool === 'eraser') {
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    return;
+  }
+
+  // restore snapshot, then draw in-progress shape
+  ctx.putImageData(S.snapshot, 0, 0);
+  ctx.strokeStyle = S.color;
+  ctx.lineWidth   = S.size;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.beginPath();
+
+  if (S.tool === 'rect') {
+    ctx.strokeRect(S.startX, S.startY, x - S.startX, y - S.startY);
+  } else if (S.tool === 'circle') {
+    const rx = Math.abs(x - S.startX) / 2;
+    const ry = Math.abs(y - S.startY) / 2;
+    const cx = S.startX + (x - S.startX) / 2;
+    const cy = S.startY + (y - S.startY) / 2;
+    ctx.ellipse(cx, cy, Math.max(rx,1), Math.max(ry,1), 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (S.tool === 'line') {
+    ctx.moveTo(S.startX, S.startY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+}
+
+function onUp() {
+  if (!S.drawing) return;
+  S.drawing = false;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.lineWidth = S.size;
+  ctx.strokeStyle = S.color;
+  ctx.beginPath();
+}
+
+// ── TEXT TOOL ─────────────────────────────────────────────────────────────────
+const textEl = document.getElementById('text-input');
+let _tx = 0, _ty = 0;
+let _committing = false;
+
+function showText(x, y) {
+  _tx = x; _ty = y;
+  const fs = Math.max(S.size * 3.5, 16);
+  textEl.style.display  = 'block';
+  textEl.style.left     = x + 'px';
+  textEl.style.top      = (y - fs) + 'px';
+  textEl.style.fontSize = fs + 'px';
+  textEl.style.color    = S.color;
+  textEl.value = '';
+  setTimeout(() => textEl.focus(), 10);
+}
+
+function commitText() {
+  if (_committing) return;
+  _committing = true;
+  const txt = textEl.value.trim();
+  hideText();
+  if (txt) {
+    pushUndo();
+    const fs = Math.max(S.size * 3.5, 16);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = S.color;
+    ctx.font = `bold ${fs}px Nunito,Arial`;
+    ctx.fillText(txt, _tx, _ty + 4);
+  }
+  _committing = false;
+}
+
+function hideText() {
+  textEl.style.display = 'none';
+  textEl.value = '';
+}
+
+textEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter')  { e.preventDefault(); commitText(); }
+  if (e.key === 'Escape') { hideText(); }
+  e.stopPropagation();
+});
+textEl.addEventListener('blur', commitText);
+
+// ── FLOOD FILL ────────────────────────────────────────────────────────────────
+function floodFill(sx, sy) {
+  const imageData = ctx.getImageData(0, 0, board.width, board.height);
+  const data = imageData.data;
+  const W = board.width, H = board.height;
+
+  const i0 = (sy * W + sx) * 4;
+  const tr = data[i0], tg = data[i0+1], tb = data[i0+2], ta = data[i0+3];
+
+  const fc = hexToRgb(S.color);
+  if (fc.r===tr && fc.g===tg && fc.b===tb && ta===255) return;
+
+  const TOL = 28;
+  function match(i) {
+    return Math.abs(data[i]-tr)  <=TOL
+        && Math.abs(data[i+1]-tg)<=TOL
+        && Math.abs(data[i+2]-tb)<=TOL
+        && Math.abs(data[i+3]-ta)<=TOL;
+  }
+
+  const stack = [sy * W + sx];
+  const visited = new Uint8Array(W * H);
+
+  while (stack.length) {
+    const idx = stack.pop();
+    if (visited[idx]) continue;
+    const pi = idx * 4;
+    if (!match(pi)) continue;
+    visited[idx] = 1;
+    data[pi]   = fc.r;
+    data[pi+1] = fc.g;
+    data[pi+2] = fc.b;
+    data[pi+3] = 255;
+    const x = idx % W, y = (idx / W) | 0;
+    if (x+1 < W) stack.push(idx+1);
+    if (x-1 >= 0) stack.push(idx-1);
+    if (y+1 < H) stack.push(idx+W);
+    if (y-1 >= 0) stack.push(idx-W);
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function hexToRgb(hex) {
+  return {
+    r: parseInt(hex.slice(1,3),16),
+    g: parseInt(hex.slice(3,5),16),
+    b: parseInt(hex.slice(5,7),16),
+  };
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target === textEl) return;
+  if ((e.ctrlKey||e.metaKey) && e.key==='z') { e.preventDefault(); undo(); return; }
+  const map = { p:'pen', e:'eraser', r:'rect', c:'circle', l:'line', t:'text', f:'fill' };
+  if (map[e.key]) setTool(map[e.key]);
+});
+</script>
+</body>
+</html>

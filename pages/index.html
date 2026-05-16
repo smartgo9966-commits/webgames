@@ -143,6 +143,11 @@ header { text-align: center; margin-bottom: 52px; }
 .ap .tag        { background: #FFF3E0; color: #E65100; }
 .ap .play-btn   { background: linear-gradient(135deg,#FF6D00,#C04400); color: #FFEE00; box-shadow: 0 5px 18px rgba(230,81,0,.45); }
 
+/* ── SMART BOARD THEME ── */
+.sb .card-title { color: #1A237E; }
+.sb .tag        { background: #E8EAF6; color: #283593; }
+.sb .play-btn   { background: linear-gradient(135deg,#3949AB,#1A237E); color: #FFD700; box-shadow: 0 5px 18px rgba(57,73,171,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -547,6 +552,107 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="animal_cell/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SMART BOARD CARD
+  ══════════════════════════════ -->
+  <div class="game-card sb" onclick="location.href='smart_board/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sbBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0d1b35"/>
+            <stop offset="100%" stop-color="#1a2480"/>
+          </linearGradient>
+        </defs>
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#sbBg)"/>
+
+        <!-- Board frame -->
+        <rect x="12" y="38" width="356" height="162" rx="6" fill="#1e3320" stroke="#FFD700" stroke-width="2.5"/>
+
+        <!-- Grid lines on board -->
+        <line x1="12" y1="68"  x2="368" y2="68"  stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="12" y1="98"  x2="368" y2="98"  stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="12" y1="128" x2="368" y2="128" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="12" y1="158" x2="368" y2="158" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="80"  y1="38" x2="80"  y2="200" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="148" y1="38" x2="148" y2="200" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="216" y1="38" x2="216" y2="200" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="284" y1="38" x2="284" y2="200" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+        <line x1="352" y1="38" x2="352" y2="200" stroke="rgba(100,200,130,.18)" stroke-width="1"/>
+
+        <!-- Drawings on board -->
+        <!-- Orange freehand curve -->
+        <path d="M 30 170 C 55 140 80 155 105 125 C 130 95 150 110 175 85" fill="none" stroke="#FF8C00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Blue rectangle -->
+        <rect x="195" y="60" width="80" height="55" rx="3" fill="none" stroke="#3399FF" stroke-width="3.5"/>
+        <!-- Green circle -->
+        <circle cx="100" cy="100" r="30" fill="none" stroke="#44CC44" stroke-width="3.5"/>
+        <!-- Red line -->
+        <line x1="200" y1="145" x2="340" y2="175" stroke="#FF4444" stroke-width="4" stroke-linecap="round"/>
+        <!-- Yellow text -->
+        <text x="220" y="98" fill="#FFD700" font-family="Arial Black,Arial" font-size="16" font-weight="900">Hello!</text>
+        <!-- Purple dots (fill) -->
+        <circle cx="50" cy="75" r="12" fill="#9400D3" opacity=".85"/>
+        <circle cx="78" cy="65" r="8"  fill="#CC00FF" opacity=".75"/>
+
+        <!-- Toolbar strip -->
+        <rect x="0" y="0" width="380" height="38" fill="#141C6E"/>
+        <!-- Tool icons in toolbar -->
+        <!-- Pen icon -->
+        <path d="M 20 28 L 28 12 L 32 16 L 24 32 Z" fill="#FFD700" stroke="#FFD700" stroke-width="1"/>
+        <line x1="28" y1="12" x2="32" y2="16" stroke="#FFD700" stroke-width="1.5"/>
+        <!-- Rect icon -->
+        <rect x="46" y="12" width="16" height="12" rx="2" fill="none" stroke="white" stroke-width="2"/>
+        <!-- Circle icon -->
+        <circle cx="80" cy="18" r="8" fill="none" stroke="white" stroke-width="2"/>
+        <!-- Line icon -->
+        <line x1="100" y1="26" x2="116" y2="10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- T icon -->
+        <text x="128" y="26" fill="white" font-family="Arial Black,Arial" font-size="14" font-weight="900">T</text>
+        <!-- Fill icon -->
+        <text x="146" y="26" fill="white" font-size="16">🪣</text>
+
+        <!-- Color swatches row -->
+        <rect x="172" y="10" width="12" height="18" rx="2" fill="#CC0000"/>
+        <rect x="186" y="10" width="12" height="18" rx="2" fill="#FF8C00"/>
+        <rect x="200" y="10" width="12" height="18" rx="2" fill="#FFD700"/>
+        <rect x="214" y="10" width="12" height="18" rx="2" fill="#44CC44"/>
+        <rect x="228" y="10" width="12" height="18" rx="2" fill="#3399FF"/>
+        <rect x="242" y="10" width="12" height="18" rx="2" fill="#9400D3"/>
+        <rect x="256" y="10" width="12" height="18" rx="2" fill="#FF0099"/>
+        <rect x="270" y="10" width="12" height="18" rx="2" fill="#FFFFFF" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+        <!-- Active swatch indicator -->
+        <rect x="198" y="8" width="16" height="22" rx="3" fill="none" stroke="white" stroke-width="2"/>
+
+        <!-- Undo/Clear/Save buttons -->
+        <rect x="296" y="7" width="24" height="22" rx="5" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <text x="308" y="22" fill="white" font-size="11" text-anchor="middle" font-family="Arial">↩</text>
+        <rect x="324" y="7" width="24" height="22" rx="5" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <text x="336" y="22" fill="white" font-size="11" text-anchor="middle" font-family="Arial">🗑</text>
+        <rect x="352" y="7" width="24" height="22" rx="5" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <text x="364" y="22" fill="white" font-size="11" text-anchor="middle" font-family="Arial">💾</text>
+
+        <!-- Bottom bar -->
+        <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.3)"/>
+        <text x="190" y="192" fill="rgba(255,255,255,.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Draw, write, and create freely on the board</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🖊 Smart Board</div>
+      <div class="card-desc">A full digital whiteboard — draw freehand, add shapes, type text, and fill areas with color. Pick from 20 colors, adjust stroke size, change the background, and save your work as PNG.</div>
+      <div class="card-tags">
+        <span class="tag">Freehand Draw</span>
+        <span class="tag">Shapes &amp; Text</span>
+        <span class="tag">Color Fill</span>
+        <span class="tag">Save PNG</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="smart_board/">▶ Open Board</a>
     </div>
   </div>
 
