@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Animal Classification Paint &amp; Makes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:radial-gradient(ellipse at center,#FF8C28 0%,#E85500 100%);
+  min-height:100vh;font-family:'Fredoka One',cursive;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+
+/* ─── MAIN SCREEN ─────────────────────────────────────────────────── */
+#scr-main{
+  width:840px;height:540px;
+  border:7px solid #111880;border-radius:10px;
+  overflow:hidden;position:relative;
+  background:#FF7022;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+
+/* Yellow title bar */
+#main-titlebar{
+  background:#FFEE00;
+  border-bottom:4px solid #000;
+  text-align:center;padding:9px 0 7px;
+  width:100%;
+}
+#main-title{
+  font-size:25px;color:#FF1111;
+  -webkit-text-stroke:2.5px #000;
+  letter-spacing:1.5px;line-height:1;
+}
+
+/* Category buttons */
+.cat-btn{
+  position:absolute;display:flex;align-items:center;
+  border:4px solid #000;cursor:pointer;
+  font-family:'Fredoka One',cursive;font-size:38px;letter-spacing:2px;
+  user-select:none;overflow:visible;
+  transition:transform .12s,box-shadow .12s;
+  box-shadow:5px 5px 0 #000;
+}
+.cat-btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 #000}
+.cat-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+
+.btn-mammals{
+  background:#9933CC;color:#FFFF00;border-radius:8px;
+  left:26px;top:65px;padding:6px 28px 6px 6px;gap:4px;
+}
+.btn-reptiles{
+  background:#D4D400;color:#004400;border-radius:8px;
+  left:26px;top:185px;padding:6px 28px 6px 6px;gap:4px;
+}
+.btn-birds{
+  background:#009999;color:#001A66;border-radius:10px;
+  right:26px;top:65px;padding:6px 58px 6px 6px;gap:4px;
+}
+.btn-amphibians{
+  background:#FF77AA;color:#770022;border-radius:50px;
+  left:90px;top:295px;
+  padding:8px 26px 8px 10px;gap:6px;
+}
+.btn-fish{
+  background:#00CCEE;color:#002266;border-radius:50px;
+  right:90px;top:295px;padding:8px 28px 8px 8px;gap:4px;
+}
+.btn-all{
+  background:#00AA99;color:#FFFF00;border-radius:8px;
+  left:50%;transform:translateX(-50%);bottom:28px;
+  padding:8px 28px 8px 8px;gap:6px;
+  width:440px;justify-content:center;
+}
+.btn-all:hover{transform:translateX(-50%) translate(-2px,-2px);box-shadow:7px 7px 0 #000}
+.btn-all:active{transform:translateX(-50%) translate(2px,2px);box-shadow:2px 2px 0 #000}
+
+#main-credit{
+  position:absolute;bottom:8px;right:14px;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+  color:#881800;letter-spacing:.5px;
+}
+
+/* ─── PAINT SCREEN ────────────────────────────────────────────────── */
+#scr-paint{
+  display:none;width:840px;height:540px;
+  border:7px solid #111880;border-radius:10px;overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+
+/* Left panel */
+#paint-left{
+  width:165px;min-width:165px;background:#141C6E;
+  display:flex;flex-direction:column;align-items:center;
+  overflow:hidden;
+}
+#left-title{
+  width:100%;background:#FFD700;border-bottom:4px solid #000;
+  text-align:center;padding:7px 0 5px;
+  font-size:16px;color:#000;letter-spacing:1px;
+}
+#left-tools{
+  display:flex;gap:10px;padding:6px 0 5px;align-items:center;
+}
+.tool-btn{
+  width:40px;height:40px;background:transparent;border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .1s;border-radius:6px;
+}
+.tool-btn:hover{transform:scale(1.14);background:rgba(255,255,255,.1)}
+#color-preview{
+  width:148px;height:16px;background:#FF0000;
+  border:3px solid #000;border-radius:3px;margin-bottom:5px;
+}
+#palette-grid{
+  display:grid;grid-template-columns:repeat(6,23px);gap:2px;
+  padding:0 6px;
+}
+.swatch{
+  width:23px;height:23px;cursor:pointer;
+  border:2px solid rgba(0,0,0,.35);border-radius:2px;
+  transition:transform .12s;
+}
+.swatch:hover{transform:scale(1.15)}
+.swatch.active{
+  border:2.5px solid #FFF;
+  outline:1.5px solid #000;
+  transform:scale(1.22);
+  z-index:1;position:relative;
+}
+#drag-label{
+  color:#66BBFF;font-size:14px;letter-spacing:2px;font-weight:700;
+  margin:7px 0 4px;text-shadow:0 1px 3px #000;
+}
+#sticker-src{
+  width:90px;height:90px;cursor:grab;
+  display:flex;align-items:center;justify-content:center;
+  border:2px dashed rgba(255,255,255,.45);border-radius:10px;
+  background:rgba(255,255,255,.06);
+  transition:background .15s;
+}
+#sticker-src:hover{background:rgba(255,255,255,.12)}
+#sticker-src:active{cursor:grabbing}
+#btn-more{
+  margin:6px auto;width:154px;
+  background:#0044DD;color:#FFEE00;
+  border:3px solid #000;border-radius:8px;
+  font-family:'Fredoka One',cursive;font-size:12.5px;
+  padding:6px 4px;cursor:pointer;text-align:center;
+  transition:background .12s;
+  box-shadow:3px 3px 0 #000;letter-spacing:.5px;
+}
+#btn-more:hover{background:#0055FF}
+
+/* Right panel */
+#paint-right{flex:1;background:#BFCED8;display:flex;flex-direction:column}
+#paint-topbar{
+  display:flex;align-items:center;padding:4px 14px;
+  background:#141C6E;gap:14px;min-height:34px;
+  border-bottom:2px solid #000;
+}
+#btn-back{
+  color:#FFDD00;background:none;border:none;
+  font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;
+  text-shadow:1px 1px 0 #000;letter-spacing:.5px;
+}
+#btn-back:hover{color:#FFF}
+#topbar-cat{
+  color:#FFD700;font-size:18px;letter-spacing:2px;
+  -webkit-text-stroke:1px #000;
+}
+#paint-canvas-wrap{
+  flex:1;background:white;
+  background-image:
+    linear-gradient(rgba(150,180,210,.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(150,180,210,.12) 1px,transparent 1px);
+  background-size:28px 28px;
+  border-top:3px solid #111880;
+  position:relative;overflow:hidden;
+}
+#animal-svg{width:100%;height:100%;display:block}
+
+/* SVG colorable regions */
+.colorable{
+  fill:white;stroke:#111;stroke-width:2.5;
+  stroke-linejoin:round;stroke-linecap:round;
+  cursor:crosshair;transition:filter .1s;
+}
+.colorable:hover{filter:brightness(.78) saturate(1.1)}
+
+/* Placed stickers */
+.placed-sticker{position:absolute;cursor:move;user-select:none;z-index:10}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1 — MAIN MENU
+════════════════════════════════════════════════════════ -->
+<div id="scr-main">
+  <!-- Title bar -->
+  <div id="main-titlebar">
+    <div id="main-title">animal classification Paint &amp; Makes</div>
+  </div>
+
+  <!-- MAMMALS — brown tabby cat -->
+  <div class="cat-btn btn-mammals" onclick="goTo('mammals')">
+    <svg width="76" height="88" viewBox="0 0 76 88" style="overflow:visible;flex-shrink:0">
+      <ellipse cx="38" cy="66" rx="24" ry="20" fill="#CC8844" stroke="#000" stroke-width="2.5"/>
+      <path d="M27,52 C25,62 25,72 27,80" fill="none" stroke="#9B5522" stroke-width="2"/>
+      <path d="M38,50 C38,60 38,70 38,80" fill="none" stroke="#9B5522" stroke-width="2"/>
+      <path d="M49,52 C51,62 51,72 49,80" fill="none" stroke="#9B5522" stroke-width="2"/>
+      <ellipse cx="22" cy="82" rx="11" ry="6" fill="#CC8844" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="54" cy="82" rx="11" ry="6" fill="#CC8844" stroke="#000" stroke-width="1.5"/>
+      <circle cx="38" cy="33" r="23" fill="#CC8844" stroke="#000" stroke-width="2.5"/>
+      <polygon points="16,19 23,2 33,19" fill="#CC8844" stroke="#000" stroke-width="2"/>
+      <polygon points="18,18 23,7 31,18" fill="#FF9999"/>
+      <polygon points="43,19 53,2 60,19" fill="#CC8844" stroke="#000" stroke-width="2"/>
+      <polygon points="45,18 53,7 58,18" fill="#FF9999"/>
+      <ellipse cx="28" cy="30" rx="7" ry="6" fill="#44CC22" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="28" cy="30" rx="3" ry="5" fill="#000"/>
+      <circle cx="27" cy="28" r="2" fill="#FFF"/>
+      <ellipse cx="48" cy="30" rx="7" ry="6" fill="#44CC22" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="48" cy="30" rx="3" ry="5" fill="#000"/>
+      <circle cx="47" cy="28" r="2" fill="#FFF"/>
+      <polygon points="36,39 40,39 38,42" fill="#FF5577" stroke="#000" stroke-width="0.5"/>
+      <path d="M32,42 Q38,49 44,42" fill="none" stroke="#000" stroke-width="1.5"/>
+      <path d="M31,14 C30,20 30,26 31,28" fill="none" stroke="#9B5522" stroke-width="1.5"/>
+      <path d="M38,12 C38,18 38,24 38,28" fill="none" stroke="#9B5522" stroke-width="1.5"/>
+      <path d="M45,14 C46,20 46,26 45,28" fill="none" stroke="#9B5522" stroke-width="1.5"/>
+      <path d="M58,72 C76,63 80,48 70,40" fill="none" stroke="#CC8844" stroke-width="9" stroke-linecap="round"/>
+      <path d="M58,72 C76,63 80,48 70,40" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    MAMMALS
+  </div>
+
+  <!-- REPTILES — green turtle with yellow spots -->
+  <div class="cat-btn btn-reptiles" onclick="goTo('reptiles')">
+    <svg width="78" height="68" viewBox="0 0 78 68" style="flex-shrink:0">
+      <ellipse cx="38" cy="40" rx="29" ry="23" fill="#44AA44" stroke="#000" stroke-width="2.5"/>
+      <ellipse cx="38" cy="40" rx="19" ry="15" fill="none" stroke="#226622" stroke-width="2"/>
+      <circle cx="31" cy="33" r="7" fill="#FFDD00" stroke="#226622" stroke-width="1.5"/>
+      <circle cx="45" cy="31" r="6" fill="#FFDD00" stroke="#226622" stroke-width="1.5"/>
+      <circle cx="41" cy="45" r="6" fill="#FFDD00" stroke="#226622" stroke-width="1.5"/>
+      <circle cx="27" cy="45" r="5" fill="#FFDD00" stroke="#226622" stroke-width="1.5"/>
+      <circle cx="52" cy="45" r="5" fill="#FFDD00" stroke="#226622" stroke-width="1.5"/>
+      <ellipse cx="63" cy="36" rx="15" ry="11" fill="#338833" stroke="#000" stroke-width="2.5"/>
+      <circle cx="69" cy="32" r="4" fill="#000"/>
+      <circle cx="68" cy="31" r="1.8" fill="#FFF"/>
+      <path d="M60,42 Q64,46 68,42" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+      <ellipse cx="10" cy="28" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(-30,10,28)"/>
+      <ellipse cx="10" cy="52" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(30,10,52)"/>
+      <ellipse cx="46" cy="16" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(-55,46,16)"/>
+      <ellipse cx="46" cy="64" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(50,46,64)"/>
+    </svg>
+    REPTILES
+  </div>
+
+  <!-- BIRDS — dark blue crow with yellow beak -->
+  <div class="cat-btn btn-birds" onclick="goTo('birds')">
+    <svg width="74" height="80" viewBox="0 0 74 80" style="flex-shrink:0">
+      <ellipse cx="36" cy="54" rx="26" ry="24" fill="#334499" stroke="#000" stroke-width="2.5"/>
+      <ellipse cx="28" cy="54" rx="16" ry="16" fill="#445588"/>
+      <path d="M13,68 L5,76 L13,72 Z" fill="#334499" stroke="#000" stroke-width="1.5"/>
+      <path d="M13,68 L7,80 L17,74 Z" fill="#334499" stroke="#000" stroke-width="1.5"/>
+      <circle cx="42" cy="28" r="22" fill="#334499" stroke="#000" stroke-width="2.5"/>
+      <path d="M52,26 L72,20 L70,30 L50,32 Z" fill="#FFAA00" stroke="#000" stroke-width="2"/>
+      <circle cx="38" cy="22" r="9" fill="#3344AA"/>
+      <circle cx="38" cy="22" r="6" fill="#000"/>
+      <circle cx="36" cy="20" r="2.5" fill="#FFFF88"/>
+      <path d="M44,6 C46,0 50,-2 52,2 C50,0 48,6 46,10" fill="#334499" stroke="#000" stroke-width="1.5"/>
+      <line x1="32" y1="76" x2="24" y2="86" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+      <path d="M24,86 L16,90 M24,86 L20,92 M24,86 L30,92" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    BIRDS
+  </div>
+
+  <!-- AMPHIBIANS — bright green frog -->
+  <div class="cat-btn btn-amphibians" onclick="goTo('amphibians')">
+    <svg width="78" height="68" viewBox="0 0 78 68" style="flex-shrink:0">
+      <path d="M14,56 C4,50 0,42 6,40 C10,38 16,42 18,48" fill="none" stroke="#44CC22" stroke-width="10" stroke-linecap="round"/>
+      <path d="M14,56 C4,50 0,42 6,40 C10,38 16,42 18,48" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+      <path d="M64,56 C74,50 78,42 72,40 C68,38 62,42 60,48" fill="none" stroke="#44CC22" stroke-width="10" stroke-linecap="round"/>
+      <path d="M64,56 C74,50 78,42 72,40 C68,38 62,42 60,48" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="39" cy="50" rx="28" ry="20" fill="#44CC22" stroke="#000" stroke-width="2.5"/>
+      <ellipse cx="39" cy="52" rx="18" ry="14" fill="#AAFFAA" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="39" cy="30" rx="28" ry="20" fill="#44CC22" stroke="#000" stroke-width="2.5"/>
+      <circle cx="17" cy="16" r="14" fill="#44CC22" stroke="#000" stroke-width="2.5"/>
+      <circle cx="61" cy="16" r="14" fill="#44CC22" stroke="#000" stroke-width="2.5"/>
+      <circle cx="17" cy="16" r="8" fill="#FFDD00" stroke="#000" stroke-width="1"/>
+      <circle cx="17" cy="16" r="5" fill="#000"/>
+      <circle cx="16" cy="14" r="2" fill="#FFF"/>
+      <circle cx="61" cy="16" r="8" fill="#FFDD00" stroke="#000" stroke-width="1"/>
+      <circle cx="61" cy="16" r="5" fill="#000"/>
+      <circle cx="60" cy="14" r="2" fill="#FFF"/>
+      <path d="M23,38 Q39,48 55,38" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    AMPHIBIANS
+  </div>
+
+  <!-- FISH — orange fish with scales -->
+  <div class="cat-btn btn-fish" onclick="goTo('fish')">
+    <svg width="80" height="60" viewBox="0 0 80 60" style="flex-shrink:0">
+      <path d="M18,22 L4,8 L4,52 L18,38 Z" fill="#FF6600" stroke="#000" stroke-width="2"/>
+      <ellipse cx="48" cy="30" rx="30" ry="22" fill="#FF6600" stroke="#000" stroke-width="2.5"/>
+      <ellipse cx="46" cy="34" rx="22" ry="14" fill="#FFAA44"/>
+      <path d="M30,18 A14,14 0 0 1 58,18" fill="none" stroke="#CC4400" stroke-width="1.5"/>
+      <path d="M24,26 A16,16 0 0 1 54,26" fill="none" stroke="#CC4400" stroke-width="1.5"/>
+      <path d="M30,34 A14,14 0 0 1 58,34" fill="none" stroke="#CC4400" stroke-width="1.5"/>
+      <path d="M36,8 C44,0 58,0 64,10 L64,10 Z" fill="#FF4400" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="52" cy="38" rx="14" ry="7" fill="#FF9944" stroke="#000" stroke-width="1.5" transform="rotate(20,52,38)"/>
+      <circle cx="66" cy="20" r="9" fill="#FFF" stroke="#000" stroke-width="2"/>
+      <circle cx="66" cy="20" r="5" fill="#000"/>
+      <circle cx="64" cy="18" r="2" fill="#FFF"/>
+    </svg>
+    FISH
+  </div>
+
+  <!-- ALL — mixed colorful animals -->
+  <div class="cat-btn btn-all" onclick="goTo('all')">
+    <svg width="100" height="58" viewBox="0 0 100 58" style="flex-shrink:0">
+      <path d="M8,52 C12,42 22,40 24,30 C26,20 18,14 22,6" fill="none" stroke="#44CC22" stroke-width="10" stroke-linecap="round"/>
+      <path d="M8,52 C12,42 22,40 24,30 C26,20 18,14 22,6" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="66" cy="15" rx="12" ry="8" fill="#FF6600" stroke="#000" stroke-width="1.5"/>
+      <path d="M54,11 L48,7 L48,19 L54,15 Z" fill="#FF6600" stroke="#000" stroke-width="1"/>
+      <path d="M50,36 C54,30 58,30 62,36" fill="none" stroke="#334499" stroke-width="2.5"/>
+      <path d="M62,36 C66,30 70,30 74,36" fill="none" stroke="#334499" stroke-width="2.5"/>
+      <circle cx="82" cy="50" r="9" fill="#44CC22" stroke="#000" stroke-width="1.5"/>
+      <circle cx="76" cy="43" r="5" fill="#44CC22" stroke="#000" stroke-width="1.5"/>
+      <circle cx="88" cy="43" r="5" fill="#44CC22" stroke="#000" stroke-width="1.5"/>
+      <circle cx="76" cy="43" r="2.5" fill="#000"/>
+      <circle cx="88" cy="43" r="2.5" fill="#000"/>
+    </svg>
+    ALL
+  </div>
+
+  <div id="main-credit">by JASMINE CHAPGAR</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2 — PAINT
+════════════════════════════════════════════════════════ -->
+<div id="scr-paint">
+  <!-- LEFT PANEL -->
+  <div id="paint-left">
+    <div id="left-title">PAINT MENU</div>
+    <div id="left-tools">
+      <!-- Clear button: red no-entry sign -->
+      <div class="tool-btn" title="Clear all" onclick="clearAll()">
+        <svg viewBox="0 0 36 36" width="36" height="36">
+          <circle cx="18" cy="18" r="16" fill="#EE0000" stroke="#000" stroke-width="2.5"/>
+          <rect x="5" y="15" width="26" height="6" rx="3" fill="#EEE" stroke="#000" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <!-- Pencil button -->
+      <div class="tool-btn active" title="Paint brush">
+        <svg viewBox="0 0 36 36" width="36" height="36">
+          <rect x="13" y="3" width="10" height="21" rx="2" fill="#FFCC00" stroke="#000" stroke-width="1.8"/>
+          <rect x="13" y="3" width="10" height="8" rx="2" fill="#FF8888" stroke="#000" stroke-width="1.8"/>
+          <rect x="13" y="11" width="10" height="2.5" fill="#CCCCCC" stroke="#000" stroke-width="0.8"/>
+          <polygon points="13,24 23,24 18,31" fill="#FFE0AA" stroke="#000" stroke-width="1.8"/>
+          <polygon points="16.5,28 19.5,28 18,31" fill="#888"/>
+        </svg>
+      </div>
+    </div>
+    <div id="color-preview"></div>
+    <div id="palette-grid"></div>
+    <div id="drag-label">DRAG + DROP</div>
+    <div id="sticker-src" draggable="true"></div>
+    <button id="btn-more" onclick="nextSticker()">◄ Click ► for more objects</button>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="paint-right">
+    <div id="paint-topbar">
+      <button id="btn-back" onclick="goToMain()">← Menu</button>
+      <span id="topbar-cat"></span>
+    </div>
+    <div id="paint-canvas-wrap"
+         ondragover="event.preventDefault()"
+         ondrop="stickerDrop(event)">
+      <svg id="animal-svg" viewBox="0 0 660 500" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── GLOBALS ──────────────────────────────────────────────────────────────────
+let selectedColor = '#FF0000';
+let stickerIdx    = 0;
+let curCat        = null;
+let dragSvg       = '';
+
+// ─── COLOR PALETTE (48 = 6×8) ────────────────────────────────────────────────
+const PALETTE = [
+  '#000000','#333333','#5C3317','#8B0000','#4B0082','#003366',
+  '#555555','#777777','#8B4513','#CC0000','#7B00CC','#0000AA',
+  '#999999','#BBBBBB','#D2691E','#FF4500','#9400D3','#0033CC',
+  '#006400','#004D40','#FF8C00','#CC6600','#CC0099','#0066CC',
+  '#228B22','#009999','#FFA500','#FF6600','#FF0099','#3399FF',
+  '#44CC44','#00CCCC','#FFD700','#FF9933','#FF66CC','#66BBFF',
+  '#99FF99','#AAFFEE','#FFFF66','#FFCC99','#FFAADD','#AADDFF',
+  '#FFFFFF','#FFFFCC','#FFEECC','#FFE4E1','#E6E6FA','#F0F8FF'
+];
+
+// ─── STICKER SVGs ─────────────────────────────────────────────────────────────
+const SVG_COW = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="56" rx="28" ry="20" fill="#F0F0F0" stroke="#111" stroke-width="2"/>
+  <circle cx="42" cy="32" r="18" fill="#F0F0F0" stroke="#111" stroke-width="2"/>
+  <ellipse cx="28" cy="17" rx="8" ry="12" fill="#F0F0F0" stroke="#111" stroke-width="2"/>
+  <ellipse cx="56" cy="17" rx="8" ry="12" fill="#F0F0F0" stroke="#111" stroke-width="2"/>
+  <ellipse cx="38" cy="56" rx="9" ry="7" fill="#444"/>
+  <ellipse cx="52" cy="48" rx="6" ry="8" fill="#444"/>
+  <circle cx="34" cy="34" r="5" fill="#444"/>
+  <rect x="27" y="72" width="9" height="12" rx="3" fill="#F0F0F0" stroke="#111" stroke-width="1.5"/>
+  <rect x="48" y="72" width="9" height="12" rx="3" fill="#F0F0F0" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="42" cy="38" rx="9" ry="6" fill="#FFB6C1" stroke="#111" stroke-width="1.2"/>
+  <circle cx="38" cy="38" r="2.5" fill="#111"/>
+  <circle cx="46" cy="38" r="2.5" fill="#111"/>
+  <circle cx="34" cy="26" r="3.5" fill="#111"/>
+  <circle cx="50" cy="26" r="3.5" fill="#111"/>
+</svg>`;
+
+const SVG_DOG = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="56" rx="24" ry="18" fill="#D2691E" stroke="#111" stroke-width="2"/>
+  <circle cx="48" cy="30" r="18" fill="#D2691E" stroke="#111" stroke-width="2"/>
+  <ellipse cx="34" cy="26" rx="10" ry="16" fill="#8B4513" stroke="#111" stroke-width="2"/>
+  <ellipse cx="62" cy="26" rx="10" ry="16" fill="#8B4513" stroke="#111" stroke-width="2"/>
+  <path d="M 60,62 C 72,58 76,50 70,44" fill="none" stroke="#D2691E" stroke-width="5" stroke-linecap="round"/>
+  <rect x="24" y="70" width="9" height="14" rx="3" fill="#D2691E" stroke="#111" stroke-width="1.5"/>
+  <rect x="51" y="70" width="9" height="14" rx="3" fill="#D2691E" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="42" cy="36" rx="9" ry="6" fill="#000"/>
+  <circle cx="40" cy="26" r="4" fill="#111"/>
+  <circle cx="56" cy="26" r="4" fill="#111"/>
+  <circle cx="41" cy="25" r="2" fill="#FFF"/>
+  <circle cx="57" cy="25" r="2" fill="#FFF"/>
+</svg>`;
+
+const SVG_ELEPHANT = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="44" cy="52" rx="30" ry="22" fill="#888" stroke="#111" stroke-width="2"/>
+  <circle cx="44" cy="28" r="20" fill="#888" stroke="#111" stroke-width="2"/>
+  <ellipse cx="26" cy="18" rx="12" ry="16" fill="#888" stroke="#111" stroke-width="2"/>
+  <ellipse cx="62" cy="18" rx="12" ry="16" fill="#888" stroke="#111" stroke-width="2"/>
+  <path d="M 38,42 C 34,52 32,62 36,72 C 38,76 42,76 44,72" fill="none" stroke="#888" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 38,42 C 34,52 32,62 36,72 C 38,76 42,76 44,72" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <rect x="20" y="70" width="10" height="14" rx="3" fill="#888" stroke="#111" stroke-width="1.5"/>
+  <rect x="54" y="70" width="10" height="14" rx="3" fill="#888" stroke="#111" stroke-width="1.5"/>
+  <circle cx="38" cy="24" r="4" fill="#111"/>
+  <circle cx="39" cy="23" r="2" fill="#FFF"/>
+</svg>`;
+
+const SVG_NOTE = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <path d="M 38,20 L 38,60" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 38,20 L 68,14 L 68,44 L 38,50 Z" fill="#222" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="30" cy="62" rx="12" ry="8" fill="#222" stroke="#111" stroke-width="2" transform="rotate(-20,30,62)"/>
+  <ellipse cx="60" cy="47" rx="11" ry="7" fill="#222" stroke="#111" stroke-width="2" transform="rotate(-20,60,47)"/>
+</svg>`;
+
+const SVG_OWL = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="50" rx="24" ry="28" fill="#8B5E3C" stroke="#111" stroke-width="2"/>
+  <circle cx="42" cy="26" r="20" fill="#8B5E3C" stroke="#111" stroke-width="2"/>
+  <ellipse cx="26" cy="20" rx="10" ry="14" fill="#8B5E3C" stroke="#111" stroke-width="2"/>
+  <ellipse cx="58" cy="20" rx="10" ry="14" fill="#8B5E3C" stroke="#111" stroke-width="2"/>
+  <circle cx="34" cy="28" r="9" fill="#FFF5DC" stroke="#111" stroke-width="2"/>
+  <circle cx="50" cy="28" r="9" fill="#FFF5DC" stroke="#111" stroke-width="2"/>
+  <circle cx="34" cy="28" r="5" fill="#111"/>
+  <circle cx="50" cy="28" r="5" fill="#111"/>
+  <circle cx="32" cy="26" r="2" fill="#FFF"/>
+  <circle cx="48" cy="26" r="2" fill="#FFF"/>
+  <polygon points="42,36 38,44 46,44" fill="#FF8C00" stroke="#111" stroke-width="1.5"/>
+  <path d="M 22,62 L 18,76 L 28,76" fill="none" stroke="#111" stroke-width="2.5"/>
+  <path d="M 62,62 L 66,76 L 56,76" fill="none" stroke="#111" stroke-width="2.5"/>
+</svg>`;
+
+const SVG_BUTTERFLY = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="42" rx="5" ry="22" fill="#222" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="22" cy="30" rx="18" ry="22" fill="#FF9933" stroke="#111" stroke-width="2"/>
+  <ellipse cx="62" cy="30" rx="18" ry="22" fill="#FF9933" stroke="#111" stroke-width="2"/>
+  <ellipse cx="22" cy="54" rx="14" ry="18" fill="#FF9933" stroke="#111" stroke-width="2"/>
+  <ellipse cx="62" cy="54" rx="14" ry="18" fill="#FF9933" stroke="#111" stroke-width="2"/>
+  <circle cx="16" cy="28" r="6" fill="#111" opacity=".5"/>
+  <circle cx="68" cy="28" r="6" fill="#111" opacity=".5"/>
+  <path d="M 40,20 L 36,14 M 44,20 L 48,14" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+const SVG_TURTLE = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="46" rx="28" ry="22" fill="#44AA44" stroke="#111" stroke-width="2"/>
+  <ellipse cx="42" cy="46" rx="18" ry="14" fill="none" stroke="#111" stroke-width="2"/>
+  <ellipse cx="62" cy="46" rx="7" ry="5" fill="#44AA44" stroke="#111" stroke-width="2"/>
+  <circle cx="62" cy="44" r="9" fill="#44AA44" stroke="#111" stroke-width="2"/>
+  <ellipse cx="18" cy="34" rx="8" ry="5" fill="#44AA44" stroke="#111" stroke-width="2" transform="rotate(-30,18,34)"/>
+  <ellipse cx="18" cy="58" rx="8" ry="5" fill="#44AA44" stroke="#111" stroke-width="2" transform="rotate(30,18,58)"/>
+  <ellipse cx="48" cy="22" rx="8" ry="5" fill="#44AA44" stroke="#111" stroke-width="2" transform="rotate(-50,48,22)"/>
+  <ellipse cx="48" cy="70" rx="8" ry="5" fill="#44AA44" stroke="#111" stroke-width="2" transform="rotate(40,48,70)"/>
+  <circle cx="68" cy="40" r="3" fill="#111"/>
+  <circle cx="40" cy="38" r="4" fill="#FFD700" stroke="#111" stroke-width="1"/>
+  <circle cx="46" cy="45" r="3" fill="#FFD700" stroke="#111" stroke-width="1"/>
+  <circle cx="38" cy="52" r="3.5" fill="#FFD700" stroke="#111" stroke-width="1"/>
+</svg>`;
+
+const SVG_CHAMELEON = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <path d="M 8,50 C 12,42 22,40 30,38 C 38,36 46,36 52,40 C 58,44 58,52 54,56 C 50,60 44,60 38,58 C 32,56 26,58 20,60" fill="#44CC44" stroke="#111" stroke-width="2"/>
+  <circle cx="18" cy="46" r="10" fill="#44CC44" stroke="#111" stroke-width="2"/>
+  <circle cx="14" cy="40" r="5" fill="#44CC44" stroke="#111" stroke-width="1.5"/>
+  <circle cx="14" cy="40" r="3" fill="#111"/>
+  <path d="M 54,40 C 62,36 70,32 74,28 C 78,24 78,20 76,18 C 80,22 78,30 72,34 C 68,38 62,42 58,44" fill="none" stroke="#111" stroke-width="2"/>
+  <path d="M 8,56 C 6,62 4,70 8,76 M 16,58 C 14,64 12,72 16,78 M 24,60 C 24,66 24,72 28,76" fill="none" stroke="#44CC44" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 8,56 C 6,62 4,70 8,76 M 16,58 C 14,64 12,72 16,78 M 24,60 C 24,66 24,72 28,76" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+</svg>`;
+
+const SVG_GECKO = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="46" rx="12" ry="22" fill="#88CC44" stroke="#111" stroke-width="2"/>
+  <circle cx="42" cy="24" r="14" fill="#88CC44" stroke="#111" stroke-width="2"/>
+  <path d="M 42,68 C 42,74 44,78 42,82 C 40,78 42,74 42,68" fill="#88CC44" stroke="#111" stroke-width="2"/>
+  <path d="M 30,38 C 20,34 14,28 10,24 M 54,38 C 64,34 70,28 74,24" fill="none" stroke="#88CC44" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 30,38 C 20,34 14,28 10,24 M 54,38 C 64,34 70,28 74,24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 30,52 C 20,54 14,58 10,62 M 54,52 C 64,54 70,58 74,62" fill="none" stroke="#88CC44" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 30,52 C 20,54 14,58 10,62 M 54,52 C 64,54 70,58 74,62" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="36" cy="20" r="4" fill="#111"/>
+  <circle cx="37" cy="19" r="2" fill="#FFF"/>
+  <circle cx="48" cy="20" r="4" fill="#111"/>
+  <circle cx="49" cy="19" r="2" fill="#FFF"/>
+</svg>`;
+
+const SVG_FROG = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="52" rx="26" ry="20" fill="#44BB44" stroke="#111" stroke-width="2"/>
+  <ellipse cx="42" cy="34" rx="22" ry="16" fill="#44BB44" stroke="#111" stroke-width="2"/>
+  <circle cx="28" cy="24" r="9" fill="#44BB44" stroke="#111" stroke-width="2"/>
+  <circle cx="56" cy="24" r="9" fill="#44BB44" stroke="#111" stroke-width="2"/>
+  <circle cx="28" cy="24" r="5" fill="#111"/>
+  <circle cx="27" cy="23" r="2.5" fill="#FFF"/>
+  <circle cx="56" cy="24" r="5" fill="#111"/>
+  <circle cx="55" cy="23" r="2.5" fill="#FFF"/>
+  <path d="M 16,58 C 8,54 4,46 10,44 M 68,58 C 76,54 80,46 74,44" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 10,44 C 10,38 12,34 16,32 M 74,44 C 74,38 72,34 68,32" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+</svg>`;
+
+const SVG_AXOLOTL = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="52" rx="28" ry="16" fill="#FFB6C1" stroke="#111" stroke-width="2"/>
+  <circle cx="42" cy="36" r="18" fill="#FFB6C1" stroke="#111" stroke-width="2"/>
+  <path d="M 30,20 C 28,10 24,4 20,6 M 42,18 C 42,8 42,2 42,0 M 54,20 C 56,10 60,4 64,6" fill="none" stroke="#FF6699" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 30,20 C 28,10 24,4 20,6 M 42,18 C 42,8 42,2 42,0 M 54,20 C 56,10 60,4 64,6" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 14,54 C 8,58 4,64 6,70 M 70,54 C 76,58 80,64 78,70" fill="none" stroke="#FFB6C1" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 14,54 C 8,58 4,64 6,70 M 70,54 C 76,58 80,64 78,70" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 42,68 C 40,74 38,80 42,84 C 46,80 44,74 42,68" fill="#FFB6C1" stroke="#111" stroke-width="2"/>
+  <circle cx="35" cy="34" r="4" fill="#111"/>
+  <circle cx="49" cy="34" r="4" fill="#111"/>
+  <path d="M 36,42 Q 42,46 48,42" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+</svg>`;
+
+const SVG_TOAD = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="42" cy="54" rx="30" ry="22" fill="#8B7355" stroke="#111" stroke-width="2"/>
+  <ellipse cx="42" cy="36" rx="24" ry="18" fill="#8B7355" stroke="#111" stroke-width="2"/>
+  <circle cx="28" cy="24" r="10" fill="#8B7355" stroke="#111" stroke-width="2"/>
+  <circle cx="56" cy="24" r="10" fill="#8B7355" stroke="#111" stroke-width="2"/>
+  <circle cx="28" cy="24" r="5" fill="#111"/>
+  <circle cx="27" cy="23" r="2.5" fill="#AA8800"/>
+  <circle cx="56" cy="24" r="5" fill="#111"/>
+  <circle cx="55" cy="23" r="2.5" fill="#AA8800"/>
+  <ellipse cx="28" cy="46" rx="5" ry="3" fill="#AA9966"/>
+  <ellipse cx="56" cy="46" rx="5" ry="3" fill="#AA9966"/>
+  <ellipse cx="42" cy="52" rx="5" ry="3" fill="#AA9966"/>
+  <path d="M 12,62 C 4,58 2,50 8,48 M 72,62 C 80,58 82,50 76,48" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 36,42 Q 42,46 48,42" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/>
+</svg>`;
+
+const SVG_TROPFISH = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="44" cy="42" rx="26" ry="18" fill="#FF6600" stroke="#111" stroke-width="2"/>
+  <path d="M 16,30 L 4,18 L 4,66 L 16,54 Z" fill="#FF6600" stroke="#111" stroke-width="2"/>
+  <path d="M 44,24 L 48,14 L 56,24" fill="#FF6600" stroke="#111" stroke-width="1.5"/>
+  <path d="M 44,60 L 48,70 L 56,60" fill="#FF6600" stroke="#111" stroke-width="1.5"/>
+  <path d="M 24,34 L 24,50" stroke="#111" stroke-width="1.5"/>
+  <path d="M 32,30 L 32,54" stroke="#111" stroke-width="1.5"/>
+  <path d="M 40,28 L 40,56" stroke="#111" stroke-width="1.5"/>
+  <path d="M 48,30 L 48,54" stroke="#111" stroke-width="1.5"/>
+  <circle cx="58" cy="36" r="5" fill="#111"/>
+  <circle cx="57" cy="35" r="2.5" fill="#FFF"/>
+  <ellipse cx="68" cy="42" rx="4" ry="5" fill="#FFAA00" stroke="#111" stroke-width="1.5"/>
+</svg>`;
+
+const SVG_SHARK = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <ellipse cx="36" cy="50" rx="30" ry="16" fill="#8899AA" stroke="#111" stroke-width="2"/>
+  <path d="M 4,44 L 12,28 L 20,44" fill="#8899AA" stroke="#111" stroke-width="1.5"/>
+  <path d="M 36,34 L 40,20 L 48,34" fill="#8899AA" stroke="#111" stroke-width="1.5"/>
+  <path d="M 36,66 L 42,78 L 54,66" fill="#8899AA" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="56" cy="50" rx="12" ry="10" fill="#8899AA" stroke="#111" stroke-width="2"/>
+  <path d="M 60,44 L 72,40 L 68,52 L 76,52" fill="none" stroke="#111" stroke-width="2"/>
+  <path d="M 50,46 Q 54,42 58,46" fill="none" stroke="#111" stroke-width="1.5"/>
+  <path d="M 50,50 Q 54,54 58,50" fill="none" stroke="#111" stroke-width="1.5"/>
+  <ellipse cx="20" cy="46" rx="5" ry="3" fill="#DDEEEE" stroke="#111" stroke-width="1"/>
+  <circle cx="60" cy="44" r="3" fill="#111"/>
+  <circle cx="59" cy="43" r="1.5" fill="#FFF"/>
+</svg>`;
+
+const SVG_SEAHORSE = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <path d="M 42,16 C 38,20 34,26 36,34 C 38,42 44,44 44,52 C 44,62 40,68 40,74 C 40,78 38,80 40,82 C 42,80 44,78 44,74" fill="none" stroke="#FF8844" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 42,16 C 38,20 34,26 36,34 C 38,42 44,44 44,52 C 44,62 40,68 40,74 C 40,78 38,80 40,82 C 42,80 44,78 44,74" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="46" cy="12" r="10" fill="#FF8844" stroke="#111" stroke-width="2"/>
+  <path d="M 50,8 L 58,4" fill="none" stroke="#FF8844" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 50,8 L 58,4" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 38,30 C 30,28 26,24 28,20" fill="none" stroke="#FF8844" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 38,30 C 30,28 26,24 28,20" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="42" cy="10" r="3" fill="#111"/>
+  <circle cx="41" cy="9" r="1.5" fill="#FFF"/>
+</svg>`;
+
+const SVG_STAR = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <polygon points="42,8 50,34 78,34 56,50 64,76 42,60 20,76 28,50 6,34 34,34" fill="#FFD700" stroke="#111" stroke-width="2"/>
+  <polygon points="42,18 48,34 64,34 52,44 56,60 42,50 28,60 32,44 20,34 36,34" fill="#FFEE44" stroke="none"/>
+</svg>`;
+
+const SVG_SUN = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <circle cx="42" cy="42" r="18" fill="#FFD700" stroke="#111" stroke-width="2"/>
+  ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>{
+    const r1=24,r2=34,rad=a*Math.PI/180;
+    const x1=42+r1*Math.sin(rad),y1=42-r1*Math.cos(rad);
+    const x2=42+r2*Math.sin(rad),y2=42-r2*Math.cos(rad);
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#FF8800" stroke-width="3" stroke-linecap="round"/>`;
+  }).join('')}
+</svg>`;
+
+const SVG_RAINBOW = `<svg width="84" height="84" viewBox="0 0 84 84">
+  <path d="M 6,62 A 36,36 0 0 1 78,62" fill="none" stroke="#FF0000" stroke-width="6"/>
+  <path d="M 10,62 A 32,32 0 0 1 74,62" fill="none" stroke="#FF8800" stroke-width="6"/>
+  <path d="M 14,62 A 28,28 0 0 1 70,62" fill="none" stroke="#FFFF00" stroke-width="6"/>
+  <path d="M 18,62 A 24,24 0 0 1 66,62" fill="none" stroke="#44CC44" stroke-width="6"/>
+  <path d="M 22,62 A 20,20 0 0 1 62,62" fill="none" stroke="#4488FF" stroke-width="6"/>
+  <path d="M 26,62 A 16,16 0 0 1 58,62" fill="none" stroke="#8844CC" stroke-width="6"/>
+  <ellipse cx="18" cy="68" rx="14" ry="10" fill="#FFF" stroke="#DDD" stroke-width="1"/>
+  <ellipse cx="66" cy="68" rx="14" ry="10" fill="#FFF" stroke="#DDD" stroke-width="1"/>
+</svg>`;
+
+const STICKERS = {
+  mammals:    [SVG_COW, SVG_DOG, SVG_ELEPHANT],
+  birds:      [SVG_NOTE, SVG_OWL, SVG_BUTTERFLY],
+  reptiles:   [SVG_TURTLE, SVG_CHAMELEON, SVG_GECKO],
+  amphibians: [SVG_FROG, SVG_AXOLOTL, SVG_TOAD],
+  fish:       [SVG_TROPFISH, SVG_SHARK, SVG_SEAHORSE],
+  all:        [SVG_STAR, SVG_SUN, SVG_RAINBOW]
+};
+
+// ─── SVG SCENE HELPERS ────────────────────────────────────────────────────────
+const C = `class="colorable"`;  // shorthand
+const ST = `stroke="#111" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"`;
+
+function flowerSVG(x, y, r=10) {
+  const petals = [0,60,120,180,240,300].map(a =>
+    `<ellipse ${C} cx="${(x+Math.sin(a*Math.PI/180)*(r+8)).toFixed(1)}" cy="${(y-Math.cos(a*Math.PI/180)*(r+8)).toFixed(1)}" rx="8" ry="${r}" fill="white" ${ST} transform="rotate(${a},${(x+Math.sin(a*Math.PI/180)*(r+8)).toFixed(1)},${(y-Math.cos(a*Math.PI/180)*(r+8)).toFixed(1)})"/>`
+  ).join('');
+  return petals + `<circle ${C} cx="${x}" cy="${y}" r="${r}" fill="white" ${ST}/>`;
+}
+
+function titleText(text) {
+  return `<text x="330" y="50" text-anchor="middle" font-family="Fredoka One,cursive" font-size="50"
+    fill="white" stroke="#000" stroke-width="4" paint-order="stroke">${text}</text>`;
+}
+
+// ─── SCENE: MAMMALS ──────────────────────────────────────────────────────────
+function buildMammalsSVG() {
+  return `
+${titleText('MAMMALS')}
+<!-- ── RABBIT ── -->
+<!-- ears -->
+<ellipse ${C} cx="118" cy="150" rx="17" ry="56" fill="white" ${ST}/>
+<ellipse ${C} cx="162" cy="148" rx="17" ry="56" fill="white" ${ST}/>
+<!-- inner ears (pink hint region) -->
+<ellipse ${C} cx="118" cy="152" rx="9" ry="44" fill="white" ${ST}/>
+<ellipse ${C} cx="162" cy="150" rx="9" ry="44" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="142" cy="358" rx="56" ry="74" fill="white" ${ST}/>
+<!-- head -->
+<circle ${C} cx="142" cy="238" r="48" fill="white" ${ST}/>
+<!-- tail -->
+<circle ${C} cx="196" cy="370" r="24" fill="white" ${ST}/>
+<!-- front paws -->
+<ellipse ${C} cx="108" cy="425" rx="15" ry="10" fill="white" ${ST}/>
+<ellipse ${C} cx="176" cy="425" rx="15" ry="10" fill="white" ${ST}/>
+<!-- eye outlines -->
+<circle ${C} cx="127" cy="228" r="9" fill="white" ${ST}/>
+<circle ${C} cx="157" cy="228" r="9" fill="white" ${ST}/>
+<!-- pupils (decorative) -->
+<circle cx="127" cy="228" r="5" fill="#111"/>
+<circle cx="157" cy="228" r="5" fill="#111"/>
+<circle cx="125" cy="226" r="2" fill="#FFF"/>
+<circle cx="155" cy="226" r="2" fill="#FFF"/>
+<!-- nose -->
+<ellipse cx="142" cy="255" rx="6" ry="4" fill="#FFAAAA" stroke="#111" stroke-width="1.5"/>
+<!-- mouth -->
+<path d="M 138,259 Q 142,265 146,259" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- whiskers -->
+<line x1="100" y1="250" x2="136" y2="254" stroke="#888" stroke-width="1.2"/>
+<line x1="100" y1="258" x2="136" y2="258" stroke="#888" stroke-width="1.2"/>
+<line x1="148" y1="254" x2="184" y2="250" stroke="#888" stroke-width="1.2"/>
+<line x1="148" y1="258" x2="184" y2="258" stroke="#888" stroke-width="1.2"/>
+
+<!-- ── SQUIRREL (top center) ── -->
+<!-- branch -->
+<path d="M 240,195 Q 320,165 430,125" fill="none" stroke="#8B5E3C" stroke-width="10" stroke-linecap="round"/>
+<!-- bushy tail -->
+<path ${C} d="M 376,150 C 418,126 452,96 448,66 C 444,36 418,30 402,44 C 386,58 378,80 376,104 C 374,122 375,142 376,150 Z" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="348" cy="162" rx="27" ry="42" fill="white" ${ST}/>
+<!-- head -->
+<circle ${C} cx="348" cy="112" r="27" fill="white" ${ST}/>
+<!-- ears -->
+<ellipse ${C} cx="333" cy="88" rx="11" ry="15" fill="white" ${ST}/>
+<ellipse ${C} cx="362" cy="87" rx="11" ry="15" fill="white" ${ST}/>
+<!-- front arms on branch -->
+<path ${C} d="M 336,196 C 326,198 318,195 315,190 C 318,186 328,185 336,188 Z" fill="white" ${ST}/>
+<!-- eye + nose -->
+<circle cx="340" cy="108" r="5" fill="#111"/>
+<circle cx="339" cy="107" r="2" fill="#FFF"/>
+<circle cx="356" cy="108" r="4" fill="#111"/>
+<circle cx="352" cy="118" r="3" fill="#FFAAAA" stroke="#111" stroke-width="1"/>
+<!-- nut -->
+<ellipse ${C} cx="345" cy="140" rx="9" ry="7" fill="white" ${ST}/>
+
+<!-- ── CAT (right) ── -->
+<!-- tail -->
+<path ${C} d="M 592,348 C 634,332 642,366 630,392 C 620,412 598,414 590,400 Z" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="540" cy="318" rx="50" ry="80" fill="white" ${ST}/>
+<!-- hind legs -->
+<ellipse ${C} cx="506" cy="390" rx="18" ry="24" fill="white" ${ST} transform="rotate(-10,506,390)"/>
+<ellipse ${C} cx="574" cy="390" rx="18" ry="24" fill="white" ${ST} transform="rotate(10,574,390)"/>
+<!-- head -->
+<circle ${C} cx="540" cy="202" r="46" fill="white" ${ST}/>
+<!-- ears -->
+<path ${C} d="M 508,168 L 520,134 L 544,168 Z" fill="white" ${ST}/>
+<path ${C} d="M 536,168 L 558,134 L 572,168 Z" fill="white" ${ST}/>
+<!-- inner ears -->
+<path ${C} d="M 514,166 L 522,142 L 538,166 Z" fill="white" ${ST}/>
+<path ${C} d="M 542,166 L 558,142 L 568,166 Z" fill="white" ${ST}/>
+<!-- front paws -->
+<ellipse ${C} cx="510" cy="392" rx="18" ry="12" fill="white" ${ST}/>
+<ellipse ${C} cx="570" cy="392" rx="18" ry="12" fill="white" ${ST}/>
+<!-- eyes -->
+<ellipse ${C} cx="524" cy="194" rx="9" ry="7" fill="white" ${ST}/>
+<ellipse ${C} cx="556" cy="194" rx="9" ry="7" fill="white" ${ST}/>
+<ellipse cx="524" cy="194" rx="5" ry="6" fill="#111"/>
+<ellipse cx="556" cy="194" rx="5" ry="6" fill="#111"/>
+<circle cx="522" cy="192" r="2" fill="#FFF"/>
+<circle cx="554" cy="192" r="2" fill="#FFF"/>
+<!-- nose + mouth -->
+<path d="M 537,208 L 543,208 L 540,213 Z" fill="#FF8899" stroke="#111" stroke-width="1"/>
+<path d="M 532,213 Q 540,220 548,213" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- whiskers -->
+<line x1="500" y1="204" x2="534" y2="208" stroke="#888" stroke-width="1.2"/>
+<line x1="500" y1="212" x2="534" y2="212" stroke="#888" stroke-width="1.2"/>
+<line x1="546" y1="208" x2="580" y2="204" stroke="#888" stroke-width="1.2"/>
+<line x1="546" y1="212" x2="580" y2="212" stroke="#888" stroke-width="1.2"/>
+
+<!-- ── MOUSE (bottom center) ── -->
+<!-- tail -->
+<path ${C} d="M 268,445 C 248,450 225,448 205,440 C 192,434 188,424 196,418 C 204,414 220,418 235,424" fill="none" ${ST} stroke-width="5"/>
+<!-- body -->
+<ellipse ${C} cx="320" cy="450" rx="44" ry="28" fill="white" ${ST}/>
+<!-- head -->
+<circle ${C} cx="358" cy="438" r="28" fill="white" ${ST}/>
+<!-- big ears -->
+<circle ${C} cx="342" cy="414" r="20" fill="white" ${ST}/>
+<circle ${C} cx="370" cy="412" r="20" fill="white" ${ST}/>
+<!-- inner ears -->
+<circle ${C} cx="342" cy="414" r="12" fill="white" ${ST}/>
+<circle ${C} cx="370" cy="412" r="12" fill="white" ${ST}/>
+<!-- eye + nose -->
+<circle cx="366" cy="430" r="5" fill="#111"/>
+<circle cx="365" cy="429" r="2" fill="#FFF"/>
+<circle cx="380" cy="438" r="4" fill="#FF9999" stroke="#111" stroke-width="1"/>
+<!-- whiskers -->
+<line x1="332" y1="438" x2="355" y2="436" stroke="#888" stroke-width="1.2"/>
+<line x1="332" y1="444" x2="355" y2="442" stroke="#888" stroke-width="1.2"/>
+
+<!-- ── FLOWERS ── -->
+${flowerSVG(80, 445, 9)}
+${flowerSVG(445, 408, 8)}
+${flowerSVG(530, 458, 8)}
+`;
+}
+
+// ─── SCENE: BIRDS ─────────────────────────────────────────────────────────────
+function buildBirdsSVG() {
+  return `
+${titleText('BIRDS')}
+<!-- ── CLOUDS ── -->
+<circle ${C} cx="110" cy="75" r="28" fill="white" ${ST}/>
+<circle ${C} cx="140" cy="62" r="32" fill="white" ${ST}/>
+<circle ${C} cx="170" cy="72" r="26" fill="white" ${ST}/>
+<circle ${C} cx="410" cy="55" r="24" fill="white" ${ST}/>
+<circle ${C} cx="438" cy="44" r="28" fill="white" ${ST}/>
+<circle ${C} cx="466" cy="52" r="22" fill="white" ${ST}/>
+<!-- flying birds (decorative) -->
+<path d="M 54,100 C 60,94 66,94 72,100" fill="none" stroke="#444" stroke-width="2.5"/>
+<path d="M 74,108 C 80,102 86,102 92,108" fill="none" stroke="#444" stroke-width="2.5"/>
+<path d="M 38,116 C 44,110 50,110 56,116" fill="none" stroke="#444" stroke-width="2.5"/>
+
+<!-- ── HERON (left, tall) ── -->
+<!-- legs -->
+<line x1="226" y1="430" x2="216" y2="490" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+<line x1="248" y1="430" x2="258" y2="490" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+<!-- feet -->
+<path d="M 216,490 L 200,494 M 216,490 L 210,498 M 216,490 L 222,498" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M 258,490 L 242,494 M 258,490 L 252,498 M 258,490 L 268,498" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+<!-- body -->
+<ellipse ${C} cx="238" cy="390" rx="52" ry="38" fill="white" ${ST}/>
+<!-- wing patch -->
+<ellipse ${C} cx="225" cy="395" rx="30" ry="22" fill="white" ${ST}/>
+<!-- tail feathers -->
+<path ${C} d="M 255,420 C 265,432 268,448 258,454 C 250,458 240,452 238,440 C 244,445 250,442 248,432 Z" fill="white" ${ST}/>
+<!-- neck -->
+<path ${C} d="M 212,358 C 205,316 204,272 210,234 C 215,202 224,182 232,168 L 248,168 C 256,182 262,202 264,234 C 268,272 264,316 258,358 Z" fill="white" ${ST}/>
+<!-- head -->
+<circle ${C} cx="238" cy="154" r="26" fill="white" ${ST}/>
+<!-- beak -->
+<path ${C} d="M 250,148 L 316,140 L 316,148 L 250,160 Z" fill="white" ${ST}/>
+<!-- eye -->
+<circle ${C} cx="246" cy="148" r="6" fill="white" ${ST}/>
+<circle cx="246" cy="148" r="3.5" fill="#111"/>
+<circle cx="245" cy="147" r="1.5" fill="#FFF"/>
+<!-- head crest -->
+<path ${C} d="M 230,130 C 226,118 230,108 238,110 C 232,110 230,118 232,128 Z" fill="white" ${ST}/>
+
+<!-- ── SEAGULL 1 (center) ── -->
+<!-- body -->
+<ellipse ${C} cx="390" cy="330" rx="52" ry="36" fill="white" ${ST}/>
+<!-- head -->
+<circle ${C} cx="434" cy="302" r="28" fill="white" ${ST}/>
+<!-- beak -->
+<path ${C} d="M 454,300 L 490,308 L 488,316 L 452,310 Z" fill="white" ${ST}/>
+<!-- wing -->
+<ellipse ${C} cx="372" cy="322" rx="38" ry="18" fill="white" ${ST} transform="rotate(-10,372,322)"/>
+<!-- tail -->
+<path ${C} d="M 340,342 C 326,348 320,358 326,366 C 332,372 344,368 350,358 C 344,362 340,356 342,348 Z" fill="white" ${ST}/>
+<!-- feet -->
+<path d="M 380,362 L 366,376 M 380,362 L 374,378 M 380,362 L 386,378" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M 408,362 L 394,376 M 408,362 L 402,378 M 408,362 L 418,378" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+<!-- eye -->
+<circle ${C} cx="440" cy="296" r="6" fill="white" ${ST}/>
+<circle cx="440" cy="296" r="3" fill="#111"/>
+<circle cx="439" cy="295" r="1.5" fill="#FFF"/>
+
+<!-- ── SEAGULL 2 (right, smaller) ── -->
+<ellipse ${C} cx="554" cy="394" rx="40" ry="28" fill="white" ${ST}/>
+<circle ${C} cx="588" cy="372" r="22" fill="white" ${ST}/>
+<path ${C} d="M 604,370 L 630,376 L 628,383 L 602,378 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="536" cy="387" rx="28" ry="14" fill="white" ${ST} transform="rotate(-10,536,387)"/>
+<path ${C} d="M 516,402 C 504,407 500,416 506,422 C 512,426 522,422 526,414 Z" fill="white" ${ST}/>
+<circle ${C} cx="594" cy="366" r="5" fill="white" ${ST}/>
+<circle cx="594" cy="366" r="2.5" fill="#111"/>
+
+<!-- ── NEST + CHICK (top right) ── -->
+<!-- nest -->
+<ellipse ${C} cx="564" cy="190" rx="56" ry="22" fill="white" ${ST}/>
+<path d="M 510,180 C 514,168 526,162 540,164 M 524,176 C 528,162 542,156 556,160 M 538,182 C 542,168 556,162 570,166 M 552,184 C 558,170 572,165 584,170 M 566,178 C 572,164 586,160 596,166" fill="none" stroke="#8B5E3C" stroke-width="2"/>
+<!-- chick body -->
+<circle ${C} cx="564" cy="158" r="28" fill="white" ${ST}/>
+<!-- chick head -->
+<circle ${C} cx="572" cy="132" r="18" fill="white" ${ST}/>
+<!-- wing nubs -->
+<ellipse ${C} cx="544" cy="162" rx="12" ry="8" fill="white" ${ST} transform="rotate(-20,544,162)"/>
+<ellipse ${C} cx="584" cy="162" rx="12" ry="8" fill="white" ${ST} transform="rotate(20,584,162)"/>
+<!-- beak -->
+<path ${C} d="M 580,132 L 596,128 L 594,136 L 578,138 Z" fill="white" ${ST}/>
+<!-- eye -->
+<circle ${C} cx="566" cy="128" r="6" fill="white" ${ST}/>
+<circle cx="566" cy="128" r="3" fill="#111"/>
+`;
+}
+
+// ─── SCENE: REPTILES ──────────────────────────────────────────────────────────
+function buildReptilesSVG() {
+  return `
+${titleText('REPTILES')}
+<!-- terrain lines (decorative) -->
+<path d="M 0,220 C 80,180 200,240 340,200 C 480,160 580,210 660,180" fill="none" stroke="#CCCCCC" stroke-width="30" stroke-linecap="round"/>
+<path d="M 0,350 C 100,320 220,370 360,340 C 480,315 590,360 660,330" fill="none" stroke="#DDDDDD" stroke-width="25" stroke-linecap="round"/>
+
+<!-- ── SNAKE (top center) ── -->
+<path ${C} d="M 290,90 C 340,70 380,80 400,110 C 420,140 400,170 370,175 C 340,180 320,165 330,140 C 340,118 360,118 368,132" fill="none" ${ST} stroke-width="18"/>
+<path ${C} d="M 290,90 C 340,70 380,80 400,110 C 420,140 400,170 370,175 C 340,180 320,165 330,140 C 340,118 360,118 368,132" fill="none" stroke="#111" stroke-width="2.5"/>
+<!-- head -->
+<ellipse ${C} cx="277" cy="93" rx="22" ry="16" fill="white" ${ST} transform="rotate(-20,277,93)"/>
+<!-- tongue -->
+<path d="M 262,85 L 245,78 M 262,85 L 248,84" fill="none" stroke="#FF4444" stroke-width="2" stroke-linecap="round"/>
+<!-- eye -->
+<circle ${C} cx="274" cy="86" r="5" fill="white" ${ST}/>
+<circle cx="274" cy="86" r="3" fill="#111"/>
+
+<!-- ── TURTLE 1 (upper right, medium) ── -->
+<!-- shell -->
+<ellipse ${C} cx="532" cy="180" rx="70" ry="52" fill="white" ${ST}/>
+<!-- shell pattern -->
+<ellipse ${C} cx="532" cy="180" rx="42" ry="32" fill="white" stroke="#111" stroke-width="1.5"/>
+<!-- shell spots -->
+<circle ${C} cx="520" cy="168" r="10" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="548" cy="165" r="9" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="536" cy="190" r="10" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="512" cy="188" r="8" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="556" cy="188" r="8" fill="white" stroke="#111" stroke-width="1.5"/>
+<!-- head -->
+<circle ${C} cx="598" cy="172" r="20" fill="white" ${ST}/>
+<!-- legs -->
+<ellipse ${C} cx="476" cy="158" rx="18" ry="10" fill="white" ${ST} transform="rotate(-30,476,158)"/>
+<ellipse ${C} cx="476" cy="204" rx="18" ry="10" fill="white" ${ST} transform="rotate(30,476,204)"/>
+<ellipse ${C} cx="556" cy="138" rx="18" ry="10" fill="white" ${ST} transform="rotate(-55,556,138)"/>
+<ellipse ${C} cx="556" cy="224" rx="18" ry="10" fill="white" ${ST} transform="rotate(50,556,224)"/>
+<!-- tail -->
+<path ${C} d="M 465,178 C 450,178 440,182 438,190 C 436,198 444,202 452,200 Z" fill="white" ${ST}/>
+<!-- eye -->
+<circle cx="606" cy="166" r="4" fill="#111"/>
+<circle cx="605" cy="165" r="2" fill="#FFF"/>
+
+<!-- ── TURTLE 2 (bottom, large) ── -->
+<ellipse ${C} cx="286" cy="408" rx="96" ry="70" fill="white" ${ST}/>
+<ellipse ${C} cx="286" cy="408" rx="60" ry="44" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="270" cy="394" r="14" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="304" cy="390" r="13" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="290" cy="416" r="14" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="264" cy="416" r="12" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="314" cy="416" r="11" fill="white" stroke="#111" stroke-width="1.5"/>
+<!-- head -->
+<circle ${C} cx="374" cy="394" r="28" fill="white" ${ST}/>
+<!-- legs -->
+<ellipse ${C} cx="192" cy="376" rx="26" ry="14" fill="white" ${ST} transform="rotate(-25,192,376)"/>
+<ellipse ${C} cx="190" cy="444" rx="26" ry="14" fill="white" ${ST} transform="rotate(25,190,444)"/>
+<ellipse ${C} cx="340" cy="348" rx="26" ry="14" fill="white" ${ST} transform="rotate(-50,340,348)"/>
+<ellipse ${C} cx="342" cy="466" rx="26" ry="14" fill="white" ${ST} transform="rotate(45,342,466)"/>
+<!-- eye -->
+<circle cx="384" cy="386" r="6" fill="#111"/>
+<circle cx="383" cy="385" r="3" fill="#FFF"/>
+
+<!-- ── LIZARD (right center) ── -->
+<!-- tail -->
+<path ${C} d="M 595,380 C 620,370 640,358 652,340 C 658,330 655,322 648,324 C 642,326 636,336 626,344" fill="none" ${ST} stroke-width="10"/>
+<!-- body -->
+<ellipse ${C} cx="548" cy="370" rx="52" ry="22" fill="white" ${ST} transform="rotate(-10,548,370)"/>
+<!-- head -->
+<ellipse ${C} cx="490" cy="345" rx="28" ry="18" fill="white" ${ST}/>
+<!-- legs -->
+<path ${C} d="M 530,358 C 520,348 514,336 518,328 L 526,330 C 524,338 528,348 538,356 Z" fill="white" ${ST}/>
+<path ${C} d="M 558,358 C 548,348 544,336 548,328 L 556,330 C 554,338 556,348 566,356 Z" fill="white" ${ST}/>
+<path ${C} d="M 534,382 C 524,392 520,406 524,414 L 532,412 C 530,406 532,394 542,386 Z" fill="white" ${ST}/>
+<path ${C} d="M 562,382 C 552,392 550,406 554,414 L 562,412 C 560,406 560,394 570,386 Z" fill="white" ${ST}/>
+<!-- eye -->
+<circle cx="482" cy="340" r="5" fill="#111"/>
+<circle cx="481" cy="339" r="2.5" fill="#FFF"/>
+<!-- tongue -->
+<path d="M 463,344 L 448,340 M 463,344 L 450,348" fill="none" stroke="#FF4444" stroke-width="2" stroke-linecap="round"/>
+`;
+}
+
+// ─── SCENE: AMPHIBIANS ────────────────────────────────────────────────────────
+function buildAmphibiansSVG() {
+  return `
+<!-- AMPHIBIANS title oval -->
+<ellipse ${C} cx="330" cy="46" rx="190" ry="36" fill="white" stroke="#111" stroke-width="3"/>
+<text x="330" y="54" text-anchor="middle" font-family="Fredoka One,cursive" font-size="36"
+  fill="#333" pointer-events="none">AMPHIBIANS</text>
+
+<!-- divider curves -->
+<path d="M 0,150 C 120,120 260,180 330,150 C 400,120 520,160 660,130" fill="none" stroke="#DDD" stroke-width="20" stroke-linecap="round"/>
+<path d="M 0,310 C 140,280 270,340 330,300 C 400,265 530,310 660,280" fill="none" stroke="#DDD" stroke-width="20" stroke-linecap="round"/>
+
+<!-- ── SALAMANDER (top left) ── -->
+<!-- tail -->
+<path ${C} d="M 58,130 C 44,118 36,106 42,96 C 48,88 58,90 62,102 C 58,96 52,96 52,106 Z" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="118" cy="138" rx="70" ry="22" fill="white" ${ST} transform="rotate(-8,118,138)"/>
+<!-- head -->
+<ellipse ${C} cx="186" cy="126" rx="24" ry="18" fill="white" ${ST}/>
+<!-- legs -->
+<ellipse ${C} cx="90" cy="122" rx="16" ry="9" fill="white" ${ST} transform="rotate(-40,90,122)"/>
+<ellipse ${C} cx="108" cy="160" rx="16" ry="9" fill="white" ${ST} transform="rotate(30,108,160)"/>
+<ellipse ${C} cx="140" cy="118" rx="16" ry="9" fill="white" ${ST} transform="rotate(-35,140,118)"/>
+<ellipse ${C} cx="148" cy="158" rx="16" ry="9" fill="white" ${ST} transform="rotate(25,148,158)"/>
+<!-- eye -->
+<circle cx="194" cy="120" r="5" fill="#111"/>
+<circle cx="193" cy="119" r="2.5" fill="#FFF"/>
+<!-- stripe pattern -->
+<ellipse ${C} cx="118" cy="134" rx="52" ry="8" fill="white" stroke="#111" stroke-width="1.5"/>
+
+<!-- ── FROG SITTING (center) ── -->
+<!-- back legs -->
+<path ${C} d="M 280,310 C 258,318 240,334 238,352 C 236,366 248,372 260,366 C 272,360 278,344 282,328" fill="none" ${ST} stroke-width="16"/>
+<path ${C} d="M 380,310 C 402,318 420,334 422,352 C 424,366 412,372 400,366 C 388,360 382,344 378,328" fill="none" ${ST} stroke-width="16"/>
+<!-- feet -->
+<ellipse ${C} cx="248" cy="368" rx="20" ry="10" fill="white" ${ST}/>
+<ellipse ${C} cx="412" cy="368" rx="20" ry="10" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="330" cy="310" rx="60" ry="48" fill="white" ${ST}/>
+<!-- belly (lighter region) -->
+<ellipse ${C} cx="330" cy="318" rx="40" ry="34" fill="white" stroke="#111" stroke-width="1.5"/>
+<!-- front arms -->
+<path ${C} d="M 278,320 C 262,314 252,310 248,316 C 244,322 250,328 264,326" fill="none" ${ST} stroke-width="10"/>
+<path ${C} d="M 382,320 C 398,314 408,310 412,316 C 416,322 410,328 396,326" fill="none" ${ST} stroke-width="10"/>
+<!-- head -->
+<ellipse ${C} cx="330" cy="264" rx="54" ry="40" fill="white" ${ST}/>
+<!-- eye domes -->
+<circle ${C} cx="302" cy="248" r="18" fill="white" ${ST}/>
+<circle ${C} cx="358" cy="248" r="18" fill="white" ${ST}/>
+<!-- pupils -->
+<circle cx="302" cy="248" r="9" fill="#111"/>
+<circle cx="300" cy="246" r="4" fill="#FFF"/>
+<circle cx="358" cy="248" r="9" fill="#111"/>
+<circle cx="356" cy="246" r="4" fill="#FFF"/>
+<!-- mouth -->
+<path d="M 298,278 Q 330,290 362,278" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+
+<!-- ── FROG ON LILY PAD 1 (top right) ── -->
+<!-- lily pad -->
+<ellipse ${C} cx="552" cy="188" rx="62" ry="40" fill="white" ${ST}/>
+<path d="M 552,148 L 552,188" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- frog body (small) -->
+<ellipse ${C} cx="546" cy="166" rx="30" ry="22" fill="white" ${ST}/>
+<!-- hind legs -->
+<path ${C} d="M 522,174 C 508,178 500,186 502,194 C 506,200 516,198 520,190" fill="none" ${ST} stroke-width="10"/>
+<path ${C} d="M 572,174 C 586,178 594,186 592,194 C 588,200 578,198 574,190" fill="none" ${ST} stroke-width="10"/>
+<!-- head -->
+<ellipse ${C} cx="550" cy="148" rx="26" ry="20" fill="white" ${ST}/>
+<!-- eye domes -->
+<circle ${C} cx="536" cy="136" r="11" fill="white" ${ST}/>
+<circle ${C} cx="564" cy="136" r="11" fill="white" ${ST}/>
+<circle cx="536" cy="136" r="5" fill="#111"/>
+<circle cx="535" cy="135" r="2" fill="#FFF"/>
+<circle cx="564" cy="136" r="5" fill="#111"/>
+<circle cx="563" cy="135" r="2" fill="#FFF"/>
+
+<!-- ── FROG ON LILY PAD 2 (bottom right, large) ── -->
+<!-- lily pad -->
+<ellipse ${C} cx="550" cy="430" rx="86" ry="56" fill="white" ${ST}/>
+<path d="M 550,374 L 550,430" fill="none" stroke="#111" stroke-width="2"/>
+<!-- frog body (from above) -->
+<ellipse ${C} cx="550" cy="398" rx="40" ry="32" fill="white" ${ST}/>
+<!-- extended legs -->
+<path ${C} d="M 512,398 C 492,390 478,378 476,366 C 480,360 490,362 498,372 C 506,382 510,392 514,398" fill="none" ${ST} stroke-width="14"/>
+<path ${C} d="M 588,398 C 608,390 622,378 624,366 C 620,360 610,362 602,372 C 594,382 590,392 586,398" fill="none" ${ST} stroke-width="14"/>
+<!-- head -->
+<ellipse ${C} cx="550" cy="368" rx="34" ry="26" fill="white" ${ST}/>
+<!-- eye domes -->
+<circle ${C} cx="530" cy="356" r="14" fill="white" ${ST}/>
+<circle ${C} cx="570" cy="356" r="14" fill="white" ${ST}/>
+<circle cx="530" cy="356" r="7" fill="#111"/>
+<circle cx="529" cy="355" r="3" fill="#FFF"/>
+<circle cx="570" cy="356" r="7" fill="#111"/>
+<circle cx="569" cy="355" r="3" fill="#FFF"/>
+<!-- mouth -->
+<path d="M 530,376 Q 550,384 570,376" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+`;
+}
+
+// ─── SCENE: FISH ──────────────────────────────────────────────────────────────
+function buildFishSVG() {
+  return `
+<!-- FISH title bubble -->
+<ellipse ${C} cx="108" cy="72" rx="90" ry="58" fill="white" stroke="#111" stroke-width="3"/>
+<text x="108" y="82" text-anchor="middle" font-family="Fredoka One,cursive" font-size="46"
+  fill="#333" pointer-events="none">FISH</text>
+
+<!-- bubbles (decorative) -->
+<circle cx="460" cy="50" r="14" fill="none" stroke="#AACCEE" stroke-width="2"/>
+<circle cx="490" cy="78" r="10" fill="none" stroke="#AACCEE" stroke-width="2"/>
+<circle cx="580" cy="110" r="16" fill="none" stroke="#AACCEE" stroke-width="2"/>
+<circle cx="610" cy="145" r="8" fill="none" stroke="#AACCEE" stroke-width="2"/>
+
+<!-- ── LARGE FISH (center left) ── -->
+<!-- tail fin -->
+<path ${C} d="M 170,288 L 110,248 L 110,336 Z" fill="white" ${ST}/>
+<!-- body -->
+<ellipse ${C} cx="292" cy="288" rx="124" ry="76" fill="white" ${ST}/>
+<!-- scales row 1 -->
+<path ${C} d="M 240,235 A 20,20 0 0 1 280,235" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 260,235 A 20,20 0 0 1 300,235" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 280,235 A 20,20 0 0 1 320,235" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 300,235 A 20,20 0 0 1 340,235" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- scales row 2 -->
+<path ${C} d="M 220,255 A 22,22 0 0 1 264,255" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 248,255 A 22,22 0 0 1 292,255" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 276,255 A 22,22 0 0 1 320,255" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 304,255 A 22,22 0 0 1 348,255" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- scales row 3 -->
+<path ${C} d="M 210,278 A 24,24 0 0 1 258,278" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 240,278 A 24,24 0 0 1 288,278" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 270,278 A 24,24 0 0 1 318,278" fill="none" stroke="#111" stroke-width="1.5"/>
+<path ${C} d="M 300,278 A 24,24 0 0 1 348,278" fill="none" stroke="#111" stroke-width="1.5"/>
+<!-- dorsal fin -->
+<path ${C} d="M 252,214 C 268,190 310,184 344,212" fill="none" ${ST}/>
+<path ${C} d="M 252,214 L 260,200 L 276,194 L 296,190 L 316,194 L 332,204 L 344,212" fill="white" ${ST}/>
+<!-- pectoral fin -->
+<ellipse ${C} cx="300" cy="308" rx="36" ry="18" fill="white" ${ST} transform="rotate(20,300,308)"/>
+<!-- ventral fin -->
+<path ${C} d="M 252,350 C 264,366 284,372 296,362 C 284,368 266,360 258,348 Z" fill="white" ${ST}/>
+<!-- eye -->
+<circle ${C} cx="366" cy="268" r="18" fill="white" ${ST}/>
+<circle cx="366" cy="268" r="10" fill="#111"/>
+<circle cx="363" cy="265" r="4" fill="#FFF"/>
+<!-- smile -->
+<path d="M 376,288 Q 385,296 382,306" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+
+<!-- ── MEDIUM FISH (upper center right) ── -->
+<path ${C} d="M 448,136 L 414,112 L 414,162 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="508" cy="138" rx="62" ry="40" fill="white" ${ST}/>
+<path ${C} d="M 490,100 C 500,84 526,80 540,100" fill="white" ${ST}/>
+<circle ${C} cx="550" cy="128" r="11" fill="white" ${ST}/>
+<circle cx="550" cy="128" r="6" fill="#111"/>
+<circle cx="548" cy="126" r="2.5" fill="#FFF"/>
+
+<!-- ── SMALL FISH 1 (top right area) ── -->
+<path ${C} d="M 558,60 L 540,48 L 540,72 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="588" cy="60" rx="30" ry="19" fill="white" ${ST}/>
+<circle cx="604" cy="54" r="5" fill="#111"/>
+<circle cx="603" cy="53" r="2" fill="#FFF"/>
+
+<!-- ── SMALL FISH 2 (right side going left) ── -->
+<path ${C} d="M 622,328 L 646,316 L 646,340 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="588" cy="328" rx="34" ry="22" fill="white" ${ST}/>
+<circle cx="572" cy="322" r="6" fill="#111"/>
+<circle cx="571" cy="321" r="2.5" fill="#FFF"/>
+<!-- smile line -->
+<path d="M 576,332 Q 579,338 576,342" fill="none" stroke="#111" stroke-width="1.5"/>
+
+<!-- ── SMALL FISH 3 (bottom left area) ── -->
+<path ${C} d="M 162,448 L 140,436 L 140,460 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="196" cy="448" rx="36" ry="22" fill="white" ${ST}/>
+<circle cx="214" cy="442" r="5" fill="#111"/>
+
+<!-- ── SMALL FISH 4 (bottom right) ── -->
+<path ${C} d="M 558,440 L 534,428 L 534,453 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="596" cy="440" rx="40" ry="26" fill="white" ${ST}/>
+<circle cx="616" cy="434" r="6" fill="#111"/>
+<circle cx="615" cy="433" r="2.5" fill="#FFF"/>
+`;
+}
+
+// ─── SCENE: ALL ───────────────────────────────────────────────────────────────
+function buildAllSVG() {
+  return `
+<!-- Zone dividers -->
+<path d="M 0,200 C 150,160 280,240 330,200 C 380,160 500,200 660,170" fill="none" stroke="#E0E0E0" stroke-width="22" stroke-linecap="round"/>
+<path d="M 330,0 C 310,80 290,140 300,200 C 310,260 350,290 330,360 C 310,420 280,450 300,500" fill="none" stroke="#E0E0E0" stroke-width="22" stroke-linecap="round"/>
+<path d="M 0,350 C 120,320 240,370 330,350 C 420,330 540,370 660,340" fill="none" stroke="#E0E0E0" stroke-width="22" stroke-linecap="round"/>
+
+<!-- Zone labels -->
+<text x="130" y="110" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#AA44BB" stroke="#FFF" stroke-width="3" paint-order="stroke">MAMMALS</text>
+<text x="510" y="100" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#555500" stroke="#FFF" stroke-width="3" paint-order="stroke">REPTILES</text>
+<text x="110" y="300" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#004488" stroke="#FFF" stroke-width="3" paint-order="stroke">BIRDS</text>
+<text x="500" y="280" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#005566" stroke="#FFF" stroke-width="3" paint-order="stroke">FISH</text>
+<text x="330" y="454" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#880033" stroke="#FFF" stroke-width="3" paint-order="stroke">AMPHIBIANS</text>
+
+<!-- ── CAT (top left zone) ── -->
+<ellipse ${C} cx="100" cy="170" rx="30" ry="38" fill="white" ${ST}/>
+<circle ${C} cx="100" cy="122" r="24" fill="white" ${ST}/>
+<path ${C} d="M 82,102 L 88,84 L 102,104 Z" fill="white" ${ST}/>
+<path ${C} d="M 98,104 L 112,84 L 118,102 Z" fill="white" ${ST}/>
+<path ${C} d="M 128,180 C 146,174 152,186 144,196 C 138,204 126,200 126,190 Z" fill="white" ${ST}/>
+<ellipse cx="90" cy="118" rx="5" ry="4" fill="#111"/>
+<ellipse cx="110" cy="118" rx="5" ry="4" fill="#111"/>
+<path d="M 97,130 L 103,130 L 100,133 Z" fill="#FF8899" stroke="#111" stroke-width="1"/>
+
+<!-- ── MOUSE (top left zone, small) ── -->
+<ellipse ${C} cx="210" cy="170" rx="25" ry="16" fill="white" ${ST}/>
+<circle ${C} cx="232" cy="164" r="16" fill="white" ${ST}/>
+<circle ${C} cx="222" cy="148" r="11" fill="white" ${ST}/>
+<circle ${C} cx="238" cy="147" r="11" fill="white" ${ST}/>
+<path ${C} d="M 184,170 C 172,174 162,170 156,162" fill="none" ${ST} stroke-width="4"/>
+<circle cx="238" cy="160" r="3" fill="#111"/>
+
+<!-- ── SNAKE (top right zone) ── -->
+<path ${C} d="M 430,120 C 480,100 520,110 540,140 C 560,170 540,195 515,198 C 490,200 474,188 480,168 C 486,152 500,152 506,162" fill="none" ${ST} stroke-width="14"/>
+<ellipse ${C} cx="418" cy="124" rx="17" ry="12" fill="white" ${ST} transform="rotate(-15,418,124)"/>
+<path d="M 406,118 L 392,113 M 406,118 L 394,120" fill="none" stroke="#FF4444" stroke-width="2" stroke-linecap="round"/>
+<circle cx="414" cy="118" r="4" fill="#111"/>
+
+<!-- ── TURTLE (top right zone) ── -->
+<ellipse ${C} cx="556" cy="178" rx="48" ry="36" fill="white" ${ST}/>
+<ellipse ${C} cx="556" cy="178" rx="30" ry="22" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="548" cy="170" r="8" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="566" cy="168" r="7" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="558" cy="184" r="7" fill="white" stroke="#111" stroke-width="1.5"/>
+<circle ${C} cx="600" cy="172" r="14" fill="white" ${ST}/>
+<circle cx="606" cy="167" r="3.5" fill="#111"/>
+
+<!-- ── BIRD (left center zone) ── -->
+<ellipse ${C} cx="116" cy="378" rx="38" ry="26" fill="white" ${ST}/>
+<circle ${C} cx="148" cy="360" r="20" fill="white" ${ST}/>
+<path ${C} d="M 163,358 L 190,352 L 188,362 L 162,366 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="94" cy="372" rx="28" ry="14" fill="white" ${ST} transform="rotate(-15,94,372)"/>
+<path ${C} d="M 82,394 C 70,400 66,408 72,414 C 78,418 88,414 90,406 Z" fill="white" ${ST}/>
+<circle cx="154" cy="354" r="4" fill="#111"/>
+
+<!-- ── FISH (right center zone) ── -->
+<path ${C} d="M 392,340 L 368,324 L 368,358 Z" fill="white" ${ST}/>
+<ellipse ${C} cx="440" cy="340" rx="52" ry="34" fill="white" ${ST}/>
+<path ${C} d="M 436,308 C 448,292 472,290 482,310" fill="white" ${ST}/>
+<path ${C} d="M 436,372 C 448,388 472,390 482,370" fill="white" ${ST}/>
+<circle ${C} cx="474" cy="330" r="12" fill="white" ${ST}/>
+<circle cx="474" cy="330" r="7" fill="#111"/>
+<circle cx="472" cy="328" r="3" fill="#FFF"/>
+
+<!-- ── FROG (bottom zone) ── -->
+<ellipse ${C} cx="330" cy="470" rx="50" ry="34" fill="white" ${ST}/>
+<ellipse ${C} cx="330" cy="444" rx="40" ry="28" fill="white" ${ST}/>
+<circle ${C} cx="308" cy="428" r="14" fill="white" ${ST}/>
+<circle ${C} cx="352" cy="428" r="14" fill="white" ${ST}/>
+<circle cx="308" cy="428" r="7" fill="#111"/>
+<circle cx="307" cy="427" r="3" fill="#FFF"/>
+<circle cx="352" cy="428" r="7" fill="#111"/>
+<circle cx="351" cy="427" r="3" fill="#FFF"/>
+<path ${C} d="M 282,464 C 260,470 248,482 252,492 C 256,498 268,496 274,486" fill="none" ${ST} stroke-width="12"/>
+<path ${C} d="M 378,464 C 400,470 412,482 408,492 C 404,498 392,496 386,486" fill="none" ${ST} stroke-width="12"/>
+`;
+}
+
+// ─── PALETTE BUILD ────────────────────────────────────────────────────────────
+function buildPalette() {
+  const grid = document.getElementById('palette-grid');
+  PALETTE.forEach((hex) => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.style.background = hex;
+    sw.title = hex;
+    sw.addEventListener('click', function() {
+      selectedColor = hex;
+      document.getElementById('color-preview').style.background = hex;
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+    });
+    grid.appendChild(sw);
+  });
+  // default select red (#CC0000 index 9)
+  grid.children[9].classList.add('active');
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+const BUILDERS = {
+  mammals:    buildMammalsSVG,
+  birds:      buildBirdsSVG,
+  reptiles:   buildReptilesSVG,
+  amphibians: buildAmphibiansSVG,
+  fish:       buildFishSVG,
+  all:        buildAllSVG
+};
+
+function goTo(cat) {
+  curCat = cat;
+  stickerIdx = 0;
+  // build SVG scene
+  const svg = document.getElementById('animal-svg');
+  svg.innerHTML = BUILDERS[cat]();
+  // attach color-click to all colorable elements
+  svg.querySelectorAll('.colorable').forEach(el => {
+    el.addEventListener('click', () => { el.style.fill = selectedColor; });
+  });
+  // sticker
+  showSticker(0);
+  // topbar
+  document.getElementById('topbar-cat').textContent = cat.toUpperCase();
+  // switch screens
+  document.getElementById('scr-main').style.display = 'none';
+  document.getElementById('scr-paint').style.display = 'flex';
+  // clear old stickers
+  document.querySelectorAll('.placed-sticker').forEach(s => s.remove());
+}
+
+function goToMain() {
+  document.getElementById('scr-paint').style.display = 'none';
+  document.getElementById('scr-main').style.display = 'block';
+}
+
+function clearAll() {
+  document.querySelectorAll('#animal-svg .colorable').forEach(el => {
+    el.style.fill = '';
+  });
+  document.querySelectorAll('.placed-sticker').forEach(s => s.remove());
+}
+
+// ─── STICKER PANEL ────────────────────────────────────────────────────────────
+function showSticker(idx) {
+  stickerIdx = ((idx % 3) + 3) % 3;
+  document.getElementById('sticker-src').innerHTML = STICKERS[curCat][stickerIdx];
+}
+function nextSticker() {
+  showSticker(stickerIdx + 1);
+}
+
+// ─── STICKER DRAG + DROP ─────────────────────────────────────────────────────
+document.getElementById('sticker-src').addEventListener('dragstart', e => {
+  dragSvg = document.getElementById('sticker-src').innerHTML;
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setData('text/plain', 'sticker');
+});
+
+function stickerDrop(e) {
+  e.preventDefault();
+  const wrap = document.getElementById('paint-canvas-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const x = e.clientX - rect.left - 42;
+  const y = e.clientY - rect.top  - 42;
+  const div = document.createElement('div');
+  div.className = 'placed-sticker';
+  div.style.left = Math.max(0, x) + 'px';
+  div.style.top  = Math.max(0, y) + 'px';
+  div.innerHTML  = dragSvg;
+  wrap.appendChild(div);
+  makeDraggable(div);
+}
+
+function makeDraggable(el) {
+  let ox = 0, oy = 0;
+  el.addEventListener('mousedown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const wrap = document.getElementById('paint-canvas-wrap');
+    const wr   = wrap.getBoundingClientRect();
+    ox = e.clientX - el.offsetLeft;
+    oy = e.clientY - el.offsetTop;
+    const move = e => {
+      el.style.left = (e.clientX - wr.left - ox) + 'px';
+      el.style.top  = (e.clientY - wr.top  - oy) + 'px';
+    };
+    const up = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildPalette();
+document.getElementById('color-preview').style.background = selectedColor;
+</script>
+</body>
+</html>
