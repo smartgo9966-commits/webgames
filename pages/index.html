@@ -149,6 +149,11 @@ header { text-align: center; margin-bottom: 52px; }
 .sb .tag        { background: #E8EAF6; color: #283593; }
 .sb .play-btn   { background: linear-gradient(135deg,#3949AB,#1A237E); color: #FFD700; box-shadow: 0 5px 18px rgba(57,73,171,.45); }
 
+/* ── PILE OF BALLS THEME ── */
+.pb .card-title { color: #8a0e25; }
+.pb .tag        { background: #FFE0E5; color: #8a0e25; }
+.pb .play-btn   { background: linear-gradient(135deg,#F1A31A,#C91A1A); color: #FFE030; box-shadow: 0 5px 18px rgba(201,26,26,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -796,6 +801,122 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="animal_classification_paint_and_makes/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PILE OF BALLS CARD
+  ══════════════════════════════ -->
+  <div class="game-card pb" onclick="location.href='pile_of_balls/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="pbBg" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stop-color="#7a0f23"/>
+            <stop offset="70%" stop-color="#4a0c1c"/>
+            <stop offset="100%" stop-color="#2c0712"/>
+          </radialGradient>
+          <radialGradient id="pbPlay" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#4ec1cf"/>
+            <stop offset="60%" stop-color="#19788a"/>
+            <stop offset="100%" stop-color="#0a3848"/>
+          </radialGradient>
+          <radialGradient id="pbBlue" cx="30%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#6ed0f5"/>
+            <stop offset="55%" stop-color="#1aa5e6"/>
+            <stop offset="100%" stop-color="#086ca8"/>
+          </radialGradient>
+          <radialGradient id="pbRed" cx="30%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#ff7e7e"/>
+            <stop offset="55%" stop-color="#d62a2a"/>
+            <stop offset="100%" stop-color="#8a0e0e"/>
+          </radialGradient>
+          <radialGradient id="pbYellow" cx="30%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#fff09a"/>
+            <stop offset="55%" stop-color="#ffcc1a"/>
+            <stop offset="100%" stop-color="#c08a00"/>
+          </radialGradient>
+          <radialGradient id="pbGreen" cx="30%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#a8f5a8"/>
+            <stop offset="55%" stop-color="#3fbf3f"/>
+            <stop offset="100%" stop-color="#1a6020"/>
+          </radialGradient>
+          <radialGradient id="pbPurple" cx="30%" cy="28%" r="80%">
+            <stop offset="0%" stop-color="#d8a4e6"/>
+            <stop offset="55%" stop-color="#9b59b6"/>
+            <stop offset="100%" stop-color="#4a1a60"/>
+          </radialGradient>
+        </defs>
+
+        <!-- BG with subtle swirls -->
+        <rect width="380" height="210" fill="url(#pbBg)"/>
+        <circle cx="40"  cy="40"  r="34" fill="rgba(255,180,180,.04)"/>
+        <circle cx="340" cy="30"  r="42" fill="rgba(255,180,180,.05)"/>
+        <circle cx="60"  cy="180" r="46" fill="rgba(255,180,180,.05)"/>
+
+        <!-- ── Title badges (left) ── -->
+        <!-- Blue "Pile" -->
+        <circle cx="78"  cy="62" r="32" fill="url(#pbBlue)" stroke="rgba(0,0,0,.4)" stroke-width="1.5"/>
+        <text x="78" y="69" text-anchor="middle"
+              font-family="'Fredoka One',Arial Black,Arial" font-size="20"
+              fill="#ffea4f" paint-order="stroke fill"
+              stroke="#112a4e" stroke-width="2" stroke-linejoin="round">Pile</text>
+
+        <!-- Red "of" -->
+        <circle cx="56" cy="118" r="28" fill="url(#pbRed)" stroke="rgba(0,0,0,.4)" stroke-width="1.5"/>
+        <text x="56" y="125" text-anchor="middle"
+              font-family="'Fredoka One',Arial Black,Arial" font-size="18"
+              fill="#ffea4f" paint-order="stroke fill"
+              stroke="#112a4e" stroke-width="2" stroke-linejoin="round">of</text>
+
+        <!-- Yellow "Balls" -->
+        <circle cx="118" cy="128" r="36" fill="url(#pbYellow)" stroke="rgba(0,0,0,.4)" stroke-width="1.5"/>
+        <text x="118" y="135" text-anchor="middle"
+              font-family="'Fredoka One',Arial Black,Arial" font-size="20"
+              fill="#ffea4f" paint-order="stroke fill"
+              stroke="#112a4e" stroke-width="2" stroke-linejoin="round">Balls</text>
+
+        <!-- ── Mini play-area on the right ── -->
+        <rect x="208" y="22" width="140" height="148" rx="14"
+              fill="url(#pbPlay)" stroke="rgba(255,255,255,.85)" stroke-width="2.5"/>
+
+        <!-- Falling triangle piece (top) -->
+        <circle cx="278" cy="44" r="11" fill="url(#pbBlue)"/>
+        <circle cx="269" cy="60" r="11" fill="url(#pbRed)"/>
+        <circle cx="288" cy="60" r="11" fill="url(#pbGreen)"/>
+
+        <!-- Stacked balls at bottom of play area -->
+        <circle cx="222" cy="158" r="10" fill="url(#pbPurple)"/>
+        <circle cx="243" cy="158" r="10" fill="url(#pbYellow)"/>
+        <circle cx="264" cy="158" r="10" fill="url(#pbRed)"/>
+        <circle cx="285" cy="158" r="10" fill="url(#pbGreen)"/>
+        <circle cx="306" cy="158" r="10" fill="url(#pbBlue)"/>
+        <circle cx="327" cy="158" r="10" fill="url(#pbRed)"/>
+        <circle cx="243" cy="138" r="10" fill="url(#pbYellow)"/>
+        <circle cx="285" cy="138" r="10" fill="url(#pbGreen)"/>
+        <circle cx="306" cy="138" r="10" fill="url(#pbBlue)"/>
+        <circle cx="327" cy="138" r="10" fill="url(#pbRed)"/>
+        <circle cx="306" cy="118" r="10" fill="url(#pbPurple)"/>
+
+        <!-- Bottom label bar -->
+        <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.32)"/>
+        <text x="190" y="192" fill="rgba(255,255,255,.92)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Connect 4+ same-colour balls to pop them!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🔴 Pile of Balls</div>
+      <div class="card-desc">A falling-block puzzle: rotate and drop triangular ball clusters to connect 4 or more balls of the same colour. Trigger chain reactions, climb the levels, and race the rising drop speed!</div>
+      <div class="card-tags">
+        <span class="tag">Falling Blocks</span>
+        <span class="tag">Chain Combos</span>
+        <span class="tag">Keyboard &amp; Touch</span>
+        <span class="tag">Puzzle</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="pile_of_balls/">▶ Play Now!</a>
     </div>
   </div>
 
