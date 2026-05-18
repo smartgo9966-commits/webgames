@@ -460,6 +460,7 @@ body::before {
   ];
   const ROT_ANIM_MS = 130;   // duration of one rotation animation
   const FALL_SPEED  = 22;    // cells/second for the cascade-gravity animation
+  const SLIDE_MIN_MS = 160;  // minimum duration for short slides (head waterfall)
 
   // ────── State ──────
   const G = {
@@ -652,15 +653,29 @@ body::before {
   }
 
   function lockPiece() {
-    for (const cell of pieceCells(G.piece)) {
+    // Snapshot where the head ball was being rendered RIGHT NOW (continuous
+    // visual coords, with the triangle's half-cell offset baked in). The
+    // gravity animation will start the head's slide from this exact spot so
+    // the centred triangle visibly flows into its landing column.
+    const visualCells = rotatedPieceCells(G.piece, G.piece.visualAngle);
+    const headVisual = visualCells[0];
+    const logicalCells = pieceCells(G.piece);
+    const headLogical = logicalCells[0];
+    for (const cell of logicalCells) {
       if (cell.r >= 0 && cell.r < ROWS && cell.c >= 0 && cell.c < COLS) {
         G.grid[cell.r][cell.c] = cell.color;
       }
     }
     G.piece = null;
     G.locked = true;
-    // Let the freshly-locked balls cascade down before checking matches.
-    applyGravityAnimated(() => resolveChains(1));
+    // Override: the head ball should slide from its visual triangle spot to
+    // wherever it lands after gravity, not from its grid cell.
+    applyGravityAnimated(() => resolveChains(1), {
+      gridR: headLogical.r,
+      gridC: headLogical.c,
+      visualR: headVisual.r,
+      visualC: headVisual.c,
+    });
   }
 
   // ────── Matches ──────
@@ -689,8 +704,9 @@ body::before {
     return groups;
   }
 
-  // Compacts each column to the bottom and returns the list of balls that
-  // moved (so the renderer can animate them flowing down).
+  // Compacts each column to the bottom. Returns 2D moves so the renderer can
+  // animate balls flowing diagonally — needed for the head ball's slide from
+  // its centred triangle visual position into its landing column.
   function applyGravity() {
     const moves = [];
     for (let c = 0; c < COLS; c++) {
@@ -698,7 +714,11 @@ body::before {
       for (let r = ROWS - 1; r >= 0; r--) {
         if (G.grid[r][c] !== -1) {
           if (r !== write) {
-            moves.push({ c, fromR: r, toR: write, color: G.grid[r][c] });
+            moves.push({
+              fromR: r,    fromC: c,
+              toR: write,  toC: c,
+              color: G.grid[r][c],
+            });
           }
           const v = G.grid[r][c];
           G.grid[r][c] = -1;
@@ -711,10 +731,36 @@ body::before {
   }
 
   // Drop balls visibly — like water cascading. Each ball travels at FALL_SPEED
-  // cells/sec from its old row to its new row. Calls `callback` once all balls
-  // have arrived (or immediately if no balls moved).
-  function applyGravityAnimated(callback) {
+  // cells/sec from its visual start to its grid destination. Calls `callback`
+  // once all balls have arrived (or immediately if no balls moved).
+  //
+  // `headOverride` (optional) attaches a sliding start to the head ball that
+  // was just locked: { gridR, gridC, visualR, visualC }. The matching move's
+  // `fromR/fromC` are replaced with the visual coords so the head visibly
+  // slides from the triangle's centred spot into its landing column.
+  function applyGravityAnimated(callback, headOverride) {
     const moves = applyGravity();
+
+    if (headOverride) {
+      // The head's final grid cell after gravity may differ from its lock
+      // cell (if the column had room below). Search the moves for the head;
+      // if not present, the head didn't fall vertically — synthesize a
+      // horizontal-only slide so the animation still plays.
+      let headMove = moves.find(m =>
+        m.fromR === headOverride.gridR && m.fromC === headOverride.gridC
+      );
+      if (headMove) {
+        headMove.fromR = headOverride.visualR;
+        headMove.fromC = headOverride.visualC;
+      } else {
+        moves.push({
+          fromR: headOverride.visualR, fromC: headOverride.visualC,
+          toR:   headOverride.gridR,   toC:   headOverride.gridC,
+          color: G.grid[headOverride.gridR][headOverride.gridC],
+        });
+      }
+    }
+
     if (moves.length === 0) { callback(); return; }
     G.fallAnim = { moves, t: 0, callback };
   }
@@ -787,7 +833,7 @@ body::before {
     // Cells whose ball is mid-cascade — skip them in the grid pass, draw later.
     const fallSet = new Set();
     if (G.fallAnim) {
-      for (const m of G.fallAnim.moves) fallSet.add(m.toR + ',' + m.c);
+      for (const m of G.fallAnim.moves) fallSet.add(m.toR + ',' + m.toC);
     }
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -804,12 +850,23 @@ body::before {
         }
       }
     }
-    // cascade-falling balls — draw at their interpolated row positions
+    // cascade-falling balls — interpolate diagonally so the head can slide
+    // from its centred triangle visual position into its landing column.
     if (G.fallAnim) {
       const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
+      const slideProgress = G.fallAnim.t / SLIDE_MIN_MS;
       for (const m of G.fallAnim.moves) {
-        const animR = Math.min(m.toR, m.fromR + distMoved);
-        const cx = m.c * CELL + CELL / 2;
+        const dR = m.toR - m.fromR;
+        const dC = m.toC - m.fromC;
+        const dist = Math.max(Math.abs(dR), Math.abs(dC));
+        // Per-ball progress in [0,1]. Use the SLOWER rate so short slides
+        // take at least SLIDE_MIN_MS (head visibility) and long cascades
+        // still respect FALL_SPEED.
+        const tNorm = dist === 0 ? 1
+          : Math.min(1, Math.min(distMoved, slideProgress * dist) / dist);
+        const animR = m.fromR + dR * tNorm;
+        const animC = m.fromC + dC * tNorm;
+        const cx = animC * CELL + CELL / 2;
         const cy = animR * CELL + CELL / 2;
         drawBall(bctx, cx, cy, BALL_R, m.color);
       }
@@ -878,11 +935,18 @@ body::before {
     const dt = t - G.lastTime;
     G.lastTime = t;
     if (G.clearAnim) G.clearAnim.t += dt;
-    // advance cascade-gravity animation
+    // advance cascade-gravity animation (now diagonal-capable for the slide)
     if (G.fallAnim) {
       G.fallAnim.t += dt;
       const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
-      const allDone = G.fallAnim.moves.every(m => m.fromR + distMoved >= m.toR);
+      const slideProgress = G.fallAnim.t / SLIDE_MIN_MS;
+      const allDone = G.fallAnim.moves.every(m => {
+        const dist = Math.max(Math.abs(m.toR - m.fromR), Math.abs(m.toC - m.fromC));
+        if (dist === 0) return true;
+        // Take whichever rate is slower — long falls use FALL_SPEED, short
+        // slides are stretched to SLIDE_MIN_MS so the head is visible.
+        return Math.min(distMoved, slideProgress * dist) >= dist;
+      });
       if (allDone) {
         const cb = G.fallAnim.callback;
         G.fallAnim = null;
