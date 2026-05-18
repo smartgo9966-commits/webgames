@@ -154,6 +154,11 @@ header { text-align: center; margin-bottom: 52px; }
 .pb .tag        { background: #FFE0E5; color: #8a0e25; }
 .pb .play-btn   { background: linear-gradient(135deg,#F1A31A,#C91A1A); color: #FFE030; box-shadow: 0 5px 18px rgba(201,26,26,.45); }
 
+/* ── MAZE THEME ── */
+.mz .card-title { color: #006e3a; }
+.mz .tag        { background: #DCFCE4; color: #006e3a; }
+.mz .play-btn   { background: linear-gradient(135deg,#22dd44,#006e3a); color: #ffe030; box-shadow: 0 5px 18px rgba(0,110,58,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -917,6 +922,96 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="pile_of_balls/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       MAZE CARD
+  ══════════════════════════════ -->
+  <div class="game-card mz" onclick="location.href='maze/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mzBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#003a36"/>
+            <stop offset="100%" stop-color="#00211e"/>
+          </linearGradient>
+          <radialGradient id="mzBall" cx="35%" cy="32%" r="65%">
+            <stop offset="0%" stop-color="#ffb0b0"/>
+            <stop offset="45%" stop-color="#ff4444"/>
+            <stop offset="100%" stop-color="#8a0a0a"/>
+          </radialGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#mzBg)"/>
+
+        <!-- Title -->
+        <text x="190" y="32" fill="#ffe030" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="26" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#003a36" stroke-width="3" stroke-linejoin="round">Maze</text>
+
+        <!-- Maze walls (decorative grid) -->
+        <g stroke="#22dd44" stroke-width="2.5" stroke-linecap="round" fill="none">
+          <!-- Outer border -->
+          <rect x="30" y="50" width="320" height="120"/>
+          <!-- Horizontals -->
+          <line x1="30"  y1="70"  x2="80"  y2="70"/>
+          <line x1="110" y1="70"  x2="180" y2="70"/>
+          <line x1="210" y1="70"  x2="270" y2="70"/>
+          <line x1="300" y1="70"  x2="350" y2="70"/>
+          <line x1="60"  y1="90"  x2="130" y2="90"/>
+          <line x1="170" y1="90"  x2="240" y2="90"/>
+          <line x1="270" y1="90"  x2="330" y2="90"/>
+          <line x1="30"  y1="110" x2="100" y2="110"/>
+          <line x1="140" y1="110" x2="200" y2="110"/>
+          <line x1="240" y1="110" x2="320" y2="110"/>
+          <line x1="80"  y1="130" x2="160" y2="130"/>
+          <line x1="200" y1="130" x2="290" y2="130"/>
+          <line x1="50"  y1="150" x2="130" y2="150"/>
+          <line x1="170" y1="150" x2="230" y2="150"/>
+          <line x1="260" y1="150" x2="350" y2="150"/>
+          <!-- Verticals -->
+          <line x1="60"  y1="50"  x2="60"  y2="90"/>
+          <line x1="100" y1="70"  x2="100" y2="130"/>
+          <line x1="140" y1="50"  x2="140" y2="110"/>
+          <line x1="170" y1="110" x2="170" y2="150"/>
+          <line x1="200" y1="50"  x2="200" y2="90"/>
+          <line x1="230" y1="90"  x2="230" y2="170"/>
+          <line x1="260" y1="50"  x2="260" y2="130"/>
+          <line x1="300" y1="110" x2="300" y2="170"/>
+          <line x1="330" y1="50"  x2="330" y2="90"/>
+          <line x1="80"  y1="130" x2="80"  y2="170"/>
+          <line x1="130" y1="130" x2="130" y2="170"/>
+        </g>
+
+        <!-- Player ball top-right -->
+        <circle cx="318" cy="60" r="8" fill="url(#mzBall)" stroke="#5a0606" stroke-width="1"/>
+        <ellipse cx="315" cy="57" rx="2.5" ry="1.4" fill="rgba(255,255,255,0.65)"/>
+
+        <!-- Yellow star bottom-left -->
+        <polygon points="48,158 51,150 59,150 53,144 56,136 48,141 40,136 43,144 37,150 45,150"
+                 fill="#ffe030" stroke="#a87000" stroke-width="1.5" stroke-linejoin="round"/>
+
+        <!-- Bottom label -->
+        <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.3)"/>
+        <text x="190" y="192" fill="rgba(255,255,255,.92)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Navigate the maze with arrow keys</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🌀 Maze</div>
+      <div class="card-desc">Steer the red ball through a winding green maze and reach the yellow star! Beat the clock for a 5-star rating, peek at the solution if you get stuck.</div>
+      <div class="card-tags">
+        <span class="tag">Arrow Keys</span>
+        <span class="tag">Single Maze</span>
+        <span class="tag">Timed</span>
+        <span class="tag">Puzzle</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="maze/">▶ Play Now!</a>
     </div>
   </div>
 
