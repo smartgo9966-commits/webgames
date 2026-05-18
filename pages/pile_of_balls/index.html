@@ -459,6 +459,7 @@ body::before {
     [1,    1  ],   // base-right
   ];
   const ROT_ANIM_MS = 130;   // duration of one rotation animation
+  const FALL_SPEED  = 22;    // cells/second for the cascade-gravity animation
 
   // ────── State ──────
   const G = {
@@ -474,6 +475,7 @@ body::before {
     locked: false,        // input lock during clears
     gameOver: false,
     clearAnim: null,      // {cells:[{r,c,color}], t, duration}
+    fallAnim: null,       // {moves:[{c,fromR,toR,color}], t, callback}
     lastTime: 0,
   };
 
@@ -657,9 +659,8 @@ body::before {
     }
     G.piece = null;
     G.locked = true;
-    // settle this piece then resolve matches
-    applyGravity();
-    setTimeout(() => resolveChains(1), 80);
+    // Let the freshly-locked balls cascade down before checking matches.
+    applyGravityAnimated(() => resolveChains(1));
   }
 
   // ────── Matches ──────
@@ -688,11 +689,17 @@ body::before {
     return groups;
   }
 
+  // Compacts each column to the bottom and returns the list of balls that
+  // moved (so the renderer can animate them flowing down).
   function applyGravity() {
+    const moves = [];
     for (let c = 0; c < COLS; c++) {
       let write = ROWS - 1;
       for (let r = ROWS - 1; r >= 0; r--) {
         if (G.grid[r][c] !== -1) {
+          if (r !== write) {
+            moves.push({ c, fromR: r, toR: write, color: G.grid[r][c] });
+          }
           const v = G.grid[r][c];
           G.grid[r][c] = -1;
           G.grid[write][c] = v;
@@ -700,6 +707,16 @@ body::before {
         }
       }
     }
+    return moves;
+  }
+
+  // Drop balls visibly — like water cascading. Each ball travels at FALL_SPEED
+  // cells/sec from its old row to its new row. Calls `callback` once all balls
+  // have arrived (or immediately if no balls moved).
+  function applyGravityAnimated(callback) {
+    const moves = applyGravity();
+    if (moves.length === 0) { callback(); return; }
+    G.fallAnim = { moves, t: 0, callback };
   }
 
   function resolveChains(chain) {
@@ -719,14 +736,12 @@ body::before {
     G.score += total * 10 * chain;
     updateHUD();
     checkLevelUp();
-    // play clear animation
+    // play clear animation, then cascade survivors down, then look for chains
     G.clearAnim = { cells, t: 0, duration: 320 };
     setTimeout(() => {
-      // remove cells from grid
       for (const cell of cells) G.grid[cell.r][cell.c] = -1;
       G.clearAnim = null;
-      applyGravity();
-      setTimeout(() => resolveChains(chain + 1), 120);
+      applyGravityAnimated(() => resolveChains(chain + 1));
     }, 320);
   }
 
@@ -769,10 +784,16 @@ body::before {
       clearAlpha = 1 - p;
       for (const c of G.clearAnim.cells) clearSet.add(c.r + ',' + c.c);
     }
+    // Cells whose ball is mid-cascade — skip them in the grid pass, draw later.
+    const fallSet = new Set();
+    if (G.fallAnim) {
+      for (const m of G.fallAnim.moves) fallSet.add(m.toR + ',' + m.c);
+    }
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const v = G.grid[r][c];
         if (v === -1) continue;
+        if (fallSet.has(r + ',' + c)) continue;
         const cx = c * CELL + CELL / 2;
         const cy = r * CELL + CELL / 2;
         const key = r + ',' + c;
@@ -781,6 +802,16 @@ body::before {
         } else {
           drawBall(bctx, cx, cy, BALL_R, v);
         }
+      }
+    }
+    // cascade-falling balls — draw at their interpolated row positions
+    if (G.fallAnim) {
+      const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
+      for (const m of G.fallAnim.moves) {
+        const animR = Math.min(m.toR, m.fromR + distMoved);
+        const cx = m.c * CELL + CELL / 2;
+        const cy = animR * CELL + CELL / 2;
+        drawBall(bctx, cx, cy, BALL_R, m.color);
       }
     }
     // falling piece — render the triangle at the current (animated) angle
@@ -847,6 +878,17 @@ body::before {
     const dt = t - G.lastTime;
     G.lastTime = t;
     if (G.clearAnim) G.clearAnim.t += dt;
+    // advance cascade-gravity animation
+    if (G.fallAnim) {
+      G.fallAnim.t += dt;
+      const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
+      const allDone = G.fallAnim.moves.every(m => m.fromR + distMoved >= m.toR);
+      if (allDone) {
+        const cb = G.fallAnim.callback;
+        G.fallAnim = null;
+        cb();
+      }
+    }
     // advance rotation animation
     if (G.piece && G.piece.rotAnimT < 1) {
       G.piece.rotAnimT = Math.min(1, G.piece.rotAnimT + dt / ROT_ANIM_MS);
