@@ -159,6 +159,11 @@ header { text-align: center; margin-bottom: 52px; }
 .mz .tag        { background: #DCFCE4; color: #006e3a; }
 .mz .play-btn   { background: linear-gradient(135deg,#22dd44,#006e3a); color: #ffe030; box-shadow: 0 5px 18px rgba(0,110,58,.45); }
 
+/* ── CASTLE DEFENSE THEME ── */
+.cd .card-title { color: #5d3010; }
+.cd .tag        { background: #F4E4C4; color: #6c4a20; }
+.cd .play-btn   { background: linear-gradient(135deg,#8edc5a,#3e8a20); color: #ffe9a0; box-shadow: 0 5px 18px rgba(62,138,32,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -1012,6 +1017,109 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="maze/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       CASTLE DEFENSE CARD
+  ══════════════════════════════ -->
+  <div class="game-card cd" onclick="location.href='castle_defense/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cdBg" cx="50%" cy="50%" r="75%">
+            <stop offset="0%" stop-color="#cce28a"/>
+            <stop offset="60%" stop-color="#a8c95a"/>
+            <stop offset="100%" stop-color="#88a843"/>
+          </radialGradient>
+          <linearGradient id="cdStone" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#dab874"/>
+            <stop offset="100%" stop-color="#a8804a"/>
+          </linearGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#cdBg)"/>
+
+        <!-- Winding sand path -->
+        <path d="M 0 150 L 80 150 L 80 80 L 160 80 L 160 130 L 240 130 L 240 60 L 320 60"
+              fill="none" stroke="#7d5a22" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 0 150 L 80 150 L 80 80 L 160 80 L 160 130 L 240 130 L 240 60 L 320 60"
+              fill="none" stroke="#f5db8e" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Castle -->
+        <g transform="translate(310, 30)">
+          <rect x="-30" y="14" width="60" height="40" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="2"/>
+          <rect x="-36" y="-4" width="18" height="58" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="2"/>
+          <rect x="18" y="-4" width="18" height="58" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="2"/>
+          <!-- Crenellations -->
+          <rect x="-36" y="-8" width="5" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <rect x="-28" y="-8" width="5" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <rect x="-20" y="-8" width="3" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <rect x="18" y="-8" width="3" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <rect x="23" y="-8" width="5" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <rect x="31" y="-8" width="5" height="6" fill="url(#cdStone)" stroke="#6c4a20" stroke-width="1.5"/>
+          <!-- Gate -->
+          <path d="M -10 54 L -10 30 Q 0 18 10 30 L 10 54 Z" fill="#3c2008"/>
+          <!-- Flag poles -->
+          <line x1="-27" y1="-26" x2="-27" y2="-6" stroke="#222" stroke-width="2"/>
+          <line x1="27" y1="-26" x2="27" y2="-6" stroke="#222" stroke-width="2"/>
+          <polygon points="-27,-26 -15,-22 -27,-18" fill="#c83018"/>
+          <polygon points="27,-26 39,-22 27,-18" fill="#c83018"/>
+        </g>
+
+        <!-- Cannons on path -->
+        <g transform="translate(120, 110)">
+          <rect x="-14" y="-14" width="28" height="28" rx="3" fill="#b8d870" stroke="#5b8d3a" stroke-width="2"/>
+          <ellipse cx="0" cy="0" rx="9" ry="6" fill="#7a5232" stroke="#3b2412" stroke-width="1.5"/>
+          <rect x="5" y="-3" width="10" height="6" fill="#5a3a22" stroke="#3b2412" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(200, 100)">
+          <rect x="-14" y="-14" width="28" height="28" rx="3" fill="#b8d870" stroke="#5b8d3a" stroke-width="2"/>
+          <rect x="-8" y="-8" width="14" height="14" fill="#3c4d2a" stroke="#1a2410" stroke-width="1.5"/>
+          <rect x="0" y="-3" width="13" height="6" fill="#222" stroke="#000" stroke-width="1.5"/>
+        </g>
+
+        <!-- Enemy tanks on left -->
+        <g transform="translate(36, 150)">
+          <ellipse cx="1" cy="11" rx="14" ry="3" fill="rgba(0,0,0,0.25)"/>
+          <rect x="-12" y="-13" width="24" height="5" fill="#1a2410"/>
+          <rect x="-12" y="8" width="24" height="5" fill="#1a2410"/>
+          <rect x="-11" y="-9" width="22" height="18" fill="#4d6b2a" stroke="#0a1004" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="7" fill="#5d7e35" stroke="#0a1004" stroke-width="1.5"/>
+          <rect x="3" y="-2" width="14" height="4" fill="#1a1a1a" stroke="#000" stroke-width="1"/>
+        </g>
+        <g transform="translate(64, 150)">
+          <ellipse cx="1" cy="11" rx="14" ry="3" fill="rgba(0,0,0,0.25)"/>
+          <rect x="-12" y="-13" width="24" height="5" fill="#2a160a"/>
+          <rect x="-12" y="8" width="24" height="5" fill="#2a160a"/>
+          <rect x="-11" y="-9" width="22" height="18" fill="#6b3a1c" stroke="#0a1004" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="7" fill="#854a25" stroke="#0a1004" stroke-width="1.5"/>
+          <rect x="3" y="-2" width="14" height="4" fill="#1a1a1a" stroke="#000" stroke-width="1"/>
+        </g>
+
+        <!-- Title -->
+        <text x="190" y="32" fill="#5db1ef" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="28" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#0b3654" stroke-width="3" stroke-linejoin="round">CASTLE DEFENSE</text>
+
+        <!-- Bottom label -->
+        <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.3)"/>
+        <text x="190" y="192" fill="rgba(255,255,255,.92)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Buy cannons, defend the castle gate</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🏰 Castle Defense</div>
+      <div class="card-desc">A tower-defense skirmish: buy cannons, place them along a winding path, and stop wooden-crate invaders before they breach the castle.</div>
+      <div class="card-tags">
+        <span class="tag">Tower Defense</span>
+        <span class="tag">Strategy</span>
+        <span class="tag">Waves</span>
+        <span class="tag">Mouse</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="castle_defense/">▶ Play Now!</a>
     </div>
   </div>
 
