@@ -164,6 +164,11 @@ header { text-align: center; margin-bottom: 52px; }
 .cd .tag        { background: #F4E4C4; color: #6c4a20; }
 .cd .play-btn   { background: linear-gradient(135deg,#8edc5a,#3e8a20); color: #ffe9a0; box-shadow: 0 5px 18px rgba(62,138,32,.45); }
 
+/* ── ALPHABET GAME THEME ── */
+.ab .card-title { color: #c41a2d; }
+.ab .tag        { background: #FFE5E8; color: #c41a2d; }
+.ab .play-btn   { background: linear-gradient(135deg,#f47820,#c41a2d); color: #ffe9a0; box-shadow: 0 5px 18px rgba(196,26,45,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -1120,6 +1125,100 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="castle_defense/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       ALPHABET GAME CARD
+  ══════════════════════════════ -->
+  <div class="game-card ab" onclick="location.href='alphabet_game/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="abBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8333f"/>
+            <stop offset="100%" stop-color="#c41a2d"/>
+          </linearGradient>
+        </defs>
+        <!-- Red background -->
+        <rect width="380" height="210" fill="url(#abBg)"/>
+
+        <!-- Title -->
+        <text x="190" y="42" fill="#fff"
+              font-family="'Patrick Hand',cursive" font-size="34" font-weight="400"
+              text-anchor="middle"
+              paint-order="stroke fill" stroke="rgba(0,0,0,0.3)" stroke-width="0.8">★ Alphabet Game ★</text>
+
+        <!-- Star decorations -->
+        <polygon points="56,28 60,38 70,38 62,44 65,54 56,48 47,54 50,44 42,38 52,38"
+                 fill="#f6d24a" stroke="#a98010" stroke-width="0.8"/>
+        <polygon points="324,28 328,38 338,38 330,44 333,54 324,48 315,54 318,44 310,38 320,38"
+                 fill="#f6d24a" stroke="#a98010" stroke-width="0.8"/>
+
+        <!-- White panel -->
+        <rect x="0" y="66" width="380" height="110" fill="#fdfdfa"/>
+
+        <!-- Letter tiles row 1 -->
+        <g font-family="'Fredoka One',Arial Black,sans-serif" font-size="30" fill="#fff" text-anchor="middle">
+          <rect x="32"  y="82"  width="44" height="44" rx="7" fill="#8a2d8c"/>
+          <text x="54"  y="115">A</text>
+
+          <rect x="86"  y="82"  width="44" height="44" rx="7" fill="#f47820"/>
+          <text x="108" y="115">B</text>
+
+          <rect x="140" y="82"  width="44" height="44" rx="7" fill="#3aa843"/>
+          <text x="162" y="115">C</text>
+
+          <rect x="194" y="82"  width="44" height="44" rx="7" fill="#2c7fd0"/>
+          <text x="216" y="115">D</text>
+
+          <rect x="248" y="82"  width="44" height="44" rx="7" fill="#c41a2d"/>
+          <text x="270" y="115">E</text>
+
+          <rect x="302" y="82"  width="44" height="44" rx="7" fill="#8a2d8c"/>
+          <text x="324" y="115">F</text>
+        </g>
+
+        <!-- Letter tiles row 2 (lowercase) -->
+        <g font-family="'Fredoka One',Arial Black,sans-serif" font-size="30" fill="#fff" text-anchor="middle">
+          <rect x="59"  y="132" width="40" height="40" rx="7" fill="#f47820"/>
+          <text x="79"  y="163">a</text>
+
+          <rect x="109" y="132" width="40" height="40" rx="7" fill="#3aa843"/>
+          <text x="129" y="163">b</text>
+
+          <rect x="159" y="132" width="40" height="40" rx="7" fill="#2c7fd0"/>
+          <text x="179" y="163">c</text>
+
+          <rect x="209" y="132" width="40" height="40" rx="7" fill="#c41a2d"/>
+          <text x="229" y="163">d</text>
+
+          <rect x="259" y="132" width="40" height="40" rx="7" fill="#8a2d8c"/>
+          <text x="279" y="163">e</text>
+
+          <rect x="309" y="132" width="40" height="40" rx="7" fill="#f47820"/>
+          <text x="329" y="163">f</text>
+        </g>
+
+        <!-- Bottom alphabet strip -->
+        <rect x="0" y="176" width="380" height="34" fill="#c41a2d"/>
+        <text x="190" y="200" fill="#fff"
+              font-family="Arial,sans-serif" font-size="15" font-weight="900"
+              text-anchor="middle" letter-spacing="1.5">ABCDEFGHIJKLMNOPQRSTUVWXYZ</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🔤 Alphabet Game</div>
+      <div class="card-desc">Press the letters in the correct order — A to Z or a to z — to complete the alphabet. Turn on Learning Level for star hints on the next letter.</div>
+      <div class="card-tags">
+        <span class="tag">Letters</span>
+        <span class="tag">Educational</span>
+        <span class="tag">Kids</span>
+        <span class="tag">Click</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="alphabet_game/">▶ Play Now!</a>
     </div>
   </div>
 
