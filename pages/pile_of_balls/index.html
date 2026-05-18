@@ -448,16 +448,17 @@ body::before {
     [[1,0], [1,1], [0,1]],   // 3 ◀: head left, base = right column
   ];
 
-  // Visual half-cell offset applied ONLY to the head ball when rendering the
-  // falling piece, so the active piece looks like a real triangle (head
-  // centered above/between the two base balls). The head still LOCKS into its
-  // logical grid cell — the offset is purely cosmetic during fall.
-  const HEAD_OFFSET = [
-    [0,  0.5],   // 0 ▲: shift head right by 0.5 cells → centered over base
-    [0.5,  0],   // 1 ▶: shift head down by 0.5 cells → centered beside base
-    [0, -0.5],   // 2 ▼: shift head left by 0.5 cells → centered under base
-    [-0.5, 0],   // 3 ◀: shift head up by 0.5 cells → centered beside base
+  // Canonical ball positions at rot 0 (cell coords relative to the 2x2 anchor).
+  // The head is at (0, 0.5) so the triangle looks visually centred between the
+  // two base balls. We rotate these around the box centre (0.5, 0.5) by the
+  // piece's continuous `visualAngle` to draw a smoothly-rotating triangle,
+  // while collision/lock still use the discrete ROT cells above.
+  const CANONICAL = [
+    [0,    0.5],   // head — top-centre of 2x2 box
+    [1,    0  ],   // base-left
+    [1,    1  ],   // base-right
   ];
+  const ROT_ANIM_MS = 130;   // duration of one rotation animation
 
   // ────── State ──────
   const G = {
@@ -568,10 +569,36 @@ body::before {
     return true;
   }
 
+  // Continuous-position ball coords, for smooth-rotation rendering.
+  // Rotates the canonical rot-0 triangle by `angle` around the 2x2 box centre.
+  function rotatedPieceCells(piece, angle) {
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    return CANONICAL.map((p, i) => {
+      const dr = p[0] - 0.5;
+      const dc = p[1] - 0.5;
+      // CW rotation in screen space (row+ = down, col+ = right)
+      const nr =  dr * cos + dc * sin;
+      const nc = -dr * sin + dc * cos;
+      return {
+        r: piece.row + 0.5 + nr,
+        c: piece.col + 0.5 + nc,
+        color: piece.colors[i],
+      };
+    });
+  }
+
   function spawnPiece() {
     const data = G.next || newPieceData();
     G.next = newPieceData();
-    G.piece = { colors: data.colors, row: 0, col: 3, rot: 0 };
+    G.piece = {
+      colors: data.colors,
+      row: 0, col: 3,
+      rot: 0,
+      rotCounter: 0,        // cumulative quarter-turns (CW = +1)
+      visualAngle: 0,       // currently-rendered angle (radians, continuous)
+      rotAnimFrom: 0,       // visualAngle at the start of the current animation
+      rotAnimT: 1,          // 0 = just started, 1 = settled at target
+    };
     drawNext();
     if (!fits(G.piece)) {
       G.gameOver = true;
@@ -588,14 +615,22 @@ body::before {
 
   function rotate(dir) {
     if (!G.piece || G.locked || G.paused || G.gameOver) return;
-    const newRot = (G.piece.rot + dir + 4) % 4;
+    const newCounter = G.piece.rotCounter + dir;
+    const newRot = ((newCounter % 4) + 4) % 4;
     const test = { ...G.piece, rot: newRot };
-    if (fits(test)) { G.piece = test; return; }
-    // try simple wall-kicks
-    for (const dx of [-1, 1, -2, 2]) {
-      const k = { ...test, col: test.col + dx };
-      if (fits(k)) { G.piece = k; return; }
+    let dx = 0, ok = fits(test);
+    if (!ok) {
+      for (const k of [-1, 1, -2, 2]) {
+        if (fits({ ...test, col: test.col + k })) { dx = k; ok = true; break; }
+      }
     }
+    if (!ok) return;
+    G.piece.col += dx;
+    G.piece.rot = newRot;
+    G.piece.rotCounter = newCounter;
+    // Start animation from the current visual angle so chained rotations stay smooth.
+    G.piece.rotAnimFrom = G.piece.visualAngle;
+    G.piece.rotAnimT = 0;
   }
 
   function softDrop() {
@@ -748,28 +783,23 @@ body::before {
         }
       }
     }
-    // falling piece — render as a triangle by visually offsetting the head ball
+    // falling piece — render the triangle at the current (animated) angle
     if (G.piece) {
-      const hOff = HEAD_OFFSET[G.piece.rot];
-      pieceCells(G.piece).forEach((cell, i) => {
-        const dr = i === 0 ? hOff[0] : 0;
-        const dc = i === 0 ? hOff[1] : 0;
-        const cx = (cell.c + dc) * CELL + CELL / 2;
-        const cy = (cell.r + dr) * CELL + CELL / 2;
+      for (const cell of rotatedPieceCells(G.piece, G.piece.visualAngle)) {
+        const cx = cell.c * CELL + CELL / 2;
+        const cy = cell.r * CELL + CELL / 2;
         drawBall(bctx, cx, cy, BALL_R, cell.color);
-      });
+      }
     }
-    // ghost (landing preview) — same triangle layout
+    // ghost (landing preview) — use the SETTLED angle (target) and projected row
     if (G.piece && !G.locked && !G.paused) {
       let ghost = { ...G.piece };
       while (fits({ ...ghost, row: ghost.row + 1 })) ghost.row++;
       if (ghost.row !== G.piece.row) {
-        const hOff = HEAD_OFFSET[ghost.rot];
-        pieceCells(ghost).forEach((cell, i) => {
-          const dr = i === 0 ? hOff[0] : 0;
-          const dc = i === 0 ? hOff[1] : 0;
-          const cx = (cell.c + dc) * CELL + CELL / 2;
-          const cy = (cell.r + dr) * CELL + CELL / 2;
+        const ghostAngle = G.piece.rotCounter * Math.PI / 2;
+        for (const cell of rotatedPieceCells(ghost, ghostAngle)) {
+          const cx = cell.c * CELL + CELL / 2;
+          const cy = cell.r * CELL + CELL / 2;
           bctx.save();
           bctx.globalAlpha = 0.22;
           bctx.strokeStyle = cell.color;
@@ -779,7 +809,7 @@ body::before {
           bctx.arc(cx, cy, BALL_R * 0.9, 0, Math.PI * 2);
           bctx.stroke();
           bctx.restore();
-        });
+        }
       }
     }
   }
@@ -817,6 +847,13 @@ body::before {
     const dt = t - G.lastTime;
     G.lastTime = t;
     if (G.clearAnim) G.clearAnim.t += dt;
+    // advance rotation animation
+    if (G.piece && G.piece.rotAnimT < 1) {
+      G.piece.rotAnimT = Math.min(1, G.piece.rotAnimT + dt / ROT_ANIM_MS);
+      const eased = 1 - Math.pow(1 - G.piece.rotAnimT, 3); // easeOutCubic
+      const target = G.piece.rotCounter * Math.PI / 2;
+      G.piece.visualAngle = G.piece.rotAnimFrom + (target - G.piece.rotAnimFrom) * eased;
+    }
     if (!G.paused && !G.locked && !G.gameOver && G.piece) {
       G.dropTimer += dt;
       while (G.dropTimer >= G.dropInterval) {
