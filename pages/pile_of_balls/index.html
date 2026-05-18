@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pile of Balls</title>
+<link rel="icon" type="image/png" href="../../assets/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,90,90,.10) 0 14%, transparent 15%),
+    radial-gradient(circle at 75% 65%, rgba(255,90,90,.08) 0 18%, transparent 19%),
+    radial-gradient(circle at 85% 15%, rgba(255,90,90,.07) 0 10%, transparent 11%),
+    radial-gradient(circle at 10% 80%, rgba(255,120,120,.06) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 50% 50%, #7a0f23 0%, #4a0c1c 65%, #2c0712 100%);
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Subtle swirl texture overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 25%, transparent 22%, rgba(255,180,180,.04) 23%, transparent 25%),
+    radial-gradient(circle at 80% 70%, transparent 30%, rgba(255,180,180,.04) 31%, transparent 33%),
+    radial-gradient(circle at 60% 20%, transparent 18%, rgba(255,180,180,.03) 19%, transparent 21%);
+  z-index: 0;
+}
+
+/* ─── Screens ─── */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 900px;
+  min-height: 92vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.screen.active { display: flex; }
+
+/* ─── TITLE SCREEN ─── */
+#screen-title { gap: 36px; flex-direction: row; flex-wrap: wrap; justify-content: center; position: relative; }
+.title-wrap {
+  position: relative;
+  width: 320px; height: 230px;
+  flex-shrink: 0;
+}
+.badge {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  text-align: center;
+  color: #ffea4f;
+  -webkit-text-stroke: 2px #112a4e;
+  text-shadow: 2px 3px 0 rgba(0,0,0,.45);
+  letter-spacing: 1px;
+}
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.45) 0%, rgba(255,255,255,.0) 45%);
+  pointer-events: none;
+}
+.badge-blue {
+  width: 130px; height: 130px;
+  top: 0; left: 20px;
+  font-size: 36px;
+  background: radial-gradient(circle at 30% 28%, #6ed0f5, #1aa5e6 55%, #086ca8 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge-red {
+  width: 130px; height: 130px;
+  top: 65px; left: 0;
+  font-size: 36px;
+  background: radial-gradient(circle at 30% 28%, #ff7e7e, #d62a2a 55%, #8a0e0e 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.3), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge-yellow {
+  width: 150px; height: 150px;
+  top: 60px; left: 150px;
+  font-size: 40px;
+  background: radial-gradient(circle at 30% 28%, #fff09a, #ffcc1a 50%, #c08a00 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge span { display: block; transform: translateY(-1px); }
+
+/* Decorative ball clusters scattered on title */
+.deco-cluster {
+  position: absolute;
+  width: 90px; height: 90px;
+  pointer-events: none;
+  opacity: .92;
+  z-index: 0;
+}
+#deco-1 { top: 12%; right: 10%; width: 90px; height: 90px; }
+#deco-2 { bottom: 18%; left: 8%; width: 100px; height: 100px; }
+#deco-3 { bottom: 24%; left: 42%; width: 95px; height: 95px; }
+
+/* ─── START BUTTON ─── */
+.btn-start {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  color: #5b1a00;
+  -webkit-text-stroke: 1px #391000;
+  text-shadow: 2px 2px 0 rgba(255,240,200,.6);
+  padding: 16px 70px;
+  border: 4px solid #b35a18;
+  border-radius: 80px;
+  cursor: pointer;
+  background:
+    radial-gradient(ellipse at 50% 30%, #fff2b8 0%, #ffd96a 35%, #f1a31a 75%, #c97a10 100%);
+  box-shadow:
+    inset 0 6px 14px rgba(255,255,255,.45),
+    inset 0 -8px 18px rgba(150,60,0,.35),
+    0 8px 18px rgba(0,0,0,.55);
+  transition: transform .12s ease, box-shadow .12s ease;
+  letter-spacing: 2px;
+}
+.btn-start:hover { transform: translateY(-2px) scale(1.03); }
+.btn-start:active { transform: translateY(1px) scale(.98); }
+
+/* ─── INSTRUCTIONS / GAME OVER CARDS ─── */
+.info-card {
+  position: relative;
+  max-width: 640px;
+  text-align: center;
+  padding: 40px 36px 36px;
+  border-radius: 28px;
+  background: radial-gradient(ellipse at center, rgba(255,210,120,.42) 0%, rgba(255,150,60,.18) 50%, transparent 80%);
+}
+.info-card h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(34px, 5vw, 46px);
+  color: #fff;
+  text-shadow: 0 3px 0 #2b0915, 2px 4px 14px rgba(0,0,0,.6);
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
+.info-card p {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: clamp(15px, 2.1vw, 19px);
+  color: #fff;
+  text-shadow: 0 2px 0 #2b0915, 1px 2px 6px rgba(0,0,0,.55);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+.info-card .btn-start { margin-top: 18px; }
+
+/* ─── GAME SCREEN ─── */
+#screen-game { gap: 0; max-width: 920px; }
+
+.game-layout {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+  padding: 18px 14px 14px;
+  width: 100%;
+  justify-content: center;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 170px;
+}
+
+.top-icons {
+  display: flex;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 2px solid rgba(255,255,255,.45);
+  color: #fff;
+  font-size: 18px;
+  font-family: 'Fredoka One', cursive;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: background .12s, transform .12s;
+}
+.icon-btn:hover { background: rgba(255,255,255,.25); transform: scale(1.05); }
+
+/* Side stats panel */
+.side-panel {
+  background: linear-gradient(180deg, #16808f 0%, #0a4b59 55%, #06303d 100%);
+  border: 3px solid rgba(255,255,255,.9);
+  border-radius: 18px;
+  padding: 20px 18px;
+  box-shadow: 0 0 22px rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.55);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 170px;
+}
+.stat-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #ff9442;
+  text-shadow: 0 2px 0 #5a1500, 1px 2px 4px rgba(0,0,0,.6);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #5b1a00;
+  -webkit-text-stroke: .5px #391000;
+  background: radial-gradient(ellipse at 50% 30%, #fff2b8 0%, #ffd96a 50%, #f1a31a 100%);
+  border: 2px solid #b35a18;
+  border-radius: 50px;
+  padding: 4px 14px;
+  display: inline-block;
+  box-shadow: inset 0 3px 8px rgba(255,255,255,.4), inset 0 -4px 10px rgba(150,60,0,.3), 0 3px 6px rgba(0,0,0,.45);
+}
+
+/* Next-piece preview floating in top-right of left col */
+.next-preview-wrap {
+  position: relative;
+  width: 88px; height: 88px;
+  align-self: flex-end;
+  margin-top: -8px;
+  margin-bottom: -6px;
+}
+.next-preview {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4d4f6e, #1c1d35 70%, #0a0a18 100%);
+  border: 3px solid rgba(255,255,255,.85);
+  box-shadow: 0 0 12px rgba(255,255,255,.25), 0 6px 14px rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#next-canvas { width: 78px; height: 78px; display: block; }
+
+.play-area {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 35%, #4ec1cf 0%, #19788a 55%, #0a3848 100%);
+  border: 4px solid rgba(255,255,255,.92);
+  border-radius: 22px;
+  box-shadow: 0 0 24px rgba(255,255,255,.22), 0 12px 28px rgba(0,0,0,.6);
+  padding: 10px;
+  flex-shrink: 0;
+}
+#board {
+  display: block;
+  border-radius: 12px;
+  width: 320px;
+  height: 560px;
+  max-width: 50vw;
+  max-height: 78vh;
+  aspect-ratio: 8 / 14;
+}
+
+/* Touch controls — hidden on devices with a fine pointer */
+.touch-controls {
+  display: none;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.touch-btn {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #ffe79a, #f1a31a 70%, #b35a18 100%);
+  border: 3px solid #b35a18;
+  color: #5b1a00;
+  font-size: 28px;
+  font-family: 'Fredoka One', cursive;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 4px 8px rgba(255,255,255,.45), inset 0 -4px 8px rgba(150,60,0,.3), 0 4px 10px rgba(0,0,0,.55);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.touch-btn:active { transform: scale(.93); }
+
+@media (pointer: coarse) {
+  .touch-controls { display: flex; }
+}
+
+/* Game-over score line */
+#final-score, #final-level {
+  font-family: 'Fredoka One', cursive;
+  color: #ffd96a;
+  -webkit-text-stroke: 1px #5a1500;
+}
+
+/* Mobile layout: stack */
+@media (max-width: 720px) {
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .left-col {
+    flex-direction: row;
+    min-width: 0;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .side-panel {
+    flex-direction: row;
+    flex: 1;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .side-panel .stat { flex: 1; }
+  .stat-label { font-size: 15px; margin-bottom: 2px; }
+  .stat-value { font-size: 18px; padding: 2px 8px; }
+  .next-preview-wrap, .next-preview { width: 70px; height: 70px; }
+  #next-canvas { width: 60px; height: 60px; }
+  .top-icons { align-self: center; }
+  #board { width: min(86vw, 320px); height: auto; max-height: 65vh; }
+}
+</style>
+</head>
+<body>
+
+<!-- ───── TITLE ───── -->
+<div id="screen-title" class="screen active">
+  <div class="title-wrap">
+    <div class="badge badge-blue"><span>Pile</span></div>
+    <div class="badge badge-red"><span>of</span></div>
+    <div class="badge badge-yellow"><span>Balls</span></div>
+  </div>
+  <button class="btn-start" id="btn-title-start">START</button>
+  <canvas class="deco-cluster" id="deco-1" width="180" height="180"></canvas>
+  <canvas class="deco-cluster" id="deco-2" width="180" height="180"></canvas>
+  <canvas class="deco-cluster" id="deco-3" width="180" height="180"></canvas>
+</div>
+
+<!-- ───── INSTRUCTIONS ───── -->
+<div id="screen-instructions" class="screen">
+  <div class="info-card">
+    <h2>Instructions</h2>
+    <p>Destroy balls by connecting 4 or more balls of the same colour.</p>
+    <p>Use the left and right arrow keys to move, up and down arrow keys to rotate, press the spacebar to drop.</p>
+    <button class="btn-start" id="btn-inst-start">START</button>
+  </div>
+</div>
+
+<!-- ───── GAME ───── -->
+<div id="screen-game" class="screen">
+  <div class="game-layout">
+    <div class="left-col">
+      <div class="top-icons">
+        <button class="icon-btn" id="btn-help" title="Instructions">?</button>
+        <button class="icon-btn" id="btn-pause" title="Pause">&#10074;&#10074;</button>
+      </div>
+      <div class="next-preview-wrap">
+        <div class="next-preview"><canvas id="next-canvas" width="156" height="156"></canvas></div>
+      </div>
+      <div class="side-panel">
+        <div class="stat">
+          <div class="stat-label">Score:</div>
+          <div class="stat-value" id="stat-score">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Level:</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Next Level:</div>
+          <div class="stat-value" id="stat-next">40</div>
+        </div>
+      </div>
+      <div class="touch-controls">
+        <button class="touch-btn" id="t-left">&#9664;</button>
+        <button class="touch-btn" id="t-rotL">&#8634;</button>
+        <button class="touch-btn" id="t-drop">&#11015;</button>
+        <button class="touch-btn" id="t-rotR">&#8635;</button>
+        <button class="touch-btn" id="t-right">&#9654;</button>
+      </div>
+    </div>
+    <div class="play-area">
+      <canvas id="board" width="384" height="672"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ───── GAME OVER ───── -->
+<div id="screen-gameover" class="screen">
+  <div class="info-card">
+    <h2>Game Over</h2>
+    <p>Final Score: <span id="final-score">0</span></p>
+    <p>Level Reached: <span id="final-level">1</span></p>
+    <button class="btn-start" id="btn-restart">Play Again</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ────── Constants ──────
+  const COLS = 8, ROWS = 14;
+  const CELL = 48;                       // canvas px per cell
+  const BALL_R = CELL * 0.45;            // ball radius in px
+  const COLORS = ['#E63946', '#1D7AD6', '#3FBF3F', '#F4C430', '#9B59B6'];
+
+  // L-tromino rotations on the grid. Each rotation is [headCell, baseA, baseB]
+  // (row,col offsets in a 2x2 box). The two base cells are always adjacent
+  // (horizontally for ▲/▼, vertically for ◀/▶). The head occupies one of the
+  // two remaining corners of the 2x2 box.
+  const ROT = [
+    [[0,0], [1,0], [1,1]],   // 0 ▲: head top, base = bottom row
+    [[0,1], [0,0], [1,0]],   // 1 ▶: head right, base = left column
+    [[1,1], [0,1], [0,0]],   // 2 ▼: head bottom, base = top row
+    [[1,0], [1,1], [0,1]],   // 3 ◀: head left, base = right column
+  ];
+
+  // Visual half-cell offset applied ONLY to the head ball when rendering the
+  // falling piece, so the active piece looks like a real triangle (head
+  // centered above/between the two base balls). The head still LOCKS into its
+  // logical grid cell — the offset is purely cosmetic during fall.
+  const HEAD_OFFSET = [
+    [0,  0.5],   // 0 ▲: shift head right by 0.5 cells → centered over base
+    [0.5,  0],   // 1 ▶: shift head down by 0.5 cells → centered beside base
+    [0, -0.5],   // 2 ▼: shift head left by 0.5 cells → centered under base
+    [-0.5, 0],   // 3 ◀: shift head up by 0.5 cells → centered beside base
+  ];
+
+  // ────── State ──────
+  const G = {
+    grid: makeGrid(),
+    piece: null,          // {colors:[c0,c1,c2], row, col, rot}
+    next: null,
+    score: 0,
+    level: 1,
+    threshold: 40,
+    dropTimer: 0,
+    dropInterval: 800,
+    paused: false,
+    locked: false,        // input lock during clears
+    gameOver: false,
+    clearAnim: null,      // {cells:[{r,c,color}], t, duration}
+    lastTime: 0,
+  };
+
+  function makeGrid() {
+    const g = [];
+    for (let r = 0; r < ROWS; r++) g.push(new Array(COLS).fill(-1));
+    return g;
+  }
+
+  // ────── Screen router ──────
+  const screens = ['screen-title', 'screen-instructions', 'screen-game', 'screen-gameover'];
+  function show(id) {
+    screens.forEach(s => document.getElementById(s).classList.toggle('active', s === id));
+  }
+
+  // ────── Color helpers ──────
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+  function rgbStr(r, g, b) { return `rgb(${r|0},${g|0},${b|0})`; }
+  function lighten(hex, amt) {
+    const c = hexToRgb(hex);
+    return rgbStr(c.r + (255 - c.r) * amt, c.g + (255 - c.g) * amt, c.b + (255 - c.b) * amt);
+  }
+  function darken(hex, amt) {
+    const c = hexToRgb(hex);
+    return rgbStr(c.r * (1 - amt), c.g * (1 - amt), c.b * (1 - amt));
+  }
+
+  // ────── Ball renderer ──────
+  function drawBall(ctx, cx, cy, r, colorHex, alpha = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // shadow under ball
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.ellipse(cx, cy + r * 0.85, r * 0.78, r * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // body gradient
+    const g = ctx.createRadialGradient(cx - r * 0.32, cy - r * 0.38, r * 0.05, cx, cy, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.18, lighten(colorHex, 0.45));
+    g.addColorStop(0.6, colorHex);
+    g.addColorStop(1, darken(colorHex, 0.4));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    // dark rim
+    ctx.strokeStyle = darken(colorHex, 0.55);
+    ctx.lineWidth = Math.max(1, r * 0.07);
+    ctx.stroke();
+    // glossy highlight
+    ctx.fillStyle = 'rgba(255,255,255,.65)';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 0.32, cy - r * 0.4, r * 0.28, r * 0.18, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    // small bright dot
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.42, cy - r * 0.42, r * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ────── Piece logic ──────
+  function newPieceData() {
+    return {
+      colors: [
+        COLORS[(Math.random() * COLORS.length) | 0],
+        COLORS[(Math.random() * COLORS.length) | 0],
+        COLORS[(Math.random() * COLORS.length) | 0],
+      ],
+    };
+  }
+
+  function pieceCells(piece) {
+    // returns [{r,c,color}, ...]
+    const o = ROT[piece.rot];
+    return [0, 1, 2].map(i => ({
+      r: piece.row + o[i][0],
+      c: piece.col + o[i][1],
+      color: piece.colors[i],
+    }));
+  }
+
+  function fits(piece) {
+    for (const cell of pieceCells(piece)) {
+      if (cell.r < 0 || cell.r >= ROWS || cell.c < 0 || cell.c >= COLS) return false;
+      if (G.grid[cell.r][cell.c] !== -1) return false;
+    }
+    return true;
+  }
+
+  function spawnPiece() {
+    const data = G.next || newPieceData();
+    G.next = newPieceData();
+    G.piece = { colors: data.colors, row: 0, col: 3, rot: 0 };
+    drawNext();
+    if (!fits(G.piece)) {
+      G.gameOver = true;
+      G.piece = null;
+      endGame();
+    }
+  }
+
+  function move(dx) {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    const test = { ...G.piece, col: G.piece.col + dx };
+    if (fits(test)) G.piece = test;
+  }
+
+  function rotate(dir) {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    const newRot = (G.piece.rot + dir + 4) % 4;
+    const test = { ...G.piece, rot: newRot };
+    if (fits(test)) { G.piece = test; return; }
+    // try simple wall-kicks
+    for (const dx of [-1, 1, -2, 2]) {
+      const k = { ...test, col: test.col + dx };
+      if (fits(k)) { G.piece = k; return; }
+    }
+  }
+
+  function softDrop() {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return false;
+    const test = { ...G.piece, row: G.piece.row + 1 };
+    if (fits(test)) { G.piece = test; return true; }
+    lockPiece();
+    return false;
+  }
+
+  function hardDrop() {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    while (fits({ ...G.piece, row: G.piece.row + 1 })) {
+      G.piece.row++;
+    }
+    lockPiece();
+  }
+
+  function lockPiece() {
+    for (const cell of pieceCells(G.piece)) {
+      if (cell.r >= 0 && cell.r < ROWS && cell.c >= 0 && cell.c < COLS) {
+        G.grid[cell.r][cell.c] = cell.color;
+      }
+    }
+    G.piece = null;
+    G.locked = true;
+    // settle this piece then resolve matches
+    applyGravity();
+    setTimeout(() => resolveChains(1), 80);
+  }
+
+  // ────── Matches ──────
+  function findMatches() {
+    const visited = [];
+    for (let r = 0; r < ROWS; r++) visited.push(new Array(COLS).fill(false));
+    const groups = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (visited[r][c] || G.grid[r][c] === -1) continue;
+        const color = G.grid[r][c];
+        const stack = [[r, c]];
+        const group = [];
+        while (stack.length) {
+          const [cr, cc] = stack.pop();
+          if (cr < 0 || cr >= ROWS || cc < 0 || cc >= COLS) continue;
+          if (visited[cr][cc]) continue;
+          if (G.grid[cr][cc] !== color) continue;
+          visited[cr][cc] = true;
+          group.push([cr, cc]);
+          stack.push([cr + 1, cc], [cr - 1, cc], [cr, cc + 1], [cr, cc - 1]);
+        }
+        if (group.length >= 4) groups.push({ color, cells: group });
+      }
+    }
+    return groups;
+  }
+
+  function applyGravity() {
+    for (let c = 0; c < COLS; c++) {
+      let write = ROWS - 1;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (G.grid[r][c] !== -1) {
+          const v = G.grid[r][c];
+          G.grid[r][c] = -1;
+          G.grid[write][c] = v;
+          write--;
+        }
+      }
+    }
+  }
+
+  function resolveChains(chain) {
+    const groups = findMatches();
+    if (groups.length === 0) {
+      G.locked = false;
+      if (!G.gameOver) spawnPiece();
+      return;
+    }
+    // collect all cells to clear
+    const cells = [];
+    let total = 0;
+    for (const g of groups) {
+      total += g.cells.length;
+      for (const [r, c] of g.cells) cells.push({ r, c, color: g.color });
+    }
+    G.score += total * 10 * chain;
+    updateHUD();
+    checkLevelUp();
+    // play clear animation
+    G.clearAnim = { cells, t: 0, duration: 320 };
+    setTimeout(() => {
+      // remove cells from grid
+      for (const cell of cells) G.grid[cell.r][cell.c] = -1;
+      G.clearAnim = null;
+      applyGravity();
+      setTimeout(() => resolveChains(chain + 1), 120);
+    }, 320);
+  }
+
+  function checkLevelUp() {
+    while (G.score >= G.threshold) {
+      G.level++;
+      G.threshold += 40 * G.level;
+      G.dropInterval = Math.max(120, G.dropInterval * 0.85);
+    }
+    updateHUD();
+  }
+
+  function updateHUD() {
+    document.getElementById('stat-score').textContent = G.score;
+    document.getElementById('stat-level').textContent = G.level;
+    document.getElementById('stat-next').textContent = G.threshold;
+  }
+
+  // ────── Rendering ──────
+  const board = document.getElementById('board');
+  const bctx = board.getContext('2d');
+  const nextCanvas = document.getElementById('next-canvas');
+  const nctx = nextCanvas.getContext('2d');
+
+  function drawBoard() {
+    bctx.clearRect(0, 0, board.width, board.height);
+    // subtle grid background sheen
+    const bg = bctx.createRadialGradient(board.width / 2, board.height * 0.35, 20, board.width / 2, board.height * 0.5, board.height * 0.8);
+    bg.addColorStop(0, 'rgba(255,255,255,.08)');
+    bg.addColorStop(1, 'rgba(0,0,0,0)');
+    bctx.fillStyle = bg;
+    bctx.fillRect(0, 0, board.width, board.height);
+
+    // grid balls
+    const clearSet = new Set();
+    let clearScale = 1, clearAlpha = 1;
+    if (G.clearAnim) {
+      const p = Math.min(1, G.clearAnim.t / G.clearAnim.duration);
+      clearScale = 1 + p * 0.6;
+      clearAlpha = 1 - p;
+      for (const c of G.clearAnim.cells) clearSet.add(c.r + ',' + c.c);
+    }
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const v = G.grid[r][c];
+        if (v === -1) continue;
+        const cx = c * CELL + CELL / 2;
+        const cy = r * CELL + CELL / 2;
+        const key = r + ',' + c;
+        if (clearSet.has(key)) {
+          drawBall(bctx, cx, cy, BALL_R * clearScale, v, clearAlpha);
+        } else {
+          drawBall(bctx, cx, cy, BALL_R, v);
+        }
+      }
+    }
+    // falling piece — render as a triangle by visually offsetting the head ball
+    if (G.piece) {
+      const hOff = HEAD_OFFSET[G.piece.rot];
+      pieceCells(G.piece).forEach((cell, i) => {
+        const dr = i === 0 ? hOff[0] : 0;
+        const dc = i === 0 ? hOff[1] : 0;
+        const cx = (cell.c + dc) * CELL + CELL / 2;
+        const cy = (cell.r + dr) * CELL + CELL / 2;
+        drawBall(bctx, cx, cy, BALL_R, cell.color);
+      });
+    }
+    // ghost (landing preview) — same triangle layout
+    if (G.piece && !G.locked && !G.paused) {
+      let ghost = { ...G.piece };
+      while (fits({ ...ghost, row: ghost.row + 1 })) ghost.row++;
+      if (ghost.row !== G.piece.row) {
+        const hOff = HEAD_OFFSET[ghost.rot];
+        pieceCells(ghost).forEach((cell, i) => {
+          const dr = i === 0 ? hOff[0] : 0;
+          const dc = i === 0 ? hOff[1] : 0;
+          const cx = (cell.c + dc) * CELL + CELL / 2;
+          const cy = (cell.r + dr) * CELL + CELL / 2;
+          bctx.save();
+          bctx.globalAlpha = 0.22;
+          bctx.strokeStyle = cell.color;
+          bctx.lineWidth = 2;
+          bctx.setLineDash([4, 4]);
+          bctx.beginPath();
+          bctx.arc(cx, cy, BALL_R * 0.9, 0, Math.PI * 2);
+          bctx.stroke();
+          bctx.restore();
+        });
+      }
+    }
+  }
+
+  function drawNext() {
+    nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    if (!G.next) return;
+    const w = nextCanvas.width;
+    const r = w * 0.17;
+    const cx = w / 2, cy = w / 2;
+    // Triangle ▲: head on top, base = two balls below
+    const positions = [
+      [cx,             cy - r * 0.95],   // head (c0) — top center
+      [cx - r * 0.95,  cy + r * 0.55],   // base-left (c1)
+      [cx + r * 0.95,  cy + r * 0.55],   // base-right (c2)
+    ];
+    positions.forEach((p, i) => drawBall(nctx, p[0], p[1], r, G.next.colors[i]));
+  }
+
+  function drawDecoCluster(canvas, colorA, colorB, colorC) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const w = canvas.width;
+    const r = w * 0.22;
+    const cx = w / 2, cy = w / 2;
+    // Triangle ▲: head on top, base = two balls below
+    drawBall(ctx, cx,             cy - r * 0.95, r, colorA);
+    drawBall(ctx, cx - r * 0.95,  cy + r * 0.55, r, colorB);
+    drawBall(ctx, cx + r * 0.95,  cy + r * 0.55, r, colorC);
+  }
+
+  // ────── Loop ──────
+  function loop(t) {
+    if (!G.lastTime) G.lastTime = t;
+    const dt = t - G.lastTime;
+    G.lastTime = t;
+    if (G.clearAnim) G.clearAnim.t += dt;
+    if (!G.paused && !G.locked && !G.gameOver && G.piece) {
+      G.dropTimer += dt;
+      while (G.dropTimer >= G.dropInterval) {
+        G.dropTimer -= G.dropInterval;
+        softDrop();
+      }
+    }
+    drawBoard();
+    requestAnimationFrame(loop);
+  }
+
+  // ────── Input ──────
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    switch (e.key) {
+      case 'ArrowLeft':  e.preventDefault(); move(-1); break;
+      case 'ArrowRight': e.preventDefault(); move(1); break;
+      case 'ArrowUp':    e.preventDefault(); rotate(1); break;
+      case 'ArrowDown':  e.preventDefault(); rotate(-1); break;
+      case ' ':          e.preventDefault(); hardDrop(); break;
+      case 'p': case 'P': togglePause(); break;
+      case 'Escape': togglePause(); break;
+    }
+  });
+
+  function bindHold(id, fn) {
+    const el = document.getElementById(id);
+    let timer = null;
+    let interval = null;
+    const start = (e) => {
+      e.preventDefault();
+      fn();
+      timer = setTimeout(() => {
+        interval = setInterval(fn, 90);
+      }, 220);
+    };
+    const stop = () => {
+      if (timer) clearTimeout(timer);
+      if (interval) clearInterval(interval);
+      timer = interval = null;
+    };
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('mouseup', stop);
+    el.addEventListener('mouseleave', stop);
+    el.addEventListener('touchend', stop);
+    el.addEventListener('touchcancel', stop);
+  }
+
+  bindHold('t-left', () => move(-1));
+  bindHold('t-right', () => move(1));
+  document.getElementById('t-rotL').addEventListener('click', () => rotate(-1));
+  document.getElementById('t-rotR').addEventListener('click', () => rotate(1));
+  document.getElementById('t-drop').addEventListener('click', hardDrop);
+
+  // ────── Pause ──────
+  function togglePause() {
+    if (G.gameOver) return;
+    G.paused = !G.paused;
+    document.getElementById('btn-pause').innerHTML = G.paused ? '&#9654;' : '&#10074;&#10074;';
+  }
+  document.getElementById('btn-pause').addEventListener('click', togglePause);
+  document.getElementById('btn-help').addEventListener('click', () => {
+    G.paused = true;
+    document.getElementById('btn-pause').innerHTML = '&#9654;';
+    show('screen-instructions');
+  });
+
+  // ────── Start / Restart ──────
+  function startGame() {
+    G.grid = makeGrid();
+    G.score = 0;
+    G.level = 1;
+    G.threshold = 40;
+    G.dropTimer = 0;
+    G.dropInterval = 800;
+    G.paused = false;
+    G.locked = false;
+    G.gameOver = false;
+    G.piece = null;
+    G.next = null;
+    G.clearAnim = null;
+    G.lastTime = 0;
+    document.getElementById('btn-pause').innerHTML = '&#10074;&#10074;';
+    updateHUD();
+    show('screen-game');
+    spawnPiece();
+  }
+
+  function endGame() {
+    document.getElementById('final-score').textContent = G.score;
+    document.getElementById('final-level').textContent = G.level;
+    setTimeout(() => show('screen-gameover'), 250);
+  }
+
+  document.getElementById('btn-title-start').addEventListener('click', startGame);
+  document.getElementById('btn-inst-start').addEventListener('click', startGame);
+  document.getElementById('btn-restart').addEventListener('click', startGame);
+
+  // ────── Decorative clusters on title ──────
+  drawDecoCluster(document.getElementById('deco-1'), COLORS[1], COLORS[0], COLORS[2]);
+  drawDecoCluster(document.getElementById('deco-2'), '#cccccc', COLORS[3], COLORS[0]);
+  drawDecoCluster(document.getElementById('deco-3'), '#3ec0c0', COLORS[3], COLORS[4]);
+
+  // ────── Go ──────
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
