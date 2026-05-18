@@ -431,41 +431,67 @@ body::before {
 
 <script>
 (() => {
-  // ────── Constants ──────
-  const COLS = 8, ROWS = 14;
-  const CELL = 48;                       // canvas px per cell
-  const BALL_R = CELL * 0.45;            // ball radius in px
+  // ────── Constants — HEX/BRICK GRID ──────
+  // Brick-pack layout: even rows have COLS cells, odd rows have COLS-1 cells
+  // (offset by half a cell). Each ball sits in a "valley" between two balls
+  // below — like cannonballs stacked in a pyramid.
+  const COLS = 8, ROWS = 16;
+  const CELL = 48;                       // horizontal spacing between cell centres
+  const ROW_H = 42;                      // vertical spacing ≈ sqrt(3)/2 * CELL
+  const BALL_R = 22;                     // ball radius
   const COLORS = ['#E63946', '#1D7AD6', '#3FBF3F', '#F4C430', '#9B59B6'];
+  const FALL_SPEED   = 42;               // cells/second for the settle animation (faster = snappier between pieces)
+  const SLIDE_MIN_MS = 80;               // minimum duration for short ball moves
+  const ROT_ANIM_MS  = 140;              // rotation animation duration
+  const CLEAR_ANIM_MS = 200;             // duration of the match-clear pop animation
+  const LOCK_DELAY_MS = 250;             // grace period before locking when piece can't fall
 
-  // L-tromino rotations on the grid. Each rotation is [headCell, baseA, baseB]
-  // (row,col offsets in a 2x2 box). The two base cells are always adjacent
-  // (horizontally for ▲/▼, vertically for ◀/▶). The head occupies one of the
-  // two remaining corners of the 2x2 box.
-  const ROT = [
-    [[0,0], [1,0], [1,1]],   // 0 ▲: head top, base = bottom row
-    [[0,1], [0,0], [1,0]],   // 1 ▶: head right, base = left column
-    [[1,1], [0,1], [0,0]],   // 2 ▼: head bottom, base = top row
-    [[1,0], [1,1], [0,1]],   // 3 ◀: head left, base = right column
-  ];
+  // ────── Hex-grid helpers ──────
+  // cellsInRow: even rows = COLS, odd rows = COLS-1 (because of the half-cell offset)
+  function cellsInRow(r)     { return r % 2 === 0 ? COLS : COLS - 1; }
+  function validCell(r, c)   { return r >= 0 && r < ROWS && c >= 0 && c < cellsInRow(r); }
+  function cellX(r, c)       { return (c + 0.5 + (r % 2) * 0.5) * CELL; }
+  function cellY(r)          { return (r + 0.5) * ROW_H; }
 
-  // Canonical ball positions at rot 0 (cell coords relative to the 2x2 anchor).
-  // The head is at (0, 0.5) so the triangle looks visually centred between the
-  // two base balls. We rotate these around the box centre (0.5, 0.5) by the
-  // piece's continuous `visualAngle` to draw a smoothly-rotating triangle,
-  // while collision/lock still use the discrete ROT cells above.
-  const CANONICAL = [
-    [0,    0.5],   // head — top-centre of 2x2 box
-    [1,    0  ],   // base-left
-    [1,    1  ],   // base-right
-  ];
-  const ROT_ANIM_MS = 130;   // duration of one rotation animation
-  const FALL_SPEED  = 22;    // cells/second for the cascade-gravity animation
-  const SLIDE_MIN_MS = 160;  // minimum duration for short slides (head waterfall)
+  // Six hex-neighbours of (r,c) — 2 same-row + 2 above + 2 below.
+  function neighbors(r, c) {
+    const out = [];
+    if (validCell(r, c - 1)) out.push([r, c - 1]);
+    if (validCell(r, c + 1)) out.push([r, c + 1]);
+    if (r % 2 === 0) {
+      if (validCell(r - 1, c - 1)) out.push([r - 1, c - 1]);
+      if (validCell(r - 1, c    )) out.push([r - 1, c    ]);
+      if (validCell(r + 1, c - 1)) out.push([r + 1, c - 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+    } else {
+      if (validCell(r - 1, c    )) out.push([r - 1, c    ]);
+      if (validCell(r - 1, c + 1)) out.push([r - 1, c + 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+      if (validCell(r + 1, c + 1)) out.push([r + 1, c + 1]);
+    }
+    return out;
+  }
+
+  // The two cells directly BELOW (r,c) in hex terms — a ball needs BOTH to be
+  // filled (or the floor) to rest stable. If either is empty, the ball rolls
+  // down into the valley.
+  function belowCells(r, c) {
+    const out = [];
+    if (r + 1 >= ROWS) return out;
+    if (r % 2 === 0) {
+      if (validCell(r + 1, c - 1)) out.push([r + 1, c - 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+    } else {
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+      if (validCell(r + 1, c + 1)) out.push([r + 1, c + 1]);
+    }
+    return out;
+  }
 
   // ────── State ──────
   const G = {
     grid: makeGrid(),
-    piece: null,          // {colors:[c0,c1,c2], row, col, rot}
+    piece: null,          // {colors:[c0,c1,c2], row(even), col}
     next: null,
     score: 0,
     level: 1,
@@ -476,11 +502,13 @@ body::before {
     locked: false,        // input lock during clears
     gameOver: false,
     clearAnim: null,      // {cells:[{r,c,color}], t, duration}
-    fallAnim: null,       // {moves:[{c,fromR,toR,color}], t, callback}
+    fallAnim: null,       // {moves:[{fromR,fromC,toR,toC,color}], t, callback}
     lastTime: 0,
   };
 
   function makeGrid() {
+    // Grid is ROWS × COLS, but cells in odd rows beyond `cellsInRow(r)`-1 are
+    // unused (off-board because of the half-cell horizontal offset).
     const g = [];
     for (let r = 0; r < ROWS; r++) g.push(new Array(COLS).fill(-1));
     return g;
@@ -554,40 +582,25 @@ body::before {
     };
   }
 
+  // The three cells occupied by the falling triangle. Anchor row is always
+  // EVEN (head sits in an even row, bases in the odd row below) so the piece
+  // doesn't visually zigzag as it falls through alternating rows.
   function pieceCells(piece) {
-    // returns [{r,c,color}, ...]
-    const o = ROT[piece.rot];
-    return [0, 1, 2].map(i => ({
-      r: piece.row + o[i][0],
-      c: piece.col + o[i][1],
-      color: piece.colors[i],
-    }));
+    const { row, col, colors } = piece;
+    // From an even row, the two below-cells are (r+1, c-1) and (r+1, c).
+    return [
+      { r: row,     c: col,     color: colors[0] },  // head (top of triangle)
+      { r: row + 1, c: col - 1, color: colors[1] },  // base-left
+      { r: row + 1, c: col,     color: colors[2] },  // base-right
+    ];
   }
 
   function fits(piece) {
     for (const cell of pieceCells(piece)) {
-      if (cell.r < 0 || cell.r >= ROWS || cell.c < 0 || cell.c >= COLS) return false;
+      if (!validCell(cell.r, cell.c)) return false;
       if (G.grid[cell.r][cell.c] !== -1) return false;
     }
     return true;
-  }
-
-  // Continuous-position ball coords, for smooth-rotation rendering.
-  // Rotates the canonical rot-0 triangle by `angle` around the 2x2 box centre.
-  function rotatedPieceCells(piece, angle) {
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    return CANONICAL.map((p, i) => {
-      const dr = p[0] - 0.5;
-      const dc = p[1] - 0.5;
-      // CW rotation in screen space (row+ = down, col+ = right)
-      const nr =  dr * cos + dc * sin;
-      const nc = -dr * sin + dc * cos;
-      return {
-        r: piece.row + 0.5 + nr,
-        c: piece.col + 0.5 + nc,
-        color: piece.colors[i],
-      };
-    });
   }
 
   function spawnPiece() {
@@ -595,12 +608,12 @@ body::before {
     G.next = newPieceData();
     G.piece = {
       colors: data.colors,
-      row: 0, col: 3,
-      rot: 0,
-      rotCounter: 0,        // cumulative quarter-turns (CW = +1)
-      visualAngle: 0,       // currently-rendered angle (radians, continuous)
-      rotAnimFrom: 0,       // visualAngle at the start of the current animation
-      rotAnimT: 1,          // 0 = just started, 1 = settled at target
+      row: 0,    // always even
+      col: 3,    // bases at cols 2,3 — both valid (odd row has 7 cells)
+      // Rotation animation state — balls visually orbit the triangle centroid.
+      rotAnimT: 1,              // 1 = no animation in progress
+      rotAnimColors: null,      // ball colours at the START of the current rotation
+      rotAnimDir: 0,            // +1 = CW, -1 = CCW
     };
     drawNext();
     if (!fits(G.piece)) {
@@ -613,32 +626,33 @@ body::before {
   function move(dx) {
     if (!G.piece || G.locked || G.paused || G.gameOver) return;
     const test = { ...G.piece, col: G.piece.col + dx };
-    if (fits(test)) G.piece = test;
+    if (fits(test)) {
+      G.piece = test;
+      G.piece.lockDelay = 0;   // give the player more time after a slide
+    }
   }
 
+  // Triangle has one spatial orientation on the hex grid, so "rotate" cycles
+  // which colour is at each vertex. The renderer animates each ball travelling
+  // along an arc to its next vertex (120° around the centroid).
   function rotate(dir) {
     if (!G.piece || G.locked || G.paused || G.gameOver) return;
-    const newCounter = G.piece.rotCounter + dir;
-    const newRot = ((newCounter % 4) + 4) % 4;
-    const test = { ...G.piece, rot: newRot };
-    let dx = 0, ok = fits(test);
-    if (!ok) {
-      for (const k of [-1, 1, -2, 2]) {
-        if (fits({ ...test, col: test.col + k })) { dx = k; ok = true; break; }
-      }
-    }
-    if (!ok) return;
-    G.piece.col += dx;
-    G.piece.rot = newRot;
-    G.piece.rotCounter = newCounter;
-    // Start animation from the current visual angle so chained rotations stay smooth.
-    G.piece.rotAnimFrom = G.piece.visualAngle;
+    const c = G.piece.colors;
+    G.piece.rotAnimColors = [...c];     // snapshot for the animation
+    G.piece.rotAnimDir = dir;
     G.piece.rotAnimT = 0;
+    // Apply the colour permutation immediately so game logic uses the new state.
+    G.piece.colors = dir > 0
+      ? [c[1], c[2], c[0]]    // CW:  head ← base-left, base-left ← base-right, base-right ← head
+      : [c[2], c[0], c[1]];   // CCW: head ← base-right, base-left ← head,      base-right ← base-left
   }
 
+  // Anchor row jumps by 2 each step so the piece always stays on even rows.
+  // One "hex step" = 2 grid rows ≈ 2 × ROW_H = 84 px, the same fall speed
+  // feel as one CELL in the old grid.
   function softDrop() {
     if (!G.piece || G.locked || G.paused || G.gameOver) return false;
-    const test = { ...G.piece, row: G.piece.row + 1 };
+    const test = { ...G.piece, row: G.piece.row + 2 };
     if (fits(test)) { G.piece = test; return true; }
     lockPiece();
     return false;
@@ -646,57 +660,43 @@ body::before {
 
   function hardDrop() {
     if (!G.piece || G.locked || G.paused || G.gameOver) return;
-    while (fits({ ...G.piece, row: G.piece.row + 1 })) {
-      G.piece.row++;
-    }
+    while (fits({ ...G.piece, row: G.piece.row + 2 })) G.piece.row += 2;
     lockPiece();
   }
 
   function lockPiece() {
-    // Snapshot where the head ball was being rendered RIGHT NOW (continuous
-    // visual coords, with the triangle's half-cell offset baked in). The
-    // gravity animation will start the head's slide from this exact spot so
-    // the centred triangle visibly flows into its landing column.
-    const visualCells = rotatedPieceCells(G.piece, G.piece.visualAngle);
-    const headVisual = visualCells[0];
-    const logicalCells = pieceCells(G.piece);
-    const headLogical = logicalCells[0];
-    for (const cell of logicalCells) {
-      if (cell.r >= 0 && cell.r < ROWS && cell.c >= 0 && cell.c < COLS) {
+    for (const cell of pieceCells(G.piece)) {
+      if (validCell(cell.r, cell.c)) {
         G.grid[cell.r][cell.c] = cell.color;
       }
     }
     G.piece = null;
     G.locked = true;
-    // Override: the head ball should slide from its visual triangle spot to
-    // wherever it lands after gravity, not from its grid cell.
-    applyGravityAnimated(() => resolveChains(1), {
-      gridR: headLogical.r,
-      gridC: headLogical.c,
-      visualR: headVisual.r,
-      visualC: headVisual.c,
-    });
+    // Settle the pile — balls roll into valleys until each rests on two
+    // balls below (or the floor). Then look for 4+ matches.
+    settleAnimated(() => resolveChains(1));
   }
 
-  // ────── Matches ──────
+  // ────── Matches — hex 6-way adjacency ──────
   function findMatches() {
     const visited = [];
     for (let r = 0; r < ROWS; r++) visited.push(new Array(COLS).fill(false));
     const groups = [];
     for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
         if (visited[r][c] || G.grid[r][c] === -1) continue;
         const color = G.grid[r][c];
         const stack = [[r, c]];
         const group = [];
         while (stack.length) {
           const [cr, cc] = stack.pop();
-          if (cr < 0 || cr >= ROWS || cc < 0 || cc >= COLS) continue;
           if (visited[cr][cc]) continue;
           if (G.grid[cr][cc] !== color) continue;
           visited[cr][cc] = true;
           group.push([cr, cc]);
-          stack.push([cr + 1, cc], [cr - 1, cc], [cr, cc + 1], [cr, cc - 1]);
+          for (const [nr, nc] of neighbors(cr, cc)) {
+            stack.push([nr, nc]);
+          }
         }
         if (group.length >= 4) groups.push({ color, cells: group });
       }
@@ -704,63 +704,61 @@ body::before {
     return groups;
   }
 
-  // Compacts each column to the bottom. Returns 2D moves so the renderer can
-  // animate balls flowing diagonally — needed for the head ball's slide from
-  // its centred triangle visual position into its landing column.
-  function applyGravity() {
-    const moves = [];
-    for (let c = 0; c < COLS; c++) {
-      let write = ROWS - 1;
-      for (let r = ROWS - 1; r >= 0; r--) {
-        if (G.grid[r][c] !== -1) {
-          if (r !== write) {
-            moves.push({
-              fromR: r,    fromC: c,
-              toR: write,  toC: c,
-              color: G.grid[r][c],
-            });
-          }
-          const v = G.grid[r][c];
+  // ────── Pile-physics gravity (settle) ──────
+  // Each ball is stable when BOTH its below-cells are filled (or it's on the
+  // floor). Otherwise it rolls into the empty below-cell. Repeat until every
+  // ball is in a valley. Returns 2-D moves: each ball's original (pre-settle)
+  // (r,c) → final (r,c) so the renderer can animate the roll.
+  function settle() {
+    // Tag each filled cell with its pre-settle position.
+    const origins = new Map();
+    const key = (r, c) => r * COLS + c;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
+        if (G.grid[r][c] !== -1) origins.set(key(r, c), { fromR: r, fromC: c });
+      }
+    }
+    // Iteratively settle balls — bottom-up, repeat until nothing moves.
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let r = ROWS - 2; r >= 0; r--) {
+        for (let c = 0; c < cellsInRow(r); c++) {
+          if (G.grid[r][c] === -1) continue;
+          const below = belowCells(r, c);
+          const empty = below.filter(([br, bc]) => G.grid[br][bc] === -1);
+          if (empty.length === 0) continue;
+          // Pick a destination — prefer randomly between two empties so the
+          // pile shape varies a bit instead of leaning hard one way.
+          const [nr, nc] = empty[Math.floor(Math.random() * empty.length)];
+          origins.set(key(nr, nc), origins.get(key(r, c)));
+          origins.delete(key(r, c));
+          G.grid[nr][nc] = G.grid[r][c];
           G.grid[r][c] = -1;
-          G.grid[write][c] = v;
-          write--;
+          changed = true;
+        }
+      }
+    }
+    // Build move list for the animation.
+    const moves = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
+        if (G.grid[r][c] === -1) continue;
+        const orig = origins.get(key(r, c));
+        if (orig && (orig.fromR !== r || orig.fromC !== c)) {
+          moves.push({
+            fromR: orig.fromR, fromC: orig.fromC,
+            toR: r,            toC: c,
+            color: G.grid[r][c],
+          });
         }
       }
     }
     return moves;
   }
 
-  // Drop balls visibly — like water cascading. Each ball travels at FALL_SPEED
-  // cells/sec from its visual start to its grid destination. Calls `callback`
-  // once all balls have arrived (or immediately if no balls moved).
-  //
-  // `headOverride` (optional) attaches a sliding start to the head ball that
-  // was just locked: { gridR, gridC, visualR, visualC }. The matching move's
-  // `fromR/fromC` are replaced with the visual coords so the head visibly
-  // slides from the triangle's centred spot into its landing column.
-  function applyGravityAnimated(callback, headOverride) {
-    const moves = applyGravity();
-
-    if (headOverride) {
-      // The head's final grid cell after gravity may differ from its lock
-      // cell (if the column had room below). Search the moves for the head;
-      // if not present, the head didn't fall vertically — synthesize a
-      // horizontal-only slide so the animation still plays.
-      let headMove = moves.find(m =>
-        m.fromR === headOverride.gridR && m.fromC === headOverride.gridC
-      );
-      if (headMove) {
-        headMove.fromR = headOverride.visualR;
-        headMove.fromC = headOverride.visualC;
-      } else {
-        moves.push({
-          fromR: headOverride.visualR, fromC: headOverride.visualC,
-          toR:   headOverride.gridR,   toC:   headOverride.gridC,
-          color: G.grid[headOverride.gridR][headOverride.gridC],
-        });
-      }
-    }
-
+  function settleAnimated(callback) {
+    const moves = settle();
     if (moves.length === 0) { callback(); return; }
     G.fallAnim = { moves, t: 0, callback };
   }
@@ -783,12 +781,12 @@ body::before {
     updateHUD();
     checkLevelUp();
     // play clear animation, then cascade survivors down, then look for chains
-    G.clearAnim = { cells, t: 0, duration: 320 };
+    G.clearAnim = { cells, t: 0, duration: CLEAR_ANIM_MS };
     setTimeout(() => {
       for (const cell of cells) G.grid[cell.r][cell.c] = -1;
       G.clearAnim = null;
-      applyGravityAnimated(() => resolveChains(chain + 1));
-    }, 320);
+      settleAnimated(() => resolveChains(chain + 1));
+    }, CLEAR_ANIM_MS);
   }
 
   function checkLevelUp() {
@@ -835,13 +833,15 @@ body::before {
     if (G.fallAnim) {
       for (const m of G.fallAnim.moves) fallSet.add(m.toR + ',' + m.toC);
     }
+    // Hex/brick grid rendering — use cellX/cellY so odd rows are offset.
     for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
+      const colsR = cellsInRow(r);
+      for (let c = 0; c < colsR; c++) {
         const v = G.grid[r][c];
         if (v === -1) continue;
         if (fallSet.has(r + ',' + c)) continue;
-        const cx = c * CELL + CELL / 2;
-        const cy = r * CELL + CELL / 2;
+        const cx = cellX(r, c);
+        const cy = cellY(r);
         const key = r + ',' + c;
         if (clearSet.has(key)) {
           drawBall(bctx, cx, cy, BALL_R * clearScale, v, clearAlpha);
@@ -850,8 +850,7 @@ body::before {
         }
       }
     }
-    // cascade-falling balls — interpolate diagonally so the head can slide
-    // from its centred triangle visual position into its landing column.
+    // Settling balls — animate hex-grid moves diagonally.
     if (G.fallAnim) {
       const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
       const slideProgress = G.fallAnim.t / SLIDE_MIN_MS;
@@ -859,42 +858,67 @@ body::before {
         const dR = m.toR - m.fromR;
         const dC = m.toC - m.fromC;
         const dist = Math.max(Math.abs(dR), Math.abs(dC));
-        // Per-ball progress in [0,1]. Use the SLOWER rate so short slides
-        // take at least SLIDE_MIN_MS (head visibility) and long cascades
-        // still respect FALL_SPEED.
         const tNorm = dist === 0 ? 1
           : Math.min(1, Math.min(distMoved, slideProgress * dist) / dist);
-        const animR = m.fromR + dR * tNorm;
-        const animC = m.fromC + dC * tNorm;
-        const cx = animC * CELL + CELL / 2;
-        const cy = animR * CELL + CELL / 2;
+        // Interpolate IN SCREEN SPACE, between cellX/Y(from) and cellX/Y(to).
+        // (Naive r/c lerp on a brick grid would zigzag because odd rows are
+        // offset.) This keeps the path visually straight.
+        const sx = cellX(m.fromR, m.fromC);
+        const sy = cellY(m.fromR);
+        const ex = cellX(m.toR,   m.toC);
+        const ey = cellY(m.toR);
+        const cx = sx + (ex - sx) * tNorm;
+        const cy = sy + (ey - sy) * tNorm;
         drawBall(bctx, cx, cy, BALL_R, m.color);
       }
     }
-    // falling piece — render the triangle at the current (animated) angle
+    // Falling piece — smooth fall offset + (optional) rotation arc.
     if (G.piece) {
-      for (const cell of rotatedPieceCells(G.piece, G.piece.visualAngle)) {
-        const cx = cell.c * CELL + CELL / 2;
-        const cy = cell.r * CELL + CELL / 2;
-        drawBall(bctx, cx, cy, BALL_R, cell.color);
+      // Smooth fall: glide between rows over dropInterval, but only if the
+      // piece can actually move to its next row (otherwise it'd visually
+      // overlap whatever's blocking it).
+      const canFall = !G.paused && !G.locked && !G.gameOver &&
+                      fits({ ...G.piece, row: G.piece.row + 2 });
+      const fallOffset = canFall ? (G.dropTimer / G.dropInterval) * 2 * ROW_H : 0;
+
+      const cells = pieceCells(G.piece);
+      const px = cells.map(c => cellX(c.r, c.c));
+      const py = cells.map(c => cellY(c.r) + fallOffset);
+
+      if (G.piece.rotAnimT < 1) {
+        // Rotation: each ball orbits the triangle centroid by an eased angle.
+        const cx = (px[0] + px[1] + px[2]) / 3;
+        const cy = (py[0] + py[1] + py[2]) / 3;
+        const eased = 1 - Math.pow(1 - G.piece.rotAnimT, 3); // easeOutCubic
+        const angle = eased * G.piece.rotAnimDir * (2 * Math.PI / 3);
+        const cos = Math.cos(angle), sin = Math.sin(angle);
+        for (let i = 0; i < 3; i++) {
+          const dx = px[i] - cx;
+          const dy = py[i] - cy;
+          // CW rotation in screen space (y-down).
+          const nx = dx * cos - dy * sin;
+          const ny = dx * sin + dy * cos;
+          drawBall(bctx, cx + nx, cy + ny, BALL_R, G.piece.rotAnimColors[i]);
+        }
+      } else {
+        for (let i = 0; i < 3; i++) {
+          drawBall(bctx, px[i], py[i], BALL_R, cells[i].color);
+        }
       }
     }
-    // ghost (landing preview) — use the SETTLED angle (target) and projected row
+    // Ghost (landing preview) — drop the piece as far as it can go.
     if (G.piece && !G.locked && !G.paused) {
       let ghost = { ...G.piece };
-      while (fits({ ...ghost, row: ghost.row + 1 })) ghost.row++;
+      while (fits({ ...ghost, row: ghost.row + 2 })) ghost.row += 2;
       if (ghost.row !== G.piece.row) {
-        const ghostAngle = G.piece.rotCounter * Math.PI / 2;
-        for (const cell of rotatedPieceCells(ghost, ghostAngle)) {
-          const cx = cell.c * CELL + CELL / 2;
-          const cy = cell.r * CELL + CELL / 2;
+        for (const cell of pieceCells(ghost)) {
           bctx.save();
           bctx.globalAlpha = 0.22;
           bctx.strokeStyle = cell.color;
           bctx.lineWidth = 2;
           bctx.setLineDash([4, 4]);
           bctx.beginPath();
-          bctx.arc(cx, cy, BALL_R * 0.9, 0, Math.PI * 2);
+          bctx.arc(cellX(cell.r, cell.c), cellY(cell.r), BALL_R * 0.9, 0, Math.PI * 2);
           bctx.stroke();
           bctx.restore();
         }
@@ -953,18 +977,26 @@ body::before {
         cb();
       }
     }
-    // advance rotation animation
+    // Advance piece rotation animation.
     if (G.piece && G.piece.rotAnimT < 1) {
       G.piece.rotAnimT = Math.min(1, G.piece.rotAnimT + dt / ROT_ANIM_MS);
-      const eased = 1 - Math.pow(1 - G.piece.rotAnimT, 3); // easeOutCubic
-      const target = G.piece.rotCounter * Math.PI / 2;
-      G.piece.visualAngle = G.piece.rotAnimFrom + (target - G.piece.rotAnimFrom) * eased;
     }
     if (!G.paused && !G.locked && !G.gameOver && G.piece) {
-      G.dropTimer += dt;
-      while (G.dropTimer >= G.dropInterval) {
-        G.dropTimer -= G.dropInterval;
-        softDrop();
+      const canFall = fits({ ...G.piece, row: G.piece.row + 2 });
+      if (canFall) {
+        // Reset lock-delay timer — the piece is in the air again (e.g. just
+        // moved sideways over an empty column).
+        G.piece.lockDelay = 0;
+        G.dropTimer += dt;
+        while (G.dropTimer >= G.dropInterval) {
+          G.dropTimer -= G.dropInterval;
+          softDrop();
+        }
+      } else {
+        // Piece is resting on something — give the player a brief grace
+        // period to slide sideways before it commits.
+        G.piece.lockDelay = (G.piece.lockDelay || 0) + dt;
+        if (G.piece.lockDelay >= LOCK_DELAY_MS) lockPiece();
       }
     }
     drawBoard();
