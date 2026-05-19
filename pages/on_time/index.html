@@ -23,8 +23,7 @@
     .fit-stage {
       position: fixed;
       inset: 0;
-      display: grid;
-      place-items: center;
+      overflow: hidden;
     }
 
     .game-wrap {
@@ -33,9 +32,11 @@
       background: #5a9fd4;
       border: 6px solid #2a5d9f;
       border-radius: 14px;
-      position: relative;
+      position: absolute;
+      left: 0;
+      top: 0;
       overflow: hidden;
-      transform-origin: center center;
+      transform-origin: 0 0;
     }
 
     /* ── SCREENS ── */
@@ -739,13 +740,18 @@ document.addEventListener('DOMContentLoaded', () => {
   c.addEventListener('touchend',   e => { e.preventDefault(); onUp(); },               { passive: false });
 
   const wrap = document.querySelector('.game-wrap');
-  const baseW = wrap.offsetWidth, baseH = wrap.offsetHeight;
+  const baseW = 920, baseH = 560;
   function fitStage() {
-    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
-    wrap.style.transform = `scale(${s})`;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
   }
   window.addEventListener('resize', fitStage);
   window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
   fitStage();
 });
 </script>

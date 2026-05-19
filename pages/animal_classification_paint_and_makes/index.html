@@ -20,12 +20,12 @@ html,body{
 
 .fit-stage{
   position:fixed;inset:0;
-  display:grid;place-items:center;
+  overflow:hidden;
 }
 .stage-content{
   width:840px;height:540px;
-  position:relative;
-  transform-origin:center center;
+  position:absolute;left:0;top:0;
+  transform-origin:0 0;
 }
 
 /* ─── MAIN SCREEN ─────────────────────────────────────────────────── */
@@ -1413,13 +1413,18 @@ document.getElementById('color-preview').style.background = selectedColor;
 // ─── SCALE-TO-FIT ────────────────────────────────────────────────────────────
 (function () {
   const stage = document.querySelector('.stage-content');
-  const baseW = stage.offsetWidth, baseH = stage.offsetHeight;
+  const baseW = 840, baseH = 540;
   function fitStage() {
-    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
-    stage.style.transform = `scale(${s})`;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    stage.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
   }
   window.addEventListener('resize', fitStage);
   window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
   fitStage();
 })();
 </script>
