@@ -179,6 +179,11 @@ header { text-align: center; margin-bottom: 52px; }
 .ss .tag        { background: #E0F7FA; color: #00838F; }
 .ss .play-btn   { background: linear-gradient(135deg,#0a8aaa,#0a5a6e); color: #fffde7; box-shadow: 0 5px 18px rgba(10,90,110,.45); }
 
+/* ── AREA SHAPE GAME THEME ── */
+.asg .card-title { color: #0d2d6a; }
+.asg .tag        { background: #E3F0FB; color: #1a4a8a; }
+.asg .play-btn   { background: linear-gradient(135deg,#2a72c6,#0d2d6a); color: #ffffff; box-shadow: 0 5px 18px rgba(13,45,106,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -1307,6 +1312,108 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="shapes_splat/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       AREA SHAPE GAME CARD
+  ══════════════════════════════ -->
+  <div class="game-card asg" onclick="location.href='area_shape_game/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="asgBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#b8e2ee"/>
+            <stop offset="100%" stop-color="#d2eef7"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Sky background -->
+        <rect width="380" height="210" fill="url(#asgBg)"/>
+
+        <!-- Navy header band evoking the game -->
+        <rect x="0" y="0" width="380" height="42" fill="#0d2d6a"/>
+        <text x="190" y="28" fill="#ffffff" font-family="Georgia, serif" font-style="italic" font-size="20" font-weight="700" text-anchor="middle">Area Shape Game</text>
+
+        <!-- Mini grid #1 — green I-tetromino (area 4) -->
+        <g transform="translate(28, 70)">
+          <rect width="84" height="72" fill="#ffffff" stroke="#7a8290" stroke-width="1"/>
+          <rect x="6" y="30" width="72" height="12" fill="#22a047"/>
+          <g stroke="#7a8290" stroke-width="1">
+            <line x1="0"  y1="12" x2="84" y2="12"/>
+            <line x1="0"  y1="24" x2="84" y2="24"/>
+            <line x1="0"  y1="36" x2="84" y2="36"/>
+            <line x1="0"  y1="48" x2="84" y2="48"/>
+            <line x1="0"  y1="60" x2="84" y2="60"/>
+            <line x1="12" y1="0"  x2="12" y2="72"/>
+            <line x1="24" y1="0"  x2="24" y2="72"/>
+            <line x1="36" y1="0"  x2="36" y2="72"/>
+            <line x1="48" y1="0"  x2="48" y2="72"/>
+            <line x1="60" y1="0"  x2="60" y2="72"/>
+            <line x1="72" y1="0"  x2="72" y2="72"/>
+          </g>
+        </g>
+
+        <!-- Mini grid #2 — magenta 2x2 (area 4) -->
+        <g transform="translate(148, 70)">
+          <rect width="84" height="72" fill="#ffffff" stroke="#7a8290" stroke-width="1"/>
+          <rect x="30" y="24" width="24" height="24" fill="#b8228e"/>
+          <g stroke="#7a8290" stroke-width="1">
+            <line x1="0"  y1="12" x2="84" y2="12"/>
+            <line x1="0"  y1="24" x2="84" y2="24"/>
+            <line x1="0"  y1="36" x2="84" y2="36"/>
+            <line x1="0"  y1="48" x2="84" y2="48"/>
+            <line x1="0"  y1="60" x2="84" y2="60"/>
+            <line x1="12" y1="0"  x2="12" y2="72"/>
+            <line x1="24" y1="0"  x2="24" y2="72"/>
+            <line x1="36" y1="0"  x2="36" y2="72"/>
+            <line x1="48" y1="0"  x2="48" y2="72"/>
+            <line x1="60" y1="0"  x2="60" y2="72"/>
+            <line x1="72" y1="0"  x2="72" y2="72"/>
+          </g>
+        </g>
+
+        <!-- Mini grid #3 — purple T-tetromino (area 4) -->
+        <g transform="translate(268, 70)">
+          <rect width="84" height="72" fill="#ffffff" stroke="#7a8290" stroke-width="1"/>
+          <rect x="18" y="24" width="36" height="12" fill="#8a3ad8"/>
+          <rect x="30" y="36" width="12" height="12" fill="#8a3ad8"/>
+          <g stroke="#7a8290" stroke-width="1">
+            <line x1="0"  y1="12" x2="84" y2="12"/>
+            <line x1="0"  y1="24" x2="84" y2="24"/>
+            <line x1="0"  y1="36" x2="84" y2="36"/>
+            <line x1="0"  y1="48" x2="84" y2="48"/>
+            <line x1="0"  y1="60" x2="84" y2="60"/>
+            <line x1="12" y1="0"  x2="12" y2="72"/>
+            <line x1="24" y1="0"  x2="24" y2="72"/>
+            <line x1="36" y1="0"  x2="36" y2="72"/>
+            <line x1="48" y1="0"  x2="48" y2="72"/>
+            <line x1="60" y1="0"  x2="60" y2="72"/>
+            <line x1="72" y1="0"  x2="72" y2="72"/>
+          </g>
+        </g>
+
+        <!-- Floating star -->
+        <text x="135" y="170" font-size="20" fill="#f8d829">★</text>
+        <text x="255" y="180" font-size="14" fill="#f8d829">★</text>
+
+        <!-- Target prompt strip -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(13,45,106,0.78)"/>
+        <text x="190" y="200" fill="#ffffff" font-family="'Patrick Hand', cursive, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Find shapes with an area of 4 squares!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Area Shape Game</div>
+      <div class="card-desc">Spot every shape that covers the target number of square units. Four rounds of counting practice — perfect for early geometry and area concepts.</div>
+      <div class="card-tags">
+        <span class="tag">Area</span>
+        <span class="tag">4 Rounds</span>
+        <span class="tag">Counting</span>
+        <span class="tag">Geometry</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="area_shape_game/">▶ Play Now!</a>
     </div>
   </div>
 

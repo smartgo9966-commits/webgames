@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Area Shape Game</title>
+<link rel="icon" type="image/png" href="../../assets/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&family=Caveat:wght@700&family=Patrick+Hand&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: #08254f;
+  font-family: 'Nunito', sans-serif;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  border: 6px solid #133b6f;
+  background: #d5edf5;
+}
+
+.screen {
+  position: absolute; inset: 0;
+  display: none;
+}
+.screen.active { display: block; }
+
+button { font-family: inherit; }
+
+/* ═══════════════════════════════════════
+   START / PILL BUTTON (handwritten)
+═══════════════════════════════════════ */
+.start-btn {
+  background: #fff;
+  border: 2px solid #c0d5e8;
+  border-radius: 60px;
+  padding: 6px 36px 10px;
+  font-family: 'Patrick Hand', 'Caveat', cursive;
+  font-size: 34px;
+  font-weight: 700;
+  color: #0d2d6a;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.start-btn:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 18px rgba(0,0,0,0.25); }
+.start-btn:active { transform: scale(0.97); }
+.start-btn.alt { background: #e6f1fb; }
+
+/* ═══════════════════════════════════════
+   SCREEN 1 – TITLE
+═══════════════════════════════════════ */
+#screen-title {
+  background: linear-gradient(180deg, #d2eef7 0%, #b8e2ee 70%, #a6d8e6 100%);
+}
+.title-band {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 36px;
+  background: #5fb5e0;
+}
+.title-band2 {
+  position: absolute;
+  top: 36px; left: 0; right: 0;
+  height: 215px;
+  background: #0d2d6a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.title-area {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 78px;
+  color: #b8d6ec;
+  line-height: 1;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  letter-spacing: 1px;
+}
+.title-game {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 50px;
+  color: #fff;
+  line-height: 1.1;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+
+.title-body {
+  position: absolute;
+  top: 251px; left: 0; right: 0; bottom: 0;
+}
+
+/* Decorative shapes on title body */
+.deco {
+  position: absolute;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+}
+.deco-label {
+  position: absolute;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0d2d6a;
+  white-space: nowrap;
+}
+
+.title-start-wrap {
+  position: absolute;
+  left: 50%;
+  top: 92px;
+  transform: translate(-50%, -50%);
+}
+.title-start-wrap .start-btn {
+  font-size: 36px;
+  padding: 8px 44px 12px;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 2 – INSTRUCTIONS
+═══════════════════════════════════════ */
+#screen-instructions {
+  background: linear-gradient(180deg, #d2eef7 0%, #b8e2ee 70%, #a6d8e6 100%);
+}
+.instr-card {
+  position: absolute;
+  left: 50%; top: 220px;
+  transform: translate(-50%, -50%);
+  width: 820px;
+  background: #fff;
+  border-radius: 50% / 35%;
+  padding: 30px 50px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.instr-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.instr-label {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 30px;
+  color: #2a72c6;
+  flex-shrink: 0;
+}
+.instr-text {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px;
+  color: #2a72c6;
+  line-height: 1.25;
+}
+.instr-shape {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.instr-rect-wrap {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-left: 38px;
+  margin-right: 8px;
+}
+.instr-rect-wrap .lbl-left {
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  color: #0d2d6a;
+  text-align: right;
+  line-height: 1;
+}
+.instr-rect-wrap .lbl-bottom {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  color: #0d2d6a;
+}
+
+.instr-start-wrap {
+  position: absolute;
+  left: 50%; bottom: 28px;
+  transform: translateX(-50%);
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 3 – GAME
+═══════════════════════════════════════ */
+#screen-game {
+  background: linear-gradient(180deg, #8cc7e0 0%, #b5dcec 50%, #d6ecf5 100%);
+}
+.game-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: #0d2d6a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  border-bottom: 4px solid #5fb5e0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.game-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 52px;
+  background: #0d2d6a;
+  display: flex;
+  align-items: center;
+  padding: 0 18px 0 26px;
+  gap: 32px;
+  color: #fff;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px;
+  letter-spacing: 1px;
+  border-top: 4px solid #5fb5e0;
+}
+.game-footer strong {
+  color: #fff;
+  font-weight: 700;
+  font-size: 26px;
+  margin-left: 6px;
+}
+.game-footer .icon-spacer { flex: 1; }
+.icon-btn {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.55);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.3); }
+.icon-btn.muted { opacity: 0.5; text-decoration: line-through; }
+
+.game-board {
+  position: absolute;
+  top: 60px; left: 0; right: 0; bottom: 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px 18px;
+  padding: 18px 32px;
+}
+
+.shape-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.12s;
+}
+.shape-card:hover { transform: scale(1.03); }
+.shape-card:disabled { cursor: default; }
+.shape-card svg { display: block; }
+
+.shape-mark {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  pointer-events: none;
+  animation: markPop 0.35s ease-out;
+}
+.shape-mark.ok { color: #1ca84a; text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.3); }
+.shape-mark.no { color: #d12a2a; text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.3); }
+
+.floating-star {
+  position: absolute;
+  left: 285px; top: 245px;
+  font-size: 30px;
+  color: #f8d829;
+  text-shadow: 0 0 6px rgba(248,216,41,0.8);
+  pointer-events: none;
+  animation: twinkle 1.6s ease-in-out infinite;
+  z-index: 5;
+}
+
+.game-back {
+  position: absolute;
+  top: 60px; left: 12px;
+  background: rgba(255,255,255,0.85);
+  border: 2px solid #0d2d6a;
+  color: #0d2d6a;
+  border-radius: 50px;
+  padding: 4px 14px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 8;
+}
+.game-back:hover { background: #fff; }
+
+/* Help overlay */
+.help-overlay {
+  position: absolute; inset: 0;
+  background: rgba(13,45,106,0.78);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 20;
+}
+.help-overlay.active { display: flex; }
+.help-box {
+  background: #fff;
+  border-radius: 22px;
+  padding: 26px 40px;
+  max-width: 680px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.help-box h3 {
+  font-family: 'Patrick Hand', cursive;
+  color: #2a72c6;
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+.help-box p {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px;
+  color: #2a72c6;
+  line-height: 1.3;
+}
+.help-close {
+  margin-top: 16px;
+  background: #0d2d6a; color: #fff;
+  border: none; border-radius: 50px;
+  padding: 6px 22px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 4 – RESULTS
+═══════════════════════════════════════ */
+#screen-results {
+  background: linear-gradient(180deg, #d2eef7 0%, #a6d8e6 100%);
+  display: none;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 22px;
+}
+#screen-results.active { display: flex; }
+.results-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 30px 60px;
+  box-shadow: 0 12px 38px rgba(0,0,0,0.22);
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 420px;
+}
+.results-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-style: italic;
+  font-size: 44px;
+  color: #0d2d6a;
+}
+.results-accuracy {
+  font-family: 'Fredoka One', cursive;
+  font-size: 80px;
+  color: #2a72c6;
+  line-height: 1;
+}
+.results-stats {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px;
+  color: #0d2d6a;
+  letter-spacing: 1px;
+}
+.results-buttons {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes popIn {
+  from { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes splat {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); filter: brightness(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@keyframes wrongFlash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2) hue-rotate(-25deg) saturate(1.5); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-1deg); }
+  40% { transform: translateX(6px) rotate(1deg); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50%      { transform: scale(1.3) rotate(20deg); opacity: 0.75; }
+}
+@keyframes markPop {
+  from { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.card-popin { animation: popIn 0.35s ease-out both; }
+</style>
+</head>
+<body>
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ════ SCREEN 1: TITLE ════ -->
+  <div id="screen-title" class="screen active">
+    <div class="title-band"></div>
+    <div class="title-band2">
+      <div class="title-area">Area</div>
+      <div class="title-game">Shape Game</div>
+    </div>
+    <div class="title-body" id="titleBody">
+      <!-- decorative shapes inserted by JS -->
+      <div class="title-start-wrap">
+        <button class="start-btn" id="titleStart">START</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN 2: INSTRUCTIONS ════ -->
+  <div id="screen-instructions" class="screen">
+    <div class="instr-card">
+      <div class="instr-row">
+        <span class="instr-label">Area:</span>
+        <span class="instr-text">The number of square units needed<br>to cover a figure.</span>
+      </div>
+      <div class="instr-row">
+        <span class="instr-label">Example:</span>
+        <div class="instr-shape" id="instrLshape"></div>
+        <span class="instr-text">This figure has 3 squares<br>so its area is 3 square units.</span>
+      </div>
+      <div class="instr-row">
+        <div class="instr-rect-wrap" id="instrRect">
+          <span class="lbl-left">2<br>ft</span>
+          <span class="lbl-bottom">6 ft</span>
+        </div>
+        <span class="instr-text">This rectangle's area is 12 sq feet<br>because 2ft × 6ft = 12 sq ft</span>
+      </div>
+    </div>
+    <div class="instr-start-wrap">
+      <button class="start-btn" id="instrStart">START</button>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN 3: GAME ════ -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <span id="target-text">Click the shapes with an area of 4 square units.</span>
+    </div>
+    <button class="game-back" id="gameBack">‹ Back</button>
+    <div class="game-board" id="gameBoard"></div>
+    <div class="floating-star" id="floatingStar">★</div>
+    <div class="game-footer">
+      <span>ROUND:<strong id="stat-round">1 / 4</strong></span>
+      <span>HITS:<strong id="stat-hits">0</strong></span>
+      <span>MISSES:<strong id="stat-misses">0</strong></span>
+      <span>SCORE:<strong id="stat-score">0</strong></span>
+      <span class="icon-spacer"></span>
+      <button class="icon-btn" id="helpBtn" title="Help">?</button>
+      <button class="icon-btn" id="soundBtn" title="Toggle sound">♪</button>
+    </div>
+
+    <div class="help-overlay" id="helpOverlay">
+      <div class="help-box">
+        <h3>How to Play</h3>
+        <p>Click every shape whose area matches the target<br>(the number of colored squares). Wrong picks add a miss.<br>Complete all 4 rounds to see your score!</p>
+        <button class="help-close" id="helpClose">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN 4: RESULTS ════ -->
+  <div id="screen-results" class="screen">
+    <div class="results-card">
+      <div class="results-title">Great job!</div>
+      <div class="results-accuracy" id="res-accuracy">100%</div>
+      <div class="results-stats" id="res-stats">Score 0 · Hits 0 · Misses 0</div>
+      <div class="results-buttons">
+        <button class="start-btn" id="playAgainBtn">PLAY AGAIN</button>
+        <button class="start-btn alt" id="titleBtn">TITLE</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// SHAPE LIBRARY — polyominoes keyed by area
+// Each entry: { cells: [[row, col], ...], w: width, h: height }
+// ════════════════════════════════════════════════════════════════
+const SHAPES = {
+  1: [
+    { cells:[[0,0]], w:1, h:1 }
+  ],
+  2: [
+    { cells:[[0,0],[0,1]], w:2, h:1 },
+    { cells:[[0,0],[1,0]], w:1, h:2 }
+  ],
+  3: [
+    { cells:[[0,0],[0,1],[0,2]], w:3, h:1 },
+    { cells:[[0,0],[1,0],[2,0]], w:1, h:3 },
+    { cells:[[0,0],[1,0],[1,1]], w:2, h:2 },
+    { cells:[[0,1],[1,0],[1,1]], w:2, h:2 },
+    { cells:[[0,0],[0,1],[1,0]], w:2, h:2 },
+    { cells:[[0,0],[0,1],[1,1]], w:2, h:2 }
+  ],
+  4: [
+    { cells:[[0,0],[0,1],[1,0],[1,1]], w:2, h:2 },              // O
+    { cells:[[0,0],[0,1],[0,2],[0,3]], w:4, h:1 },              // I
+    { cells:[[0,0],[1,0],[2,0],[3,0]], w:1, h:4 },              // I vert
+    { cells:[[0,0],[0,1],[0,2],[1,2]], w:3, h:2 },              // J
+    { cells:[[0,0],[0,1],[0,2],[1,0]], w:3, h:2 },              // L
+    { cells:[[0,1],[1,0],[1,1],[1,2]], w:3, h:2 },              // T
+    { cells:[[1,0],[1,1],[1,2],[0,1]], w:3, h:2 },              // T2
+    { cells:[[0,0],[0,1],[1,1],[1,2]], w:3, h:2 },              // S
+    { cells:[[0,1],[0,2],[1,0],[1,1]], w:3, h:2 },              // Z
+    { cells:[[0,0],[1,0],[1,1],[2,1]], w:2, h:3 },              // S vert
+    { cells:[[0,1],[1,0],[1,1],[2,0]], w:2, h:3 }               // Z vert
+  ],
+  5: [
+    { cells:[[0,0],[0,1],[0,2],[0,3],[0,4]], w:5, h:1 },                  // I
+    { cells:[[0,0],[1,0],[2,0],[3,0],[4,0]], w:1, h:5 },                  // I vert
+    { cells:[[0,0],[0,1],[1,0],[1,1],[2,0]], w:2, h:3 },                  // P
+    { cells:[[0,0],[0,1],[1,0],[1,1],[2,1]], w:2, h:3 },                  // P2
+    { cells:[[0,0],[1,0],[1,1],[1,2],[2,2]], w:3, h:3 },                  // W-ish
+    { cells:[[0,1],[1,0],[1,1],[1,2],[2,1]], w:3, h:3 },                  // plus
+    { cells:[[0,0],[0,1],[0,2],[1,2],[2,2]], w:3, h:3 },                  // L-pent
+    { cells:[[0,0],[1,0],[2,0],[2,1],[2,2]], w:3, h:3 },                  // L-pent2
+    { cells:[[0,0],[0,1],[0,2],[1,0],[1,2]], w:3, h:2 }                   // U
+  ],
+  6: [
+    { cells:[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], w:3, h:2 },            // 2x3
+    { cells:[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]], w:2, h:3 },            // 3x2
+    { cells:[[0,0],[1,0],[1,1],[1,2],[2,2],[2,3]], w:4, h:3 },            // staircase
+    { cells:[[0,0],[0,1],[0,2],[1,2],[2,2],[2,1]], w:3, h:3 },            // Z hex
+    { cells:[[0,0],[0,1],[0,2],[1,0],[2,0],[2,1]], w:3, h:3 }             // U-hex
+  ]
+};
+
+// Shape color palette (matches screenshots)
+const COLORS = [
+  '#22a047',  // green
+  '#b8228e',  // magenta
+  '#1a3a8a',  // dark blue
+  '#3aaee0',  // light blue
+  '#8a3ad8',  // purple
+  '#388f88',  // teal
+  '#a02a4a',  // dark red
+  '#4673c8',  // royal blue
+  '#d56eed'   // light purple
+];
+
+// ════════════════════════════════════════════════════════════════
+// SHAPE SVG RENDERING
+// ════════════════════════════════════════════════════════════════
+function renderGridShape(shape, color, gridW, gridH, cellPx, opts = {}) {
+  const w = gridW * cellPx;
+  const h = gridH * cellPx;
+  // pick offset to center shape in grid
+  const offC = Math.floor((gridW - shape.w) / 2);
+  const offR = Math.floor((gridH - shape.h) / 2);
+
+  let svg = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<rect width="${w}" height="${h}" fill="#ffffff"/>`;
+
+  // filled cells
+  shape.cells.forEach(([r, c]) => {
+    const x = (c + offC) * cellPx;
+    const y = (r + offR) * cellPx;
+    svg += `<rect x="${x}" y="${y}" width="${cellPx}" height="${cellPx}" fill="${color}"/>`;
+  });
+
+  // grid lines
+  const strokeW = opts.strokeW || 1;
+  const stroke = opts.stroke || '#7a8290';
+  for (let i = 0; i <= gridW; i++) {
+    svg += `<line x1="${i * cellPx}" y1="0" x2="${i * cellPx}" y2="${h}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+  }
+  for (let i = 0; i <= gridH; i++) {
+    svg += `<line x1="0" y1="${i * cellPx}" x2="${w}" y2="${i * cellPx}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+  }
+
+  // outer border
+  svg += `<rect x="0" y="0" width="${w}" height="${h}" fill="none" stroke="${stroke}" stroke-width="${strokeW + 0.5}"/>`;
+  svg += `</svg>`;
+  return svg;
+}
+
+function renderPlainRect(wFt, hFt, color, scale) {
+  scale = scale || 16;
+  const w = wFt * scale, h = hFt * scale;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${w}" height="${h}" fill="${color}" stroke="#0a2244" stroke-width="1"/>
+  </svg>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+let roundOrder = [];          // shuffled target areas for the 4 rounds
+let curRoundIdx = 0;
+let targetArea = 4;
+let correctRemaining = 0;
+let hits = 0, misses = 0, score = 0;
+let cardsLocked = false;
+let soundOn = true;
+let audioCtx = null;
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN HELPERS
+// ════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════════
+// AUDIO (synthesized — no asset files required)
+// ════════════════════════════════════════════════════════════════
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+}
+function playTone(freq, dur, type) {
+  if (!soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+function playCorrect() {
+  playTone(660, 0.13, 'triangle');
+  setTimeout(() => playTone(880, 0.18, 'triangle'), 110);
+}
+function playWrong() { playTone(180, 0.28, 'sawtooth'); }
+function playRoundEnd() {
+  playTone(523, 0.12, 'sine');
+  setTimeout(() => playTone(659, 0.12, 'sine'), 120);
+  setTimeout(() => playTone(784, 0.22, 'sine'), 240);
+}
+
+// ════════════════════════════════════════════════════════════════
+// TITLE SCREEN DECORATIONS
+// ════════════════════════════════════════════════════════════════
+function buildTitleDeco() {
+  const body = document.getElementById('titleBody');
+  // shape decorations: each = { type, x, y, ...spec }
+  const decos = [
+    // Top row in title body
+    { kind:'grid', x:170, y:14, shape:SHAPES[4][0], color:'#c0238a', gw:7, gh:6, cell:13 },
+    { kind:'rect', x:430, y:18, wFt:6, hFt:2, color:'#d56eed', lblL:'2\nft', lblB:'6 ft' },
+    { kind:'grid', x:710, y:14, shape:SHAPES[4][7], color:'#9a2a4a', gw:7, gh:6, cell:13 },
+    // Middle-left vertical rectangle
+    { kind:'rect', x:38, y:60, wFt:2, hFt:6, color:'#4a7a7c', lblL:'6\nft', lblB:'2 ft' },
+    // Bottom row
+    { kind:'grid', x:170, y:148, shape:SHAPES[4][8], color:'#2a4ec0', gw:7, gh:6, cell:13 },
+    { kind:'rect', x:380, y:170, wFt:5, hFt:2, color:'#2aa0c8', lblL:'2\nft', lblB:'5 ft' },
+    { kind:'grid', x:520, y:148, shape:SHAPES[4][5], color:'#8a3ad8', gw:7, gh:6, cell:13 },
+    { kind:'rect', x:760, y:152, wFt:4, hFt:3, color:'#4ac641', lblL:'3\nft', lblB:'4 ft' }
+  ];
+
+  decos.forEach(d => {
+    const wrap = document.createElement('div');
+    wrap.className = 'deco';
+    wrap.style.left = d.x + 'px';
+    wrap.style.top  = d.y + 'px';
+
+    if (d.kind === 'grid') {
+      wrap.innerHTML = renderGridShape(d.shape, d.color, d.gw, d.gh, d.cell);
+    } else if (d.kind === 'rect') {
+      const rectWrap = document.createElement('div');
+      rectWrap.style.position = 'relative';
+      rectWrap.style.display = 'inline-block';
+      rectWrap.innerHTML = renderPlainRect(d.wFt, d.hFt, d.color, 13);
+      if (d.lblL) {
+        const l = document.createElement('div');
+        l.className = 'deco-label';
+        l.style.left = '-22px';
+        l.style.top = '50%';
+        l.style.transform = 'translateY(-50%)';
+        l.style.textAlign = 'right';
+        l.style.lineHeight = '1';
+        l.innerHTML = d.lblL.replace('\n','<br>');
+        rectWrap.appendChild(l);
+      }
+      if (d.lblB) {
+        const b = document.createElement('div');
+        b.className = 'deco-label';
+        b.style.left = '50%';
+        b.style.bottom = '-20px';
+        b.style.transform = 'translateX(-50%)';
+        b.textContent = d.lblB;
+        rectWrap.appendChild(b);
+      }
+      wrap.appendChild(rectWrap);
+    }
+    body.insertBefore(wrap, body.firstChild);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// INSTRUCTIONS SCREEN — populate examples
+// ════════════════════════════════════════════════════════════════
+function buildInstructionExamples() {
+  // L-shape (3 squares) yellow
+  const lShape = { cells:[[0,0],[1,0],[1,1]], w:2, h:2 };
+  document.getElementById('instrLshape').innerHTML =
+    renderGridShape(lShape, '#f8d829', 2, 2, 28, { stroke:'#0d2d6a', strokeW:2 });
+
+  // rectangle 6 ft × 2 ft
+  const rectWrap = document.getElementById('instrRect');
+  const rectSvg = renderPlainRect(6, 2, '#d56eed', 22);
+  rectWrap.insertAdjacentHTML('afterbegin', rectSvg);
+}
+
+// ════════════════════════════════════════════════════════════════
+// ROUND LOGIC
+// ════════════════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  hits = 0; misses = 0; score = 0;
+  curRoundIdx = 0;
+  roundOrder = shuffle([3, 4, 5, 6]);
+  showScreen('screen-game');
+  updateStats();
+  nextRound();
+}
+
+function nextRound() {
+  if (curRoundIdx >= 4) { endGame(); return; }
+  targetArea = roundOrder[curRoundIdx];
+  document.getElementById('target-text').textContent =
+    `Click the shapes with an area of ${targetArea} square units.`;
+
+  const board = document.getElementById('gameBoard');
+  board.innerHTML = '';
+
+  // Decide correct count: 2 or 3
+  const correctCount = 2 + Math.floor(Math.random() * 2);
+  correctRemaining = correctCount;
+
+  // Distractor areas — pick from {1..6} excluding targetArea
+  const otherAreas = [1,2,3,4,5,6].filter(a => a !== targetArea);
+  const distractorAreas = shuffle(otherAreas).slice(0, 6 - correctCount);
+
+  // Build slot list
+  const slots = [];
+  for (let i = 0; i < correctCount; i++) slots.push({ area: targetArea, correct: true });
+  distractorAreas.forEach(a => slots.push({ area: a, correct: false }));
+  const placed = shuffle(slots);
+
+  // Pre-pick colors to avoid two adjacent identical
+  const colorPool = shuffle(COLORS).slice(0, 6);
+
+  // Render 6 shape cards
+  const gridW = 7, gridH = 6, cellPx = 26;
+
+  placed.forEach((slot, i) => {
+    const shape = SHAPES[slot.area][Math.floor(Math.random() * SHAPES[slot.area].length)];
+    const color = colorPool[i % colorPool.length];
+
+    const btn = document.createElement('button');
+    btn.className = 'shape-card card-popin';
+    btn.style.animationDelay = (i * 55) + 'ms';
+    btn.setAttribute('data-area', slot.area);
+    btn.setAttribute('data-correct', slot.correct ? '1' : '0');
+    btn.innerHTML = renderGridShape(shape, color, gridW, gridH, cellPx);
+
+    const handler = (e) => {
+      if (e) e.preventDefault();
+      onCardClick(btn);
+    };
+    btn.addEventListener('click', handler);
+    btn.addEventListener('touchend', handler, { passive: false });
+
+    board.appendChild(btn);
+  });
+
+  cardsLocked = false;
+  updateStats();
+}
+
+function onCardClick(btn) {
+  if (cardsLocked) return;
+  if (btn.disabled) return;
+  const isCorrect = btn.getAttribute('data-correct') === '1';
+  btn.disabled = true;
+
+  // Place mark inside card
+  const mark = document.createElement('span');
+  mark.className = 'shape-mark ' + (isCorrect ? 'ok' : 'no');
+  mark.textContent = isCorrect ? '✓' : '✗';
+  btn.appendChild(mark);
+
+  if (isCorrect) {
+    hits++;
+    score += 10;
+    correctRemaining--;
+    btn.style.animation = 'splat 0.45s ease-out';
+    playCorrect();
+    updateStats();
+    if (correctRemaining <= 0) {
+      cardsLocked = true;
+      setTimeout(() => {
+        curRoundIdx++;
+        if (curRoundIdx >= 4) endGame(); else nextRound();
+      }, 850);
+    }
+  } else {
+    misses++;
+    btn.style.animation = 'wrongFlash 0.4s ease, shake 0.4s ease';
+    playWrong();
+    updateStats();
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-round').textContent  = ' ' + Math.min(curRoundIdx + 1, 4) + ' / 4';
+  document.getElementById('stat-hits').textContent   = ' ' + hits;
+  document.getElementById('stat-misses').textContent = ' ' + misses;
+  document.getElementById('stat-score').textContent  = ' ' + score;
+}
+
+function endGame() {
+  playRoundEnd();
+  const total = hits + misses;
+  const pct = total > 0 ? Math.round((hits / total) * 100) : 0;
+  document.getElementById('res-accuracy').textContent = pct + '%';
+  document.getElementById('res-stats').textContent =
+    `Score ${score} · Hits ${hits} · Misses ${misses}`;
+  showScreen('screen-results');
+}
+
+// ════════════════════════════════════════════════════════════════
+// SOUND TOGGLE / HELP / NAV
+// ════════════════════════════════════════════════════════════════
+function wireUI() {
+  document.getElementById('titleStart').addEventListener('click', () => {
+    ensureAudio();
+    showScreen('screen-instructions');
+  });
+  document.getElementById('instrStart').addEventListener('click', () => {
+    ensureAudio();
+    startGame();
+  });
+  document.getElementById('gameBack').addEventListener('click', () => {
+    showScreen('screen-title');
+  });
+  document.getElementById('playAgainBtn').addEventListener('click', startGame);
+  document.getElementById('titleBtn').addEventListener('click', () => showScreen('screen-title'));
+
+  const helpOverlay = document.getElementById('helpOverlay');
+  document.getElementById('helpBtn').addEventListener('click', () => helpOverlay.classList.add('active'));
+  document.getElementById('helpClose').addEventListener('click', () => helpOverlay.classList.remove('active'));
+  helpOverlay.addEventListener('click', (e) => {
+    if (e.target === helpOverlay) helpOverlay.classList.remove('active');
+  });
+
+  const soundBtn = document.getElementById('soundBtn');
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.classList.toggle('muted', !soundOn);
+    soundBtn.textContent = soundOn ? '♪' : '✕';
+    if (soundOn) playTone(880, 0.08, 'sine');
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// VIEWPORT SCALING (matches shapes_splat pattern)
+// ════════════════════════════════════════════════════════════════
+function rescale() {
+  const wrap = document.getElementById('gameWrap');
+  const s = Math.min(window.innerWidth / 960, window.innerHeight / 540);
+  wrap.style.transform = `scale(${s})`;
+  wrap.style.left = Math.max(0, (window.innerWidth  - 960 * s) / 2) + 'px';
+  wrap.style.top  = Math.max(0, (window.innerHeight - 540 * s) / 2) + 'px';
+}
+window.addEventListener('resize', rescale);
+window.addEventListener('orientationchange', () => setTimeout(rescale, 200));
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+buildTitleDeco();
+buildInstructionExamples();
+wireUI();
+rescale();
+</script>
+</body>
+</html>
