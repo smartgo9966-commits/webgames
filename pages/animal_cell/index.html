@@ -8,7 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Raleway:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:#2A0515;display:flex;align-items:center;justify-content:center;font-family:'Raleway',sans-serif;padding:8px}
+html,body{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh;background:#2A0515;display:flex;align-items:center;justify-content:center;font-family:'Raleway',sans-serif;padding:8px}
 
 /* ── SCREENS ── */
 .screen{display:none;width:100%;max-width:1180px}
@@ -797,7 +798,7 @@ function buildMainSVG() {
     el.setAttribute('data-id', h.id);
     el.addEventListener('mouseenter', () => highlightOrganelle(h.id));
     el.addEventListener('mouseleave', () => highlightOrganelle(null));
-    el.addEventListener('click', () => selectOrganelleInfo(h.id));
+    el.addEventListener('click', () => { highlightOrganelle(h.id); selectOrganelleInfo(h.id); });
     gHit.appendChild(el);
   });
   svg.appendChild(gHit);
@@ -910,7 +911,7 @@ function buildGameSVG() {
   gPlaced.id = 'svg-placed-labels';
   svg.appendChild(gPlaced);
 
-  /* drop zone transparent hit areas */
+  /* drop zone transparent hit areas (kept for visual cursor + hit-test markers) */
   const gDrop = document.createElementNS(ns,'g');
   gDrop.id = 'svg-drop-zones';
   ORGANELLES.forEach(org => {
@@ -923,39 +924,38 @@ function buildGameSVG() {
     zone.setAttribute('fill','transparent');
     zone.setAttribute('data-id', org.id);
     zone.style.cursor = 'crosshair';
-    zone.addEventListener('dragover', e => { e.preventDefault(); });
-    zone.addEventListener('drop', e => { e.preventDefault(); handleDrop(org.id); });
     gDrop.appendChild(zone);
   });
   svg.appendChild(gDrop);
 
-  /* also make svg a drop target */
-  svg.addEventListener('dragover', e => e.preventDefault());
-  svg.addEventListener('drop', e => {
-    e.preventDefault();
-    const rect = svg.getBoundingClientRect();
-    const vbW = 560, vbH = 560;
-    const scaleX = vbW / rect.width;
-    const scaleY = vbH / rect.height;
-    const svgX = (e.clientX - rect.left) * scaleX;
-    const svgY = (e.clientY - rect.top) * scaleY;
-    // find closest drop zone
-    let best = null, bestDist = 999;
-    ORGANELLES.forEach(org => {
-      if (gamePlaced[org.id]) return;
-      const dp = DROP_POS[org.id];
-      if (!dp) return;
-      const d = Math.hypot(svgX - dp.cx, svgY - dp.cy);
-      if (d < bestDist) { bestDist = d; best = org.id; }
-    });
-    if (best && bestDist < 60) handleDrop(best);
-    else {
-      // wrong area shake
-      shakePill(dragId);
-    }
-  });
-
   return svg;
+}
+
+/* ════════════════════════════════════════
+   POINTER-BASED DRAG (works on mouse + touch)
+   Hit-tests the SVG closest-zone math on pointerup.
+════════════════════════════════════════ */
+function dropAtPoint(clientX, clientY) {
+  const svg = document.querySelector('#game-svg-wrap svg');
+  if (!svg) return false;
+  const rect = svg.getBoundingClientRect();
+  if (clientX < rect.left || clientX > rect.right ||
+      clientY < rect.top  || clientY > rect.bottom) return false;
+  const vbW = 560, vbH = 560;
+  const scaleX = vbW / rect.width;
+  const scaleY = vbH / rect.height;
+  const svgX = (clientX - rect.left) * scaleX;
+  const svgY = (clientY - rect.top)  * scaleY;
+  let best = null, bestDist = 999;
+  ORGANELLES.forEach(org => {
+    if (gamePlaced[org.id]) return;
+    const dp = DROP_POS[org.id];
+    if (!dp) return;
+    const d = Math.hypot(svgX - dp.cx, svgY - dp.cy);
+    if (d < bestDist) { bestDist = d; best = org.id; }
+  });
+  if (best && bestDist < 60) { handleDrop(best); return true; }
+  return false;
 }
 
 function handleDrop(zoneId) {
@@ -1227,18 +1227,45 @@ function buildGameLabels() {
     const pill = document.createElement('div');
     pill.className = 'label-pill';
     pill.textContent = org.name;
-    pill.setAttribute('draggable','true');
     pill.setAttribute('data-id', org.id);
+    pill.style.touchAction = 'none';
     if (gamePlaced[org.id]) pill.classList.add('placed');
-    pill.addEventListener('dragstart', e => {
+
+    pill.addEventListener('pointerdown', e => {
+      if (gamePlaced[org.id]) return;
+      e.preventDefault();
       dragId = org.id;
       pill.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', org.id);
-      e.dataTransfer.effectAllowed = 'move';
+
+      const ghost = pill.cloneNode(true);
+      ghost.classList.remove('dragging');
+      Object.assign(ghost.style, {
+        position: 'fixed', pointerEvents: 'none', zIndex: '9999',
+        left: e.clientX + 'px', top: e.clientY + 'px',
+        transform: 'translate(-50%, -50%) scale(1.05)',
+        opacity: '0.92', boxShadow: '0 6px 18px rgba(0,0,0,0.25)'
+      });
+      document.body.appendChild(ghost);
+
+      function move(ev) {
+        ghost.style.left = ev.clientX + 'px';
+        ghost.style.top  = ev.clientY + 'px';
+      }
+      function up(ev) {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        ghost.remove();
+        pill.classList.remove('dragging');
+        const placed = dropAtPoint(ev.clientX, ev.clientY);
+        if (!placed && dragId) shakePill(dragId);
+        dragId = null;
+      }
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
     });
-    pill.addEventListener('dragend', () => {
-      pill.classList.remove('dragging');
-    });
+
     panel.appendChild(pill);
   });
 }
@@ -1255,7 +1282,7 @@ function buildOrgList() {
     li.setAttribute('data-id', org.id);
     li.addEventListener('mouseenter', () => highlightOrganelle(org.id));
     li.addEventListener('mouseleave', () => highlightOrganelle(null));
-    li.addEventListener('click', () => selectOrganelleInfo(org.id));
+    li.addEventListener('click', () => { highlightOrganelle(org.id); selectOrganelleInfo(org.id); });
     list.appendChild(li);
   });
 }

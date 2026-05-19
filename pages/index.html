@@ -9,9 +9,14 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: 'Nunito', sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(160deg, #0d1b35 0%, #1a3050 55%, #0d2040 100%);
   display: flex;
   flex-direction: column;

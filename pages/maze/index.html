@@ -10,17 +10,21 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-  height: 100%;
+  height: 100dvh;
+  margin: 0;
   font-family: 'Nunito', Arial, sans-serif;
   background: #1872dd;
   overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
+.fit-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
 }
 
 .game-wrap {
@@ -32,7 +36,10 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  transform-origin: center center;
 }
+
+#maze-canvas { touch-action: none; }
 
 /* ── SCREENS ── */
 .screen {
@@ -454,6 +461,7 @@ body {
 </head>
 <body>
 
+<div class="fit-stage">
 <div class="game-wrap">
 
   <!-- ════════════ MAIN MENU ════════════ -->
@@ -551,6 +559,7 @@ body {
     </div>
   </div>
 
+</div>
 </div>
 
 <script>
@@ -996,6 +1005,51 @@ document.getElementById('btn-results-ok').addEventListener('click', () => {
   showScreen('screen-menu');
   renderPreview();
 });
+
+// ════════════════════════════════════════════════════════════
+//  TOUCH: swipe to move
+// ════════════════════════════════════════════════════════════
+(function () {
+  const SWIPE_MIN = 25; // px in screen space
+  let startX = 0, startY = 0, active = false;
+  canvas.addEventListener('touchstart', (e) => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    if (document.querySelector('.modal.active')) return;
+    const t = e.changedTouches[0];
+    startX = t.clientX; startY = t.clientY; active = true;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => {
+    if (active) e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN) return;
+    let dir = 0;
+    if (Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? E : W;
+    else                              dir = dy > 0 ? S : N;
+    tryMove(dir);
+    e.preventDefault();
+  }, { passive: false });
+})();
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = wrap.offsetWidth, baseH = wrap.offsetHeight;
+  function fitStage() {
+    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+    wrap.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
+})();
 
 // ════════════════════════════════════════════════════════════
 //  BOOT

@@ -10,16 +10,21 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-  height: 100%;
+  height: 100dvh;
+  margin: 0;
   font-family: 'Nunito', Arial, sans-serif;
   background: linear-gradient(160deg, #fff4e6 0%, #ffe2c2 55%, #ffd194 100%);
   overflow: hidden;
   user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+.fit-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
 }
 
 .game-wrap {
@@ -31,6 +36,7 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+  transform-origin: center center;
 }
 
 /* ── SCREENS ── */
@@ -386,6 +392,7 @@ body {
   </defs>
 </svg>
 
+<div class="fit-stage">
 <div class="game-wrap">
 
   <!-- ═══════════════ MENU SCREEN ═══════════════ -->
@@ -458,6 +465,7 @@ body {
     <div class="alphabet-strip" id="winAlphabet">abcdefghijklmnopqrstuvwxyz</div>
   </section>
 
+</div>
 </div>
 
 <script>
@@ -545,15 +553,17 @@ function placeLetter(tile, idx) {
   const tileRect = tile.getBoundingClientRect();
   const slot = document.querySelector(`#slotsGrid .slot[data-index="${idx}"]`);
   const slotRect = slot.getBoundingClientRect();
+  // Wrap is CSS-scaled by fitStage; convert screen-space rects back to wrap-local px.
+  const s = wrapRect.width / wrap.offsetWidth || 1;
 
   // Flying clone, sized like the pool tile
   const fly = document.createElement('div');
   fly.className = `flying-tile ${colorFor(idx)}`;
   fly.style.background = colorHex(idx);
-  fly.style.left = (tileRect.left - wrapRect.left) + 'px';
-  fly.style.top  = (tileRect.top  - wrapRect.top)  + 'px';
-  fly.style.width  = tileRect.width  + 'px';
-  fly.style.height = tileRect.height + 'px';
+  fly.style.left = ((tileRect.left - wrapRect.left) / s) + 'px';
+  fly.style.top  = ((tileRect.top  - wrapRect.top)  / s) + 'px';
+  fly.style.width  = (tileRect.width  / s) + 'px';
+  fly.style.height = (tileRect.height / s) + 'px';
   fly.style.fontSize = '44px';
   fly.textContent = letterAt(idx);
   document.getElementById('flyLayer').appendChild(fly);
@@ -562,13 +572,12 @@ function placeLetter(tile, idx) {
   tile.classList.add('placed');
 
   // Animate next frame
-  const targetW = slotRect.width  - 4;
-  const targetH = slotRect.height - 4;
-  const targetX = slotRect.left - wrapRect.left + 2;
-  const targetY = slotRect.top  - wrapRect.top  + 2;
-  const dx = targetX - (tileRect.left - wrapRect.left);
-  const dy = targetY - (tileRect.top  - wrapRect.top);
-  const scale = targetW / tileRect.width;
+  const targetW = (slotRect.width  / s) - 4;
+  const targetX = (slotRect.left - wrapRect.left) / s + 2;
+  const targetY = (slotRect.top  - wrapRect.top)  / s + 2;
+  const dx = targetX - ((tileRect.left - wrapRect.left) / s);
+  const dy = targetY - ((tileRect.top  - wrapRect.top)  / s);
+  const scale = targetW / (tileRect.width / s);
   requestAnimationFrame(() => {
     fly.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
   });
@@ -637,6 +646,18 @@ document.querySelectorAll('.option-col').forEach(col => {
 
 document.getElementById('backBtn').addEventListener('click', () => showScreen('screen-menu'));
 document.getElementById('playAgainBtn').addEventListener('click', () => showScreen('screen-menu'));
+
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = wrap.offsetWidth, baseH = wrap.offsetHeight;
+  function fitStage() {
+    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+    wrap.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
+})();
 </script>
 </body>
 </html>

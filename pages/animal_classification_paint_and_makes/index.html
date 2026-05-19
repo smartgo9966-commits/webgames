@@ -9,17 +9,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{
+html,body{
+  height:100dvh;margin:0;
   background:radial-gradient(ellipse at center,#FF8C28 0%,#E85500 100%);
-  min-height:100vh;font-family:'Fredoka One',cursive;
-  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  font-family:'Fredoka One',cursive;
+  overflow:hidden;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.fit-stage{
+  position:fixed;inset:0;
+  display:grid;place-items:center;
+}
+.stage-content{
+  width:840px;height:540px;
+  position:relative;
+  transform-origin:center center;
 }
 
 /* ─── MAIN SCREEN ─────────────────────────────────────────────────── */
 #scr-main{
   width:840px;height:540px;
   border:7px solid #111880;border-radius:10px;
-  overflow:hidden;position:relative;
+  overflow:hidden;position:absolute;inset:0;
   background:#FF7022;
   box-shadow:0 12px 40px rgba(0,0,0,.5);
 }
@@ -90,6 +103,7 @@ body{
   display:none;width:840px;height:540px;
   border:7px solid #111880;border-radius:10px;overflow:hidden;
   box-shadow:0 12px 40px rgba(0,0,0,.5);
+  position:absolute;inset:0;
 }
 
 /* Left panel */
@@ -197,6 +211,9 @@ body{
 </style>
 </head>
 <body>
+
+<div class="fit-stage">
+<div class="stage-content">
 
 <!-- ═══════════════════════════════════════════════════════
      SCREEN 1 — MAIN MENU
@@ -386,6 +403,9 @@ body{
       <svg id="animal-svg" viewBox="0 0 660 500" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
   </div>
+</div>
+
+</div>
 </div>
 
 <script>
@@ -1286,19 +1306,66 @@ function nextSticker() {
   showSticker(stickerIdx + 1);
 }
 
-// ─── STICKER DRAG + DROP ─────────────────────────────────────────────────────
-document.getElementById('sticker-src').addEventListener('dragstart', e => {
-  dragSvg = document.getElementById('sticker-src').innerHTML;
-  e.dataTransfer.effectAllowed = 'copy';
-  e.dataTransfer.setData('text/plain', 'sticker');
-});
+// ─── STICKER DRAG + DROP (pointer-based: works on mouse and touch) ───────────
+// Returns the current CSS scale of the stage container by comparing the post-
+// transform rect to the unscaled offsetWidth.
+function stageScale() {
+  const stage = document.querySelector('.stage-content');
+  if (!stage) return 1;
+  const r = stage.getBoundingClientRect();
+  return (r.width / stage.offsetWidth) || 1;
+}
+
+(function () {
+  const src = document.getElementById('sticker-src');
+  const wrap = document.getElementById('paint-canvas-wrap');
+  let dragging = false;
+  let ghost = null;
+
+  src.setAttribute('draggable', 'false'); // disable HTML5 drag
+  src.style.touchAction = 'none';
+
+  src.addEventListener('pointerdown', e => {
+    if (!src.innerHTML) return;
+    e.preventDefault();
+    dragSvg = src.innerHTML;
+    dragging = true;
+    ghost = document.createElement('div');
+    ghost.style.cssText =
+      'position:fixed;pointer-events:none;width:84px;height:84px;' +
+      'transform:translate(-50%,-50%);opacity:.85;z-index:9999';
+    ghost.innerHTML = dragSvg;
+    document.body.appendChild(ghost);
+    ghost.style.left = e.clientX + 'px';
+    ghost.style.top  = e.clientY + 'px';
+    try { src.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  src.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    ghost.style.left = e.clientX + 'px';
+    ghost.style.top  = e.clientY + 'px';
+  });
+
+  function finishDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    if (ghost) { ghost.remove(); ghost = null; }
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    if (target && (target === wrap || wrap.contains(target))) {
+      stickerDrop({ clientX: e.clientX, clientY: e.clientY });
+    }
+  }
+  src.addEventListener('pointerup', finishDrag);
+  src.addEventListener('pointercancel', finishDrag);
+})();
 
 function stickerDrop(e) {
-  e.preventDefault();
   const wrap = document.getElementById('paint-canvas-wrap');
   const rect = wrap.getBoundingClientRect();
-  const x = e.clientX - rect.left - 42;
-  const y = e.clientY - rect.top  - 42;
+  const s = stageScale();
+  const x = (e.clientX - rect.left) / s - 42;
+  const y = (e.clientY - rect.top)  / s - 42;
   const div = document.createElement('div');
   div.className = 'placed-sticker';
   div.style.left = Math.max(0, x) + 'px';
@@ -1309,30 +1376,52 @@ function stickerDrop(e) {
 }
 
 function makeDraggable(el) {
-  let ox = 0, oy = 0;
-  el.addEventListener('mousedown', e => {
+  el.style.touchAction = 'none';
+  el.addEventListener('pointerdown', e => {
     e.preventDefault();
     e.stopPropagation();
     const wrap = document.getElementById('paint-canvas-wrap');
-    const wr   = wrap.getBoundingClientRect();
-    ox = e.clientX - el.offsetLeft;
-    oy = e.clientY - el.offsetTop;
-    const move = e => {
-      el.style.left = (e.clientX - wr.left - ox) + 'px';
-      el.style.top  = (e.clientY - wr.top  - oy) + 'px';
-    };
-    const up = () => {
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', up);
-    };
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
+    const wr = wrap.getBoundingClientRect();
+    const s = stageScale();
+    // pointer position in wrap-local (unscaled) coords:
+    const px0 = (e.clientX - wr.left) / s;
+    const py0 = (e.clientY - wr.top)  / s;
+    const ox = px0 - el.offsetLeft;
+    const oy = py0 - el.offsetTop;
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    function move(ev) {
+      const px = (ev.clientX - wr.left) / s;
+      const py = (ev.clientY - wr.top)  / s;
+      el.style.left = (px - ox) + 'px';
+      el.style.top  = (py - oy) + 'px';
+    }
+    function up() {
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerup', up);
+      el.removeEventListener('pointercancel', up);
+    }
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
   });
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 buildPalette();
 document.getElementById('color-preview').style.background = selectedColor;
+
+// ─── SCALE-TO-FIT ────────────────────────────────────────────────────────────
+(function () {
+  const stage = document.querySelector('.stage-content');
+  const baseW = stage.offsetWidth, baseH = stage.offsetHeight;
+  function fitStage() {
+    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+    stage.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
+})();
 </script>
 </body>
 </html>

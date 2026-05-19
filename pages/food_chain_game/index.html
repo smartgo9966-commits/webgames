@@ -9,22 +9,30 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
+html, body {
   font-family: 'Nunito', sans-serif;
   background: #dce8f5;
-  width: 100vw; height: 100vh;
-  display: flex; align-items: center; justify-content: center;
+  width: 100vw; height: 100dvh;
+  margin: 0;
   overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage {
+  position: fixed; inset: 0;
+  display: grid; place-items: center;
 }
 
 #game-frame {
-  width: min(960px, 100vw);
-  height: min(620px, 100vh);
+  width: 960px;
+  height: 620px;
   border-radius: 18px;
   overflow: hidden;
   position: relative;
   background: white;
   box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+  transform-origin: center center;
 }
 
 .screen {
@@ -234,6 +242,7 @@ body {
 </style>
 </head>
 <body>
+<div class="fit-stage">
 <div id="game-frame">
 
   <!-- LOADING -->
@@ -301,6 +310,7 @@ body {
     <button class="replay-btn" onclick="resetGame()">🔄 Play Again</button>
   </div>
 
+</div>
 </div>
 <script>
 /* ═══════════════════════════════════════════
@@ -1047,6 +1057,21 @@ function launchConfetti() {
 }
 
 window.addEventListener('load', runLoading);
+
+/* ═══════════════════════════════════════════
+   SCALE-TO-FIT (phone + big touch screen)
+═══════════════════════════════════════════ */
+(function () {
+  const frame = document.getElementById('game-frame');
+  const baseW = frame.offsetWidth, baseH = frame.offsetHeight;
+  function fitStage() {
+    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+    frame.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
+})();
 </script>
 </body>
 </html>

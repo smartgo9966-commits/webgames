@@ -8,14 +8,23 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html, body {
+      height: 100dvh;
+      margin: 0;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
       background: #2a5d9f;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       font-family: 'Arial Black', Arial, sans-serif;
-      overflow: hidden;
+    }
+
+    .fit-stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
     }
 
     .game-wrap {
@@ -26,6 +35,7 @@
       border-radius: 14px;
       position: relative;
       overflow: hidden;
+      transform-origin: center center;
     }
 
     /* ── SCREENS ── */
@@ -302,6 +312,7 @@
   </style>
 </head>
 <body>
+<div class="fit-stage">
 <div class="game-wrap">
 
   <!-- ════════════════ MAIN MENU ════════════════ -->
@@ -381,6 +392,7 @@
     </div>
   </div>
 
+</div>
 </div>
 <script>
 // ══════════════════════════════════════════
@@ -725,6 +737,16 @@ document.addEventListener('DOMContentLoaded', () => {
   c.addEventListener('touchstart', e => { e.preventDefault(); onDown(e.touches[0]); }, { passive: false });
   c.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0]); }, { passive: false });
   c.addEventListener('touchend',   e => { e.preventDefault(); onUp(); },               { passive: false });
+
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = wrap.offsetWidth, baseH = wrap.offsetHeight;
+  function fitStage() {
+    const s = Math.min(window.innerWidth / baseW, window.innerHeight / baseH);
+    wrap.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
 });
 </script>
 </body>
