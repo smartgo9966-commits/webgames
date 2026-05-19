@@ -174,6 +174,11 @@ header { text-align: center; margin-bottom: 52px; }
 .ab .tag        { background: #FFE5E8; color: #c41a2d; }
 .ab .play-btn   { background: linear-gradient(135deg,#f47820,#c41a2d); color: #ffe9a0; box-shadow: 0 5px 18px rgba(196,26,45,.45); }
 
+/* ── SHAPES SPLAT THEME ── */
+.ss .card-title { color: #0a5a6e; }
+.ss .tag        { background: #E0F7FA; color: #00838F; }
+.ss .play-btn   { background: linear-gradient(135deg,#0a8aaa,#0a5a6e); color: #fffde7; box-shadow: 0 5px 18px rgba(10,90,110,.45); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -1224,6 +1229,84 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="alphabet_game/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SHAPES SPLAT CARD
+  ══════════════════════════════ -->
+  <div class="game-card ss" onclick="location.href='shapes_splat/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ssBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#70d8f0"/>
+            <stop offset="100%" stop-color="#d8f5ff"/>
+          </linearGradient>
+          <radialGradient id="ssSph" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f0e0ff"/>
+            <stop offset="30%" stop-color="#cc77ff"/>
+            <stop offset="100%" stop-color="#330055"/>
+          </radialGradient>
+          <linearGradient id="ssCon" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#b8ccff"/>
+            <stop offset="100%" stop-color="#223388"/>
+          </linearGradient>
+          <linearGradient id="ssCyl" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ff9999"/>
+            <stop offset="100%" stop-color="#881111"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Sky background -->
+        <rect width="380" height="210" fill="url(#ssBg)"/>
+
+        <!-- Ghost shape outlines in background -->
+        <circle cx="30" cy="50" r="40" fill="none" stroke="#00aacc" stroke-width="2" opacity="0.18"/>
+        <rect x="320" y="140" width="55" height="55" fill="none" stroke="#00aacc" stroke-width="2" opacity="0.15"/>
+
+        <!-- Purple sphere (top-left area) -->
+        <circle cx="68" cy="72" r="42" fill="url(#ssSph)" stroke="#220044" stroke-width="1"/>
+        <ellipse cx="55" cy="55" rx="11" ry="7" fill="rgba(255,255,255,0.55)" transform="rotate(-25,55,55)"/>
+
+        <!-- Blue cone (center-top) -->
+        <polygon points="185,20 155,110 215,110" fill="url(#ssCon)" stroke="#112266" stroke-width="1"/>
+        <ellipse cx="185" cy="110" rx="30" ry="8" fill="#334499" stroke="#112266" stroke-width="1"/>
+
+        <!-- Green cube (right) -->
+        <polygon points="290,30 330,50 290,70 250,50" fill="#88ee88" stroke="#115511" stroke-width="1"/>
+        <polygon points="330,50 330,90 290,110 290,70" fill="#339933" stroke="#115511" stroke-width="1"/>
+        <polygon points="250,50 250,90 290,110 290,70" fill="#227722" stroke="#115511" stroke-width="1"/>
+
+        <!-- Red cylinder (bottom-left) -->
+        <rect x="40" y="138" width="72" height="46" fill="url(#ssCyl)"/>
+        <ellipse cx="76" cy="138" rx="36" ry="11" fill="#ffaaaa" stroke="#881111" stroke-width="1"/>
+        <ellipse cx="76" cy="184" rx="36" ry="11" fill="#aa1111" stroke="#881111" stroke-width="1"/>
+
+        <!-- Yellow pyramid (bottom-right) -->
+        <polygon points="310,120 275,190 345,190" fill="#ffee44" stroke="#887700" stroke-width="1"/>
+        <polygon points="310,120 345,190 352,180" fill="#ccaa22" stroke="#887700" stroke-width="1"/>
+
+        <!-- Magenta circle (scattered) -->
+        <circle cx="230" cy="158" r="26" fill="#1a237e" stroke="#000d33" stroke-width="1.5"/>
+
+        <!-- Label bar -->
+        <rect x="0" y="172" width="380" height="38" fill="rgba(0,0,0,0.22)"/>
+        <text x="190" y="196" fill="rgba(255,255,255,0.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Tap the shape that matches the name!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Shapes Splat!</div>
+      <div class="card-desc">Identify 2D and 3D shapes before the clock runs out! Four levels covering basic shapes, rotations, extra shapes, and 3-D solids — with relaxed and timed modes.</div>
+      <div class="card-tags">
+        <span class="tag">Shapes</span>
+        <span class="tag">4 Levels</span>
+        <span class="tag">Timed</span>
+        <span class="tag">Geometry</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="shapes_splat/">▶ Play Now!</a>
     </div>
   </div>
 
