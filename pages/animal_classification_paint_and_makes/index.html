@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Animal Classification Paint &amp; Makes</title>
 <link rel="icon" type="image/png" href="../../assets/images/logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
@@ -1428,5 +1430,15 @@ document.getElementById('color-preview').style.background = selectedColor;
   fitStage();
 })();
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
 </body>
 </html>
