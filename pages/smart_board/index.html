@@ -276,13 +276,16 @@ function resetCtx() {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-window.addEventListener('resize', () => {
+function resizeCanvas() {
+  if (!board.width || !board.height) { initCanvas(); return; }
   const snap = ctx.getImageData(0, 0, board.width, board.height);
   board.width  = wrap.clientWidth;
   board.height = wrap.clientHeight;
   resetCtx();
   ctx.putImageData(snap, 0, 0);
-});
+}
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 200));
 window.addEventListener('load', initCanvas);
 
 // ── PALETTE ───────────────────────────────────────────────────────────────────

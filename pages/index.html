@@ -21,7 +21,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 50px 20px 60px;
+  padding: clamp(24px, 5vh, 50px) clamp(12px, 3vw, 20px) clamp(28px, 6vh, 60px);
 }
 
 /* Dot-grid overlay */
@@ -56,10 +56,10 @@ header { text-align: center; margin-bottom: 52px; }
 /* ── GRID ── */
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 30px;
   width: 100%;
-  max-width: 1060px;
+  max-width: min(1500px, 95vw);
 }
 
 /* ── CARD ── */

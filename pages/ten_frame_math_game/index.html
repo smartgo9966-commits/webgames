@@ -7,19 +7,30 @@
 <link rel="icon" type="image/png" href="../../assets/images/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-body {
-  min-height: 100dvh;
+  font-family: 'Nunito', sans-serif;
   background: #c8e6c9;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 920px;
+  height: 620px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito', sans-serif;
   padding: 12px;
 }
 
@@ -387,17 +398,10 @@ body {
 .oval-btn.teal { background: #00695C; }
 .oval-btn.teal:hover { background: #004D40; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 520px) {
-  .game-main { flex-direction: column; align-items: center; padding: 10px 16px 24px; }
-  .ten-frame { width: 104px; height: 258px; }
-  .choice-btn { width: 72px; height: 72px; font-size: 26px; }
-  .examples-row { gap: 12px; }
-  .mini-frame { width: 90px; height: 38px; }
-}
 </style>
 </head>
 <body>
+<div class="fit-stage"><div class="game-wrap">
 
 <!-- ══════════════════ START SCREEN ══════════════════ -->
 <div id="scr-start" class="screen active">
@@ -491,6 +495,8 @@ body {
     </div>
   </div>
 </div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
 
 <script>
 // ── UTILS ─────────────────────────────────────────────────────
@@ -788,6 +794,25 @@ function replayGame() {
   if (G.mode === 'play') startPlayGame();
   else startSpeedGame(G.speedVar);
 }
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT (matches maze pattern)
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = 920, baseH = 620;
+  function fitStage() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
 </script>
 </body>
 </html>
