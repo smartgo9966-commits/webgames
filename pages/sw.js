@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v1';
+const CACHE = 'games-v2';
 
 const PRECACHE = [
   './',
@@ -26,18 +26,32 @@ const PRECACHE = [
   '../assets/images/icon-512.png',
   '../assets/images/icon-maskable-512.png',
 
-  // Game pages
+  // Game pages — cache BOTH the directory form (what the gallery links use,
+  // e.g. "food_chain_game/") AND the explicit index.html form (what a direct
+  // URL paste resolves to). Different cache keys; same bytes.
+  './alphabet_game/',
   './alphabet_game/index.html',
+  './animal_cell/',
   './animal_cell/index.html',
+  './animal_classification_paint_and_makes/',
   './animal_classification_paint_and_makes/index.html',
+  './area_shape_game/',
   './area_shape_game/index.html',
+  './castle_defense/',
   './castle_defense/index.html',
+  './food_chain_game/',
   './food_chain_game/index.html',
+  './maze/',
   './maze/index.html',
+  './on_time/',
   './on_time/index.html',
+  './pile_of_balls/',
   './pile_of_balls/index.html',
+  './shapes_splat/',
   './shapes_splat/index.html',
+  './smart_board/',
   './smart_board/index.html',
+  './ten_frame_math_game/',
   './ten_frame_math_game/index.html',
 ];
 
@@ -65,20 +79,37 @@ self.addEventListener('fetch', event => {
   // Skip cross-origin (e.g. analytics, third-party CDNs) — let the network handle it.
   if (url.origin !== location.origin) return;
 
-  event.respondWith(
-    caches.match(req).then(hit => {
-      if (hit) return hit;
-      return fetch(req).then(res => {
-        if (res && res.status === 200 && res.type === 'basic') {
-          const copy = res.clone();
-          caches.open(CACHE).then(cache => cache.put(req, copy));
-        }
-        return res;
-      }).catch(() => {
-        // Offline + not cached → fall back to landing page for navigations.
-        if (req.mode === 'navigate') return caches.match('./index.html');
-        return Response.error();
-      });
-    })
-  );
+  event.respondWith((async () => {
+    // 1. Direct cache hit
+    let hit = await caches.match(req);
+    if (hit) return hit;
+
+    // 2. Normalised variants: cache may hold "foo/" while request is "foo/index.html"
+    //    or vice-versa. Try the alternate form before going to network.
+    if (req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html')) {
+      const alt = url.pathname.endsWith('/')
+        ? url.pathname + 'index.html'
+        : url.pathname.replace(/index\.html$/, '');
+      if (alt && alt !== url.pathname) {
+        hit = await caches.match(url.origin + alt);
+        if (hit) return hit;
+      }
+    }
+
+    // 3. Network → cache the response on the way back
+    try {
+      const res = await fetch(req);
+      if (res && res.status === 200 && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE).then(cache => cache.put(req, copy));
+      }
+      return res;
+    } catch (_) {
+      // 4. Offline + not cached → fall back to landing for navigations
+      if (req.mode === 'navigate') {
+        return (await caches.match('./index.html')) || (await caches.match('./'));
+      }
+      return Response.error();
+    }
+  })());
 });
