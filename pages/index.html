@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Games Gallery</title>
-<link rel="icon" type="image/png" href="../assets/images/logo.png">
+<link rel="icon" type="image/jpeg" href="../assets/images/logo-blue.jpeg">
 <link rel="apple-touch-icon" href="../assets/images/icon-192.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#0d1b35">
@@ -49,36 +49,17 @@ body::before {
 .brand-wordmark {
   display: inline-flex;
   align-items: center;
-  gap: clamp(14px, 2vw, 24px);
-}
-.brand-mark {
-  width: clamp(72px, 9vw, 110px);
-  height: clamp(72px, 9vw, 110px);
-  border-radius: clamp(18px, 2vw, 26px);
-  background: linear-gradient(135deg, #5af4e6 0%, #1ee4d6 45%, #18d0a8 100%);
-  color: #0a1d3a;
-  font-family: 'Fredoka One', cursive;
-  font-size: clamp(36px, 5vw, 56px);
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  letter-spacing: -1.5px;
-  box-shadow:
-    0 14px 38px rgba(30, 228, 214, .35),
-    inset 0 2px 0 rgba(255,255,255,.55),
-    inset 0 -3px 0 rgba(15, 184, 154, .35);
-  transform: rotate(-4deg);
 }
 .brand-name {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(42px, 6.5vw, 76px);
+  font-size: clamp(52px, 8.5vw, 104px);
   line-height: 1;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   background: linear-gradient(90deg, #5af4e6 0%, #1ee4d6 40%, #18d0a8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 6px 22px rgba(30, 228, 214, .3));
+  filter: drop-shadow(0 6px 22px rgba(30, 228, 214, .35));
 }
 .brand-name .accent {
   background: linear-gradient(90deg, #18d0a8 0%, #0fb89a 100%);
@@ -239,7 +220,6 @@ footer {
 
 <header class="brand-header">
   <div class="brand-wordmark" aria-label="Smart Go">
-    <div class="brand-mark" aria-hidden="true">SG</div>
     <div class="brand-name">SMART <span class="accent">GO</span></div>
   </div>
   <p class="page-sub">Educational games for curious minds</p>
