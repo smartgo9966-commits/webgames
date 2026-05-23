@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v3';
+const CACHE = 'games-v4';
 
 const PRECACHE = [
   './',
@@ -22,8 +22,6 @@ const PRECACHE = [
 
   // Icons + favicon
   '../assets/images/logo.png',
-  '../assets/images/logo-blue.jpeg',
-  '../assets/images/logo-white.png',
   '../assets/images/icon-192.png',
   '../assets/images/icon-512.png',
   '../assets/images/icon-maskable-512.png',

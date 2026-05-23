@@ -44,14 +44,47 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
-.brand-logo {
-  width: clamp(220px, 32vw, 420px);
-  height: auto;
-  border-radius: 18px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.45);
-  display: block;
+.brand-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(14px, 2vw, 24px);
+}
+.brand-mark {
+  width: clamp(72px, 9vw, 110px);
+  height: clamp(72px, 9vw, 110px);
+  border-radius: clamp(18px, 2vw, 26px);
+  background: linear-gradient(135deg, #5af4e6 0%, #1ee4d6 45%, #18d0a8 100%);
+  color: #0a1d3a;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  letter-spacing: -1.5px;
+  box-shadow:
+    0 14px 38px rgba(30, 228, 214, .35),
+    inset 0 2px 0 rgba(255,255,255,.55),
+    inset 0 -3px 0 rgba(15, 184, 154, .35);
+  transform: rotate(-4deg);
+}
+.brand-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(42px, 6.5vw, 76px);
+  line-height: 1;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6 0%, #1ee4d6 40%, #18d0a8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 22px rgba(30, 228, 214, .3));
+}
+.brand-name .accent {
+  background: linear-gradient(90deg, #18d0a8 0%, #0fb89a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .page-sub {
@@ -205,7 +238,10 @@ footer {
 <body>
 
 <header class="brand-header">
-  <img src="../assets/images/logo-blue.jpeg" alt="Smart Go" class="brand-logo">
+  <div class="brand-wordmark" aria-label="Smart Go">
+    <div class="brand-mark" aria-hidden="true">SG</div>
+    <div class="brand-name">SMART <span class="accent">GO</span></div>
+  </div>
   <p class="page-sub">Educational games for curious minds</p>
 </header>
 
