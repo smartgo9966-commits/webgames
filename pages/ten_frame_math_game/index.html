@@ -401,9 +401,24 @@ html, body {
 .oval-btn.teal { background: #00695C; }
 .oval-btn.teal:hover { background: #004D40; }
 
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: clamp(56px, 7vw, 92px);
+  z-index: 9999;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease;
+  line-height: 0;
+}
+.sg-badge:hover { transform: scale(1.06); box-shadow: 0 6px 22px rgba(0,0,0,.5); }
+.sg-badge img { width: 100%; height: auto; display: block; }
 </style>
 </head>
 <body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><img src="../../assets/images/logo-white.png" alt="Smart Go"></a>
 <div class="fit-stage"><div class="game-wrap">
 
 <!-- ══════════════════ START SCREEN ══════════════════ -->

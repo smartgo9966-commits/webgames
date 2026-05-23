@@ -38,15 +38,20 @@ body::before {
 }
 
 /* ── HEADER ── */
-header { text-align: center; margin-bottom: 52px; }
-
-.page-title {
-  font-family: 'Fredoka One', cursive;
-  font-size: clamp(36px, 6vw, 64px);
-  color: white;
-  letter-spacing: 1px;
-  text-shadow: 0 4px 24px rgba(0,0,0,.5);
-  margin-bottom: 10px;
+.brand-header {
+  text-align: center;
+  margin-bottom: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.brand-logo {
+  width: clamp(220px, 32vw, 420px);
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  display: block;
 }
 
 .page-sub {
@@ -199,8 +204,8 @@ footer {
 </head>
 <body>
 
-<header>
-  <h1 class="page-title">Games Gallery</h1>
+<header class="brand-header">
+  <img src="../assets/images/logo-blue.jpeg" alt="Smart Go" class="brand-logo">
   <p class="page-sub">Educational games for curious minds</p>
 </header>
 
