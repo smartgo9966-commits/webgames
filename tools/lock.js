@@ -56,7 +56,7 @@ function buildLoader(depth, params) {
     '<link rel="apple-touch-icon" href="' + up + 'assets/images/icon-192.png">',
     '<link rel="manifest" href="' + sib + 'manifest.webmanifest">',
     '<meta name="theme-color" content="#0d1b35">',
-    '<script src="' + sib + '_lib/lock.js"></' + 'script>',
+    '<script src="' + sib + 'lib/lock.js"></' + 'script>',
     '</head>',
     '<body>',
     '<script>LOCK.boot(' + JSON.stringify(params) + ');</' + 'script>',
@@ -68,7 +68,7 @@ function buildLoader(depth, params) {
 
 function findIndexes(dir, depth, out) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith('_')) continue;
+    if (entry.name === 'lib') continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       findIndexes(full, depth + 1, out);

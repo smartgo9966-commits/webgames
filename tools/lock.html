@@ -143,7 +143,7 @@ function buildLoader(depth, params) {
     '<link rel="apple-touch-icon" href="' + up + 'assets/images/icon-192.png">',
     '<link rel="manifest" href="' + sib + 'manifest.webmanifest">',
     '<meta name="theme-color" content="#0d1b35">',
-    '<script src="' + sib + '_lib/lock.js"><\/script>',
+    '<script src="' + sib + 'lib/lock.js"><\/script>',
     '</head>',
     '<body>',
     '<script>LOCK.boot(' + JSON.stringify(params) + ');<\/script>',
@@ -172,7 +172,7 @@ async function writeFile(parent, name, content) {
 async function walkDirHandle(handle, path, results) {
   for await (const entry of handle.values()) {
     const p = path ? path + '/' + entry.name : entry.name;
-    if (entry.kind === 'directory' && !entry.name.startsWith('_') && entry.name !== 'tools') {
+    if (entry.kind === 'directory' && entry.name !== 'lib' && entry.name !== 'tools') {
       await walkDirHandle(entry, p, results);
     } else if (entry.kind === 'file' && entry.name === 'index.html') {
       results.push({ kind: 'html', handle: entry, parent: handle, path: p, depth: p.split('/').length });

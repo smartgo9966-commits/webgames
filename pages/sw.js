@@ -3,13 +3,13 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v7';
+const CACHE = 'games-v8';
 
 const PRECACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './_lib/lock.js',
+  './lib/lock.js',
 
   // Fonts
   '../assets/fonts/fonts.css',
