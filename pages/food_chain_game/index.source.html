@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Chain Game</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Nunito', sans-serif;
+  background: #dce8f5;
+  width: 100vw; height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage {
+  position: fixed; inset: 0;
+  overflow: hidden;
+}
+
+#game-frame {
+  width: 960px;
+  height: 620px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: white;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+  transform-origin: 0 0;
+}
+
+.screen {
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.screen.active { display: flex; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── LOADING ── */
+#screen-loading { background: #dce8f5; gap: 0; }
+.loading-card {
+  background: white; border-radius: 20px;
+  padding: 40px 60px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+.loading-spinner {
+  width: 60px; height: 60px;
+  border: 6px solid #E3F2FD;
+  border-top-color: #1565C0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-family: 'Fredoka One', cursive; font-size: 22px; color: #1565C0; }
+.prog-track { width: 240px; height: 14px; background: #E3F2FD; border-radius: 7px; overflow: hidden; }
+.prog-fill { height: 100%; background: #1565C0; border-radius: 7px; width: 0%; transition: width .25s ease; }
+#loading-label { font-size: 14px; color: #999; font-weight: 700; }
+
+/* ── START ── */
+#screen-start { background: #dce8f5; gap: 18px; padding: 30px; }
+.start-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 5vw, 46px);
+  color: #1565C0; text-align: center;
+}
+.start-subtitle { font-size: 17px; color: #555; text-align: center; }
+.start-card {
+  background: white; border-radius: 16px;
+  padding: 20px 32px; max-width: 500px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center;
+}
+.start-card strong { font-size: 17px; color: #333; display: block; margin-bottom: 8px; }
+.start-card p { font-size: 15px; color: #555; line-height: 1.5; }
+.start-card .hint { font-size: 13px; color: #999; margin-top: 8px; font-style: italic; }
+.chain-preview {
+  font-size: 14px; color: #777;
+  background: rgba(255,255,255,0.75); border-radius: 10px; padding: 8px 18px;
+}
+.play-btn {
+  font-family: 'Fredoka One', cursive; font-size: 22px;
+  background: #1565C0; color: white;
+  border: none; cursor: pointer;
+  padding: 13px 42px; border-radius: 50px;
+  box-shadow: 0 4px 18px rgba(21,101,192,0.4);
+  transition: transform .15s, box-shadow .15s;
+}
+.play-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 24px rgba(21,101,192,0.5); }
+
+/* ── GAME ── */
+#screen-game { justify-content: flex-start; padding: 0; gap: 0; background: white; }
+
+.level-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 22px; color: white; flex-shrink: 0;
+  transition: background 0.4s ease;
+}
+.level-info { display: flex; flex-direction: column; gap: 1px; }
+.level-num { font-size: 11px; opacity: 0.8; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+.level-name { font-family: 'Fredoka One', cursive; font-size: 22px; }
+.mistake-badge {
+  background: rgba(255,255,255,0.2); border-radius: 20px;
+  padding: 5px 16px; font-size: 15px; font-weight: 700; color: white;
+}
+.mistake-badge .m-count { color: #FFD700; font-size: 20px; margin-left: 4px; }
+
+.game-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-evenly;
+  padding: 16px 20px;
+}
+
+.section-label {
+  font-size: 11px; font-weight: 800; color: #BDBDBD;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.chain-wrap { display: flex; flex-direction: column; align-items: center; }
+.cards-wrap  { display: flex; flex-direction: column; align-items: center; }
+
+.chain-area { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.chain-arrow-lbl { display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; }
+.chain-arrow-lbl svg { filter: drop-shadow(0 0 5px rgba(66,165,245,0.55)); }
+
+.chain-cycle-wrap   { display: flex; flex-direction: column; gap: 6px; }
+.chain-cycle-top    { display: flex; align-items: center; gap: 8px; }
+.chain-cycle-bottom { display: flex; align-items: center; gap: 8px; padding-left: 56px; }
+.cycle-hint { font-size: 12px; color: #aaa; font-style: italic; align-self: center; }
+
+/* Slots */
+.slot {
+  width: 112px; height: 112px;
+  border: 2.5px dashed #BDBDBD;
+  border-radius: 14px;
+  background: #FAFAFA;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color .2s, background .2s, transform .15s;
+  position: relative; overflow: hidden;
+}
+.slot.dragover  { border-color: #1976D2; border-style: solid; background: #E3F2FD; transform: scale(1.06); }
+.slot.filled    { border-style: solid; border-color: #4CAF50; background: white; }
+.slot.anim-pop        { animation: kPop .4s ease; }
+.slot.anim-shake      { animation: kShake .5s ease; }
+.slot.anim-wrongflash { animation: kWrong .5s ease; }
+@keyframes kPop   { 0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)} }
+@keyframes kShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)rotate(-3deg)} 40%{transform:translateX(9px)rotate(3deg)} 60%{transform:translateX(-6px)rotate(-2deg)} 80%{transform:translateX(6px)rotate(2deg)} }
+@keyframes kWrong { 0%,100%{background:#FAFAFA} 30%{background:rgba(244,67,54,0.18)} }
+
+.placed-card {
+  width:100%; height:100%; border-radius:12px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; pointer-events:none;
+}
+.placed-card svg { width:70%; height:70%; }
+.placed-card .lbl { font-size:11px; font-weight:800; color:#555; }
+
+/* Cards */
+.cards-area { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+.card {
+  width: 108px; height: 108px; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: grab;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 2px solid #E0E0E0;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+  user-select: none; position: relative; overflow: hidden;
+  touch-action: none;
+}
+.card svg { width: 68%; height: 68%; pointer-events: none; }
+.card .c-lbl { font-size: 12px; font-weight: 800; color: #555; pointer-events: none; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); border-color: #90CAF9; }
+.card.dragging { opacity: .3; transform: scale(.9) rotate(-3deg); cursor: grabbing; }
+
+/* ── WIN ── */
+#screen-win { background: white; gap: 16px; padding: 30px; }
+.win-banner {
+  display: flex; align-items: center; gap: 14px;
+  background: #E8F5E9; border-radius: 16px; padding: 14px 30px;
+}
+.win-star { font-size: 36px; }
+.win-level-name { font-family: 'Fredoka One', cursive; font-size: 26px; color: #2E7D32; }
+.win-chain-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.win-animal { width: 76px; height: 76px; animation: celebBounce .7s ease-in-out infinite alternate; }
+.win-animal:nth-child(3) { animation-delay: .1s; }
+.win-animal:nth-child(5) { animation-delay: .2s; }
+.win-animal:nth-child(7) { animation-delay: .3s; }
+.win-animal:nth-child(9) { animation-delay: .4s; }
+.win-animal svg { width: 100%; height: 100%; }
+.win-arrow { display: flex; align-items: center; filter: drop-shadow(0 0 4px rgba(144,202,249,0.6)); }
+.win-sub { font-size: 17px; color: #777; text-align: center; }
+@keyframes celebBounce { from{transform:translateY(0)scale(1)} to{transform:translateY(-16px)scale(1.1)} }
+
+.next-btn {
+  font-family: 'Fredoka One', cursive; font-size: 20px;
+  background: #1565C0; color: white;
+  border: none; cursor: pointer;
+  padding: 12px 38px; border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(21,101,192,0.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.next-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 6px 22px rgba(21,101,192,0.4); }
+
+/* ── FINISH ── */
+#screen-finish { background: white; gap: 12px; padding: 28px; }
+.finish-trophy { font-size: 52px; }
+.finish-title { font-family: 'Fredoka One', cursive; font-size: 26px; color: #1565C0; text-align: center; }
+.all-chains-grid { display: flex; flex-direction: column; gap: 6px; }
+.chain-row-summary {
+  display: flex; align-items: center; gap: 5px;
+  background: #F5F5F5; border-radius: 10px; padding: 6px 12px;
+}
+.chain-lbl { font-size: 11px; font-weight: 800; color: #757575; min-width: 92px; }
+.chain-row-summary .se { width: 30px; height: 30px; flex-shrink: 0; }
+.chain-row-summary .se svg { width: 100%; height: 100%; }
+.chain-row-summary .sa { font-size: 14px; color: #90CAF9; font-weight: 900; }
+.finish-score { font-size: 19px; color: #555; font-weight: 700; }
+.finish-score span { color: #F44336; font-size: 26px; font-weight: 800; }
+.finish-rating { font-family: 'Fredoka One', cursive; font-size: 20px; color: #388E3C; }
+.replay-btn {
+  font-family: 'Fredoka One', cursive; font-size: 20px;
+  background: #388E3C; color: white;
+  border: none; cursor: pointer;
+  padding: 12px 38px; border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(56,142,60,0.35);
+  transition: transform .15s;
+}
+.replay-btn:hover { transform: scale(1.05) translateY(-2px); }
+
+.particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; }
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="fit-stage">
+<div id="game-frame">
+
+  <!-- LOADING -->
+  <div id="screen-loading" class="screen active">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Food Chain Game</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+      <div id="loading-label">0%</div>
+    </div>
+  </div>
+
+  <!-- START -->
+  <div id="screen-start" class="screen">
+    <h1 class="start-title">🌿 Food Chain Game</h1>
+    <p class="start-subtitle">Can you put the food chain in the right order?</p>
+    <div class="start-card">
+      <strong>How to Play</strong>
+      <p>Drag the animals into the correct slots to build the food chain — from the producer to the top predator!</p>
+      <p class="hint">Wrong placements won't stick. Try for zero mistakes!</p>
+    </div>
+    <div class="chain-preview">5 levels: Forest · Grassland · Ocean · Mixed · Full Cycle</div>
+    <button class="play-btn" onclick="startGame()">▶ Play Now!</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game" class="screen">
+    <div class="level-header" id="level-header">
+      <div class="level-info">
+        <span class="level-num" id="level-num">LEVEL 1 OF 5</span>
+        <span class="level-name" id="level-name">Simple Chain</span>
+      </div>
+      <div class="mistake-badge">Mistakes:<span class="m-count" id="mistake-count">0</span></div>
+    </div>
+    <div class="game-body">
+      <div class="chain-wrap">
+        <div class="section-label">Build the food chain</div>
+        <div id="chain-area" class="chain-area"></div>
+      </div>
+      <div class="cards-wrap">
+        <div class="section-label">Drag these animals</div>
+        <div id="cards-area" class="cards-area"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div id="screen-win" class="screen">
+    <div class="win-banner">
+      <span class="win-star">⭐</span>
+      <span class="win-level-name" id="win-level-name">Level Complete!</span>
+    </div>
+    <div class="win-chain-row" id="win-chain-row"></div>
+    <p class="win-sub" id="win-sub"></p>
+    <button class="next-btn" id="next-btn" onclick="goNext()">Next Level →</button>
+  </div>
+
+  <!-- FINISH -->
+  <div id="screen-finish" class="screen">
+    <div class="finish-trophy">🏆</div>
+    <h2 class="finish-title" id="finish-title">All 5 Chains Complete!</h2>
+    <div class="all-chains-grid" id="all-chains-grid"></div>
+    <div class="finish-score">Total mistakes: <span id="final-mistakes">0</span></div>
+    <div class="finish-rating" id="finish-rating"></div>
+    <button class="replay-btn" onclick="resetGame()">🔄 Play Again</button>
+  </div>
+
+</div>
+</div>
+<script>
+/* ═══════════════════════════════════════════
+   SVG ANIMAL ILLUSTRATIONS
+═══════════════════════════════════════════ */
+const SVGS = {
+
+flower: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <line x1="50" y1="95" x2="50" y2="56" stroke="#2d8a4e" stroke-width="5" stroke-linecap="round"/>
+  <path d="M50 78 Q33 70 27 57 Q40 63 50 72" fill="#3aad5e" stroke="#2a7a3e" stroke-width="2.5"/>
+  <path d="M50 70 Q67 62 73 49 Q60 56 50 65" fill="#3aad5e" stroke="#2a7a3e" stroke-width="2.5"/>
+  <ellipse cx="50" cy="34" rx="11" ry="17" fill="#c860a8" stroke="#8a3070" stroke-width="3"/>
+  <ellipse cx="35" cy="42" rx="11" ry="15" fill="#d870b8" stroke="#8a3070" stroke-width="3" transform="rotate(-40,35,42)"/>
+  <ellipse cx="65" cy="42" rx="11" ry="15" fill="#d870b8" stroke="#8a3070" stroke-width="3" transform="rotate(40,65,42)"/>
+  <circle cx="50" cy="44" r="11" fill="#f5d040" stroke="#c8a020" stroke-width="2.5"/>
+  <circle cx="46" cy="41" r="3" fill="#f8e060" stroke="none" opacity=".6"/>
+</svg>`,
+
+caterpillar: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="18" cy="66" r="13" fill="#6dbe4a" stroke="#3a8a20" stroke-width="3.5"/>
+  <circle cx="36" cy="63" r="13" fill="#7ed456" stroke="#3a8a20" stroke-width="3.5"/>
+  <circle cx="54" cy="63" r="13" fill="#6dbe4a" stroke="#3a8a20" stroke-width="3.5"/>
+  <circle cx="74" cy="58" r="16" fill="#7ed456" stroke="#3a8a20" stroke-width="3.5"/>
+  <circle cx="74" cy="58" r="9" fill="none" stroke="#3a8a20" stroke-width="1.5" opacity=".4"/>
+  <circle cx="68" cy="52" r="6" fill="white" stroke="#3a8a20" stroke-width="2.5"/>
+  <circle cx="67" cy="52" r="3.5" fill="#222"/>
+  <circle cx="66" cy="51" r="1.2" fill="white"/>
+  <path d="M 67 62 Q 74 68 80 63" stroke="#3a8a20" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <line x1="75" y1="43" x2="70" y2="30" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="70" cy="28" r="3.5" fill="#3a8a20"/>
+  <line x1="83" y1="44" x2="90" y2="31" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="91" cy="29" r="3.5" fill="#3a8a20"/>
+  <line x1="18" y1="77" x2="14" y2="90" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <line x1="26" y1="77" x2="30" y2="90" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <line x1="36" y1="74" x2="33" y2="88" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <line x1="44" y1="74" x2="48" y2="88" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="74" x2="51" y2="88" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+  <line x1="62" y1="74" x2="66" y2="88" stroke="#3a8a20" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+
+bird: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M73 57 L92 50 M74 62 L93 63 M73 67 L91 72" stroke="#3a6ba8" stroke-width="5.5" stroke-linecap="round"/>
+  <ellipse cx="50" cy="62" rx="27" ry="22" fill="#4a7fc1" stroke="#1a3a78" stroke-width="3.5"/>
+  <ellipse cx="55" cy="70" rx="17" ry="13" fill="#f0b888"/>
+  <path d="M30 54 Q44 42 56 49 Q46 59 32 61 Z" fill="#3a6ba8" stroke="#1a3a78" stroke-width="2.5"/>
+  <circle cx="36" cy="40" r="19" fill="#4a7fc1" stroke="#1a3a78" stroke-width="3.5"/>
+  <circle cx="29" cy="37" r="6" fill="white" stroke="#1a3a78" stroke-width="2.5"/>
+  <circle cx="28" cy="37" r="3.8" fill="#111"/>
+  <circle cx="27" cy="36" r="1.4" fill="white"/>
+  <path d="M17 41 L8 38 L18 46 Z" fill="#b89838" stroke="#7a6018" stroke-width="2.5"/>
+  <line x1="46" y1="82" x2="42" y2="96" stroke="#222" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="57" y1="83" x2="54" y2="96" stroke="#222" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="42" y1="96" x2="34" y2="99" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <line x1="42" y1="96" x2="40" y2="100" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <line x1="42" y1="96" x2="49" y2="100" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="96" x2="46" y2="99" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="96" x2="52" y2="100" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="96" x2="61" y2="100" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+
+acorn: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="50" cy="68" rx="27" ry="28" fill="#c8841e" stroke="#7a4808" stroke-width="3.5"/>
+  <ellipse cx="44" cy="62" rx="9" ry="14" fill="rgba(255,255,255,.18)" stroke="none"/>
+  <path d="M23 52 Q50 34 77 52 Q70 63 50 63 Q30 63 23 52 Z" fill="#7a4808" stroke="#4a2805" stroke-width="3.5"/>
+  <path d="M30 55 L37 60 M42 52 L46 61 M52 51 L52 62 M62 53 L58 61 M70 55 L63 59" stroke="#5a3408" stroke-width="2" opacity=".7"/>
+  <path d="M50 36 Q56 25 52 16" stroke="#5a3408" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+mouse: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M74 74 Q90 68 94 53 Q97 40 88 36" stroke="#b08868" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="50" cy="70" rx="32" ry="22" fill="#c8a070" stroke="#8a6040" stroke-width="3.5"/>
+  <circle cx="22" cy="34" r="14" fill="#c8a070" stroke="#8a6040" stroke-width="3.5"/>
+  <circle cx="22" cy="34" r="9" fill="#e8a0a0"/>
+  <circle cx="42" cy="31" r="14" fill="#c8a070" stroke="#8a6040" stroke-width="3.5"/>
+  <circle cx="42" cy="31" r="9" fill="#e8a0a0"/>
+  <ellipse cx="30" cy="54" rx="23" ry="21" fill="#c8a070" stroke="#8a6040" stroke-width="3.5"/>
+  <circle cx="23" cy="50" r="5" fill="#c82020" stroke="#8a1010" stroke-width="2"/>
+  <circle cx="22" cy="49" r="2" fill="white"/>
+  <ellipse cx="10" cy="57" rx="5" ry="3.5" fill="#e06080" stroke="#a03050" stroke-width="2"/>
+</svg>`,
+
+snake: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M52 92 Q20 88 17 66 Q14 44 34 38 Q56 32 66 50 Q76 68 58 78 Q40 88 30 76 Q20 64 28 53 Q36 43 52 43" stroke="#1a1a1a" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M52 92 Q20 88 17 66 Q14 44 34 38 Q56 32 66 50 Q76 68 58 78 Q40 88 30 76 Q20 64 28 53 Q36 43 52 43" stroke="#c8b420" stroke-width="17" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M52 92 Q20 88 17 66 Q14 44 34 38 Q56 32 66 50 Q76 68 58 78 Q40 88 30 76 Q20 64 28 53 Q36 43 52 43" stroke="#a09010" stroke-width="17" fill="none" stroke-linecap="round" stroke-dasharray="8 8"/>
+  <ellipse cx="57" cy="37" rx="14" ry="9" fill="#c8b420" stroke="#6a7010" stroke-width="3" transform="rotate(-20,57,37)"/>
+  <circle cx="62" cy="33" r="4" fill="#200000" stroke="#6a7010" stroke-width="2"/>
+  <circle cx="63" cy="32" r="1.3" fill="rgba(255,255,255,.6)"/>
+  <path d="M66 40 L77 37 M77 37 L82 33 M77 37 L82 41" stroke="#e03030" stroke-width="2.5" stroke-linecap="round"/>
+</svg>`,
+
+hawk: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="50" cy="60" rx="23" ry="18" fill="#a06030" stroke="#5a3010" stroke-width="3.5"/>
+  <ellipse cx="54" cy="66" rx="15" ry="12" fill="#d4a070"/>
+  <circle cx="47" cy="63" r="3.5" fill="#a06030" opacity=".55"/>
+  <circle cx="55" cy="61" r="3" fill="#a06030" opacity=".55"/>
+  <circle cx="53" cy="70" r="2.5" fill="#a06030" opacity=".55"/>
+  <path d="M28 54 Q23 36 33 26 Q48 46 50 60 Z" fill="#8a4820" stroke="#5a3010" stroke-width="3"/>
+  <path d="M72 54 Q77 36 67 26 Q52 46 50 60 Z" fill="#8a4820" stroke="#5a3010" stroke-width="3"/>
+  <circle cx="50" cy="38" r="17" fill="#a06030" stroke="#5a3010" stroke-width="3.5"/>
+  <path d="M34 39 Q26 37 24 42 Q28 48 35 46 Z" fill="#c8b010" stroke="#7a6808" stroke-width="2.5"/>
+  <circle cx="40" cy="36" r="6" fill="#f0d030" stroke="#5a3010" stroke-width="2"/>
+  <circle cx="40" cy="36" r="3.5" fill="#111"/>
+  <circle cx="39" cy="35" r="1.2" fill="white"/>
+  <line x1="43" y1="76" x2="39" y2="90" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="57" y1="76" x2="54" y2="90" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="39" y1="90" x2="31" y2="93" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+  <line x1="39" y1="90" x2="37" y2="97" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+  <line x1="39" y1="90" x2="45" y2="95" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="90" x2="46" y2="93" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="90" x2="52" y2="97" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="90" x2="60" y2="95" stroke="#5a3010" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+
+algae: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M50 95 Q46 78 52 62 Q48 46 54 30 Q50 15 50 8" stroke="#1e8a40" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M48 72 Q33 64 26 52 Q38 57 48 66" fill="#2aad50" stroke="#1e8a40" stroke-width="3"/>
+  <path d="M51 54 Q36 44 28 30 Q42 40 51 50" fill="#2aad50" stroke="#1e8a40" stroke-width="3"/>
+  <path d="M52 77 Q67 68 74 56 Q63 62 52 72" fill="#2aad50" stroke="#1e8a40" stroke-width="3"/>
+  <path d="M54 50 Q69 40 75 26 Q62 36 53 46" fill="#2aad50" stroke="#1e8a40" stroke-width="3"/>
+  <path d="M50 95 Q40 98 34 100 M50 95 Q56 99 62 100 M50 95 Q49 99 47 100" stroke="#1e8a40" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+small_fish: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M77 50 L97 34 L91 50 L97 66 Z" fill="#20b0b0" stroke="#108080" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="48" cy="50" rx="32" ry="19" fill="#30c8c8" stroke="#108080" stroke-width="3.5"/>
+  <ellipse cx="50" cy="57" rx="23" ry="11" fill="#60e0e0" stroke="none"/>
+  <path d="M33 31 Q48 23 62 32 L59 38 Q48 31 33 38 Z" fill="#20b0b0" stroke="#108080" stroke-width="2.5"/>
+  <path d="M46 56 Q38 64 30 61 Q35 52 46 52" fill="#20b0b0" stroke="#108080" stroke-width="2.5"/>
+  <circle cx="26" cy="47" r="8" fill="white" stroke="#108080" stroke-width="3"/>
+  <circle cx="25" cy="47" r="5" fill="#222"/>
+  <circle cx="24" cy="46" r="1.8" fill="white"/>
+  <path d="M16 52 Q20 57 24 53" stroke="#108080" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+big_fish: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M74 50 L96 31 L89 50 L96 69 Z" fill="#e07820" stroke="#8a4010" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="44" cy="50" rx="34" ry="24" fill="#e88020" stroke="#8a4010" stroke-width="3.5"/>
+  <ellipse cx="32" cy="52" rx="14" ry="10" fill="#f8a040" stroke="none" opacity=".6"/>
+  <path d="M52 27 Q52 50 52 73 Q47 50 52 27" fill="white" stroke="#ddd" stroke-width="1.5" opacity=".8"/>
+  <path d="M30 34 Q33 50 30 66 Q25 50 30 34" fill="white" stroke="#ddd" stroke-width="1.5" opacity=".7"/>
+  <path d="M34 27 Q50 16 66 27 L63 35 Q50 24 34 35 Z" fill="#e07020" stroke="#8a4010" stroke-width="2.5"/>
+  <circle cx="18" cy="45" r="9" fill="white" stroke="#8a4010" stroke-width="3"/>
+  <circle cx="17" cy="45" r="5.5" fill="#111"/>
+  <circle cx="16" cy="44" r="2" fill="white"/>
+  <path d="M8 52 Q12 58 16 54" stroke="#8a4010" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+dolphin: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 58 Q30 36 64 46 Q82 51 92 40 Q86 64 70 61 Q50 66 20 74 Z" fill="#6090c0" stroke="#304870" stroke-width="3.5"/>
+  <path d="M12 61 Q36 54 67 58 Q78 60 85 55 Q78 67 62 64 Q36 67 20 70 Z" fill="#d8e8f8" stroke="none"/>
+  <path d="M56 45 Q66 22 74 30 Q70 41 61 45 Z" fill="#5080b0" stroke="#304870" stroke-width="3"/>
+  <path d="M30 64 Q20 76 16 82 Q27 73 37 67 Z" fill="#5080b0" stroke="#304870" stroke-width="2.5"/>
+  <path d="M90 41 Q100 32 100 24 Q97 35 93 41 Z" fill="#5080b0" stroke="#304870" stroke-width="2.5"/>
+  <path d="M90 41 Q100 52 100 62 Q97 53 93 47 Z" fill="#5080b0" stroke="#304870" stroke-width="2.5"/>
+  <path d="M10 58 Q2 52 0 55 Q2 60 10 61" fill="#6090c0" stroke="#304870" stroke-width="2.5"/>
+  <circle cx="16" cy="53" r="5" fill="#111" stroke="#304870" stroke-width="2"/>
+  <circle cx="15" cy="52" r="1.8" fill="white"/>
+  <path d="M5 58 Q9 62 13 58" stroke="#304870" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+red_flower: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <line x1="50" y1="95" x2="50" y2="56" stroke="#2d8a4e" stroke-width="5" stroke-linecap="round"/>
+  <path d="M50 76 Q32 68 25 54 Q39 60 50 70" fill="#3aad5e" stroke="#2a7a3e" stroke-width="2.5"/>
+  <path d="M50 68 Q69 59 75 45 Q61 53 50 62" fill="#3aad5e" stroke="#2a7a3e" stroke-width="2.5"/>
+  <ellipse cx="50" cy="33" rx="11" ry="17" fill="#e02828" stroke="#901010" stroke-width="3"/>
+  <ellipse cx="34" cy="41" rx="11" ry="15" fill="#d82020" stroke="#901010" stroke-width="3" transform="rotate(-42,34,41)"/>
+  <ellipse cx="66" cy="41" rx="11" ry="15" fill="#d82020" stroke="#901010" stroke-width="3" transform="rotate(42,66,41)"/>
+  <ellipse cx="30" cy="53" rx="10" ry="13" fill="#c81818" stroke="#901010" stroke-width="3" transform="rotate(-70,30,53)"/>
+  <ellipse cx="70" cy="53" rx="10" ry="13" fill="#c81818" stroke="#901010" stroke-width="3" transform="rotate(70,70,53)"/>
+  <circle cx="50" cy="44" r="12" fill="#e04040" stroke="#901010" stroke-width="2.5"/>
+  <circle cx="50" cy="44" r="6" fill="#c02020" stroke="#901010" stroke-width="2"/>
+</svg>`,
+
+insect: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 54 Q62 44 84 52 Q86 63 64 70 Q42 72 38 62 Z" fill="#8a6020" stroke="#5a3800" stroke-width="3.5"/>
+  <line x1="56" y1="44" x2="54" y2="70" stroke="#5a3800" stroke-width="2" opacity=".5"/>
+  <line x1="66" y1="43" x2="64" y2="70" stroke="#5a3800" stroke-width="2" opacity=".5"/>
+  <line x1="76" y1="44" x2="74" y2="69" stroke="#5a3800" stroke-width="2" opacity=".5"/>
+  <ellipse cx="34" cy="53" rx="15" ry="12" fill="#9a7028" stroke="#5a3800" stroke-width="3.5"/>
+  <circle cx="22" cy="50" r="13" fill="#9a7028" stroke="#5a3800" stroke-width="3.5"/>
+  <circle cx="16" cy="46" r="6" fill="#1a0800" stroke="#1a0800" stroke-width="2"/>
+  <circle cx="15" cy="45" r="2" fill="white"/>
+  <path d="M16 40 Q11 27 8 16" stroke="#5a3800" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M24 39 Q26 26 34 16" stroke="#5a3800" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M38 44 Q50 26 72 30 Q68 40 47 46 Z" fill="rgba(200,225,255,.75)" stroke="#5a3800" stroke-width="2"/>
+  <path d="M38 48 Q49 32 70 36 Q66 46 46 50 Z" fill="rgba(200,225,255,.55)" stroke="#5a3800" stroke-width="2"/>
+  <line x1="26" y1="60" x2="18" y2="74" stroke="#5a3800" stroke-width="3" stroke-linecap="round"/>
+  <line x1="34" y1="62" x2="28" y2="77" stroke="#5a3800" stroke-width="3" stroke-linecap="round"/>
+  <path d="M58 66 L50 80 L42 90" stroke="#5a3800" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M70 65 L65 79 L57 90" stroke="#5a3800" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`,
+
+seagull: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M24 46 Q8 30 3 20 Q18 29 30 40 Q38 44 43 50 Z" fill="#c0c8d0" stroke="#8a8888" stroke-width="3"/>
+  <path d="M76 46 Q92 30 97 20 Q82 29 70 40 Q62 44 57 50 Z" fill="#c0c8d0" stroke="#8a8888" stroke-width="3"/>
+  <path d="M3 20 Q0 14 6 11 Q9 18 14 23" fill="#2a2a2a" stroke="none"/>
+  <path d="M97 20 Q100 14 94 11 Q91 18 86 23" fill="#2a2a2a" stroke="none"/>
+  <ellipse cx="50" cy="60" rx="22" ry="16" fill="white" stroke="#c0c0c0" stroke-width="3"/>
+  <circle cx="50" cy="40" r="17" fill="white" stroke="#c0c0c0" stroke-width="3"/>
+  <path d="M34 42 L24 45 L34 48 Z" fill="#e8a020" stroke="#b07010" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="27" cy="45" r="2.5" fill="#e03020"/>
+  <circle cx="41" cy="37" r="5.5" fill="#f0e020" stroke="#8a7010" stroke-width="2"/>
+  <circle cx="40" cy="37" r="3.5" fill="#111"/>
+  <circle cx="39" cy="36" r="1.2" fill="white"/>
+  <path d="M63 66 L77 74 L68 74 Z" fill="#c0c8d0" stroke="#8a8888" stroke-width="2.5"/>
+  <line x1="46" y1="74" x2="43" y2="88" stroke="#e8a020" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="54" y1="74" x2="51" y2="88" stroke="#e8a020" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="43" y1="88" x2="35" y2="91" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+  <line x1="43" y1="88" x2="41" y2="95" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+  <line x1="43" y1="88" x2="50" y2="93" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+  <line x1="51" y1="88" x2="44" y2="91" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+  <line x1="51" y1="88" x2="49" y2="95" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+  <line x1="51" y1="88" x2="58" y2="93" stroke="#e8a020" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+
+plant: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M28 90 Q50 84 72 90 Q68 100 32 100 Z" fill="#8a5828" stroke="#5a3808" stroke-width="2.5"/>
+  <path d="M50 90 Q48 73 50 56 Q52 40 50 22" stroke="#2a8a20" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M50 70 Q28 60 20 42 Q38 54 50 64" fill="#3aad30" stroke="#2a8a20" stroke-width="3"/>
+  <path d="M50 62 Q72 52 80 34 Q62 46 50 56" fill="#3aad30" stroke="#2a8a20" stroke-width="3"/>
+  <path d="M50 30 Q40 19 36 10 Q46 20 50 26" fill="#50c040" stroke="#2a8a20" stroke-width="2.5"/>
+  <path d="M50 30 Q60 19 64 10 Q54 20 50 26" fill="#50c040" stroke="#2a8a20" stroke-width="2.5"/>
+  <path d="M50 90 Q38 95 33 100 M50 90 Q57 96 60 100 M50 90 Q49 97 47 100" stroke="#5a3808" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</svg>`,
+
+grasshopper: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 56 Q62 44 84 52 Q86 64 64 70 Q40 72 36 62 Z" fill="#4a9a20" stroke="#2a6a10" stroke-width="3.5"/>
+  <line x1="55" y1="45" x2="53" y2="71" stroke="#2a6a10" stroke-width="2" opacity=".5"/>
+  <line x1="65" y1="44" x2="63" y2="71" stroke="#2a6a10" stroke-width="2" opacity=".5"/>
+  <line x1="75" y1="45" x2="73" y2="70" stroke="#2a6a10" stroke-width="2" opacity=".5"/>
+  <ellipse cx="33" cy="55" rx="14" ry="12" fill="#5ab030" stroke="#2a6a10" stroke-width="3.5"/>
+  <circle cx="20" cy="50" r="13" fill="#5ab030" stroke="#2a6a10" stroke-width="3.5"/>
+  <ellipse cx="14" cy="46" rx="6" ry="7" fill="#f0e000" stroke="#2a6a10" stroke-width="2.5"/>
+  <ellipse cx="13" cy="46" rx="4" ry="5" fill="#111"/>
+  <circle cx="12" cy="44" r="1.5" fill="white"/>
+  <path d="M12 40 Q8 27 6 16" stroke="#2a6a10" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M22 40 Q24 27 32 16" stroke="#2a6a10" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M36 47 Q56 28 80 32 Q73 42 52 47 Z" fill="rgba(170,240,130,.8)" stroke="#2a6a10" stroke-width="2"/>
+  <line x1="26" y1="64" x2="18" y2="78" stroke="#2a6a10" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="34" y1="65" x2="28" y2="80" stroke="#2a6a10" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M52 66 L60 78 L50 92" stroke="#2a6a10" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M66 63 L74 75 L64 90" stroke="#2a6a10" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`,
+
+lizard: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M72 56 Q88 52 95 44 Q100 36 99 30" stroke="#1a1a1a" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path d="M72 56 Q88 52 95 44 Q100 36 99 30" stroke="#50aa30" stroke-width="11" fill="none" stroke-linecap="round"/>
+  <ellipse cx="52" cy="56" rx="28" ry="16" fill="#50aa30" stroke="#2a6a10" stroke-width="3.5"/>
+  <path d="M34 49 Q52 44 70 49" stroke="#3a8a20" stroke-width="1.5" fill="none" opacity=".5"/>
+  <path d="M32 55 Q52 50 72 55" stroke="#3a8a20" stroke-width="1.5" fill="none" opacity=".5"/>
+  <path d="M34 62 Q52 57 70 62" stroke="#3a8a20" stroke-width="1.5" fill="none" opacity=".5"/>
+  <path d="M18 52 Q16 44 24 39 Q33 36 41 42 Q46 47 44 58 Q38 64 28 62 Z" fill="#50aa30" stroke="#2a6a10" stroke-width="3.5"/>
+  <circle cx="23" cy="46" r="5.5" fill="#f0e000" stroke="#2a6a10" stroke-width="2.5"/>
+  <ellipse cx="23" cy="46" rx="2.2" ry="4.5" fill="#111"/>
+  <circle cx="22.5" cy="44" r="1.2" fill="white"/>
+  <path d="M16 54 L5 51 M5 51 L0 48 M5 51 L0 54" stroke="#e03030" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M37 67 L28 77 L19 82" stroke="#2a6a10" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M19 82 L12 85 M19 82 L17 89 M19 82 L24 87" stroke="#2a6a10" stroke-width="3" stroke-linecap="round"/>
+  <path d="M60 67 L54 78 L46 84" stroke="#2a6a10" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M46 84 L39 87 M46 84 L44 91 M46 84 L51 90" stroke="#2a6a10" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+
+eagle: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="50" cy="64" rx="25" ry="20" fill="#2a1a08" stroke="#111" stroke-width="3.5"/>
+  <path d="M27 58 Q18 38 26 24 Q42 46 50 62 Z" fill="#1a0e04" stroke="#111" stroke-width="3"/>
+  <path d="M73 58 Q82 38 74 24 Q58 46 50 62 Z" fill="#1a0e04" stroke="#111" stroke-width="3"/>
+  <path d="M38 80 Q50 88 62 80 Q56 84 50 91 Q44 84 38 80" fill="white" stroke="#aaa" stroke-width="2.5"/>
+  <circle cx="50" cy="38" r="18" fill="white" stroke="#bbb" stroke-width="3"/>
+  <path d="M32 43 Q23 46 21 52 Q28 54 35 50 Z" fill="#e8c000" stroke="#b08800" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="38" cy="37" r="7" fill="#e8c800" stroke="#8a6800" stroke-width="2.5"/>
+  <circle cx="37" cy="37" r="4" fill="#111"/>
+  <circle cx="36" cy="36" r="1.4" fill="white"/>
+  <path d="M31 31 Q38 27 46 31" stroke="#aaa" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <line x1="43" y1="82" x2="39" y2="96" stroke="#8a6800" stroke-width="4" stroke-linecap="round"/>
+  <line x1="57" y1="82" x2="53" y2="96" stroke="#8a6800" stroke-width="4" stroke-linecap="round"/>
+  <line x1="39" y1="96" x2="30" y2="99" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="39" y1="96" x2="37" y2="100" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="39" y1="96" x2="46" y2="100" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="53" y1="96" x2="44" y2="99" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="53" y1="96" x2="51" y2="100" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="53" y1="96" x2="60" y2="100" stroke="#8a6800" stroke-width="3.5" stroke-linecap="round"/>
+</svg>`,
+
+mushrooms: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="19" y="72" width="9" height="20" rx="3" fill="#f5f0e8" stroke="#a08060" stroke-width="2.5"/>
+  <path d="M10 74 Q24 52 38 73 Q30 69 18 71 Z" fill="#c02818" stroke="#8a1008" stroke-width="3"/>
+  <circle cx="20" cy="63" r="3.5" fill="white" stroke="#c02818" stroke-width="1.5"/>
+  <circle cx="30" cy="60" r="3" fill="white" stroke="#c02818" stroke-width="1.5"/>
+  <circle cx="14" cy="68" r="2.5" fill="white" stroke="#c02818" stroke-width="1.5"/>
+  <rect x="65" y="68" width="10" height="24" rx="3" fill="#f5f0e8" stroke="#a08060" stroke-width="2.5"/>
+  <path d="M53 70 Q70 47 87 68 Q78 64 64 66 Z" fill="#d03020" stroke="#8a1008" stroke-width="3"/>
+  <circle cx="66" cy="57" r="4" fill="white" stroke="#d03020" stroke-width="1.5"/>
+  <circle cx="77" cy="55" r="3.5" fill="white" stroke="#d03020" stroke-width="1.5"/>
+  <circle cx="58" cy="62" r="3" fill="white" stroke="#d03020" stroke-width="1.5"/>
+  <rect x="43" y="64" width="14" height="28" rx="4" fill="#f5f0e8" stroke="#a08060" stroke-width="3"/>
+  <path d="M26 68 Q50 42 74 66 Q63 61 50 63 Q37 63 26 68 Z" fill="#e84030" stroke="#8a1008" stroke-width="3.5"/>
+  <circle cx="44" cy="53" r="5.5" fill="white" stroke="#e84030" stroke-width="2"/>
+  <circle cx="56" cy="51" r="5" fill="white" stroke="#e84030" stroke-width="2"/>
+  <circle cx="34" cy="60" r="4" fill="white" stroke="#e84030" stroke-width="2"/>
+  <circle cx="66" cy="59" r="3.5" fill="white" stroke="#e84030" stroke-width="2"/>
+</svg>`
+
+};
+
+/* ═══════════════════════════════════════════
+   LEVEL DATA
+═══════════════════════════════════════════ */
+const LEVELS = [
+  {
+    id: 1, name: "Simple Chain", icon: '🌿',
+    headerBg: '#2E7D32',
+    chain: [
+      { id:'flower',      label:'Flower',      svgId:'flower' },
+      { id:'caterpillar', label:'Caterpillar', svgId:'caterpillar' },
+      { id:'bird',        label:'Bird',        svgId:'bird' },
+    ]
+  },
+  {
+    id: 2, name: "Bigger Chain", icon: '🌾',
+    headerBg: '#BF360C',
+    chain: [
+      { id:'acorns', label:'Acorns', svgId:'acorn' },
+      { id:'mouse',  label:'Mouse',  svgId:'mouse' },
+      { id:'snake',  label:'Snake',  svgId:'snake' },
+      { id:'hawk',   label:'Hawk',   svgId:'hawk' },
+    ]
+  },
+  {
+    id: 3, name: "Marine Chain", icon: '🌊',
+    headerBg: '#01579B',
+    chain: [
+      { id:'algae',      label:'Algae',      svgId:'algae' },
+      { id:'small_fish', label:'Small Fish', svgId:'small_fish' },
+      { id:'big_fish',   label:'Big Fish',   svgId:'big_fish' },
+      { id:'dolphin',    label:'Dolphin',    svgId:'dolphin' },
+    ]
+  },
+  {
+    id: 4, name: "Mixed Chain", icon: '🌍',
+    headerBg: '#4A148C',
+    chain: [
+      { id:'flower2',     label:'Flower',     svgId:'red_flower' },
+      { id:'insect',      label:'Insect',     svgId:'insect' },
+      { id:'small_fish2', label:'Small Fish', svgId:'small_fish' },
+      { id:'big_fish2',   label:'Big Fish',   svgId:'big_fish' },
+      { id:'seagull',     label:'Seagull',    svgId:'seagull' },
+    ]
+  },
+  {
+    id: 5, name: "Full Cycle", icon: '♻️',
+    headerBg: '#1B5E20',
+    layoutType: 'cycle',
+    chain: [
+      { id:'plant',       label:'Plant',       svgId:'plant' },
+      { id:'grasshopper', label:'Grasshopper', svgId:'grasshopper' },
+      { id:'lizard',      label:'Lizard',      svgId:'lizard' },
+      { id:'eagle',       label:'Eagle',       svgId:'eagle' },
+      { id:'mushrooms',   label:'Mushrooms',   svgId:'mushrooms' },
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let currentLvl    = 0;
+let totalMistakes = 0;
+let lvlMistakes   = 0;
+let slots         = [];
+let dragId        = null;
+let dragEl        = null;
+
+/* ═══════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   LOADING
+═══════════════════════════════════════════ */
+function runLoading() {
+  let pct = 0;
+  const fill  = document.getElementById('prog-fill');
+  const label = document.getElementById('loading-label');
+  const t = setInterval(() => {
+    pct += Math.random() * 16 + 5;
+    if (pct >= 100) { pct = 100; clearInterval(t); setTimeout(() => showScreen('screen-start'), 500); }
+    fill.style.width  = pct + '%';
+    label.textContent = Math.floor(pct) + '%';
+  }, 120);
+}
+
+/* ═══════════════════════════════════════════
+   GAME FLOW
+═══════════════════════════════════════════ */
+function startGame() { currentLvl = 0; totalMistakes = 0; loadLevel(); }
+function resetGame()  { startGame(); }
+
+function loadLevel() {
+  const lv = LEVELS[currentLvl];
+  lvlMistakes = 0;
+  slots = new Array(lv.chain.length).fill(null);
+
+  document.getElementById('level-header').style.background = lv.headerBg;
+  document.getElementById('level-num').textContent  = `LEVEL ${lv.id} OF ${LEVELS.length}`;
+  document.getElementById('level-name').textContent = lv.icon + ' ' + lv.name;
+  document.getElementById('mistake-count').textContent = totalMistakes;
+
+  buildChainArea(lv);
+  buildCardsArea(lv);
+  showScreen('screen-game');
+}
+
+/* ═══════════════════════════════════════════
+   BUILD CHAIN AREA
+═══════════════════════════════════════════ */
+function buildChainArea(lv) {
+  const area = document.getElementById('chain-area');
+  area.innerHTML = '';
+  area.className = 'chain-area';
+
+  if (lv.layoutType === 'cycle') {
+    const wrap = document.createElement('div');
+    wrap.className = 'chain-cycle-wrap';
+    const top = document.createElement('div');
+    top.className = 'chain-cycle-top';
+    for (let i = 0; i < 4; i++) {
+      top.appendChild(mkSlot(i, lv));
+      if (i < 3) top.appendChild(mkArr('→'));
+    }
+    top.appendChild(mkArr('↓'));
+    const bot = document.createElement('div');
+    bot.className = 'chain-cycle-bottom';
+    bot.appendChild(mkArr('↖'));
+    bot.appendChild(mkSlot(4, lv));
+    const hint = document.createElement('span');
+    hint.className = 'cycle-hint';
+    hint.textContent = '← decomposer (returns nutrients to soil)';
+    bot.appendChild(hint);
+    wrap.appendChild(top);
+    wrap.appendChild(bot);
+    area.appendChild(wrap);
+  } else {
+    for (let i = 0; i < lv.chain.length; i++) {
+      area.appendChild(mkSlot(i, lv));
+      if (i < lv.chain.length - 1) area.appendChild(mkArr('→'));
+    }
+  }
+}
+
+let _arrowId = 0;
+function mkArr(ch) {
+  const s = document.createElement('span');
+  s.className = 'chain-arrow-lbl';
+  const id = ++_arrowId;
+  const light = '#90CAF9', dark = '#1565C0';
+
+  if (ch === '→') {
+    s.innerHTML = `<svg width="52" height="26" viewBox="0 0 52 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="${light}"/><stop offset="100%" stop-color="${dark}"/>
+      </linearGradient></defs>
+      <path d="M4 13 L34 13" stroke="url(#g${id})" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="30,6 48,13 30,20" fill="${dark}"/>
+    </svg>`;
+  } else if (ch === '↓') {
+    s.innerHTML = `<svg width="26" height="52" viewBox="0 0 26 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${light}"/><stop offset="100%" stop-color="${dark}"/>
+      </linearGradient></defs>
+      <path d="M13 4 L13 34" stroke="url(#g${id})" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="6,30 13,48 20,30" fill="${dark}"/>
+    </svg>`;
+  } else if (ch === '↖') {
+    s.innerHTML = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g${id}" x1="1" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="${light}"/><stop offset="100%" stop-color="${dark}"/>
+      </linearGradient></defs>
+      <path d="M40 40 L14 14" stroke="url(#g${id})" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="20,8 8,8 8,20" fill="${dark}"/>
+    </svg>`;
+  }
+  return s;
+}
+
+function mkSlot(index, lv) {
+  const el = document.createElement('div');
+  el.className = 'slot';
+  el.dataset.index = index;
+  if (lv.chain.length >= 5) { el.style.width = '94px'; el.style.height = '94px'; }
+  el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', ()  => el.classList.remove('dragover'));
+  el.addEventListener('drop',      e => { e.preventDefault(); el.classList.remove('dragover'); handleDrop(+el.dataset.index); });
+  return el;
+}
+
+/* ═══════════════════════════════════════════
+   BUILD CARDS AREA
+═══════════════════════════════════════════ */
+function buildCardsArea(lv) {
+  const area = document.getElementById('cards-area');
+  area.innerHTML = '';
+  [...lv.chain].sort(() => Math.random() - 0.5).forEach(item => area.appendChild(mkCard(item, lv)));
+}
+
+function mkCard(item, lv) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.draggable = true;
+  el.dataset.id = item.id;
+  if (lv.chain.length >= 5) { el.style.width = '94px'; el.style.height = '94px'; }
+
+  el.innerHTML = SVGS[item.svgId] + `<span class="c-lbl">${item.label}</span>`;
+
+  el.addEventListener('dragstart', e => {
+    dragId = item.id; dragEl = el;
+    el.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', item.id);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', () => { el.classList.remove('dragging'); dragId = null; dragEl = null; });
+
+  addTouch(el, item.id);
+  return el;
+}
+
+/* ═══════════════════════════════════════════
+   TOUCH DRAG
+═══════════════════════════════════════════ */
+function addTouch(card, itemId) {
+  let ghost = null, lastSlot = null;
+  card.addEventListener('touchstart', e => {
+    dragId = itemId; dragEl = card;
+    const t = e.touches[0];
+    ghost = card.cloneNode(true);
+    Object.assign(ghost.style, {
+      position:'fixed', pointerEvents:'none', opacity:'.88', zIndex:'9999',
+      width: card.offsetWidth+'px', height: card.offsetHeight+'px',
+      left: (t.clientX - card.offsetWidth/2)+'px', top: (t.clientY - card.offsetHeight/2)+'px',
+      transform:'rotate(4deg) scale(1.08)', borderRadius:'14px',
+      boxShadow:'0 8px 24px rgba(0,0,0,0.22)'
+    });
+    document.body.appendChild(ghost);
+    card.style.opacity = '.25';
+  }, {passive:true});
+
+  card.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    if (ghost) { ghost.style.left = (t.clientX - card.offsetWidth/2)+'px'; ghost.style.top = (t.clientY - card.offsetHeight/2)+'px'; }
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('dragover'));
+    const hit = document.elementFromPoint(t.clientX, t.clientY);
+    lastSlot = hit?.closest('.slot') || null;
+    if (lastSlot) lastSlot.classList.add('dragover');
+  }, {passive:false});
+
+  card.addEventListener('touchend', () => {
+    if (ghost) { ghost.remove(); ghost = null; }
+    card.style.opacity = '1';
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('dragover'));
+    if (lastSlot) handleDrop(+lastSlot.dataset.index);
+    dragId = null; dragEl = null; lastSlot = null;
+  }, {passive:true});
+}
+
+/* ═══════════════════════════════════════════
+   DROP LOGIC
+═══════════════════════════════════════════ */
+function handleDrop(slotIndex) {
+  if (!dragId) return;
+  const lv = LEVELS[currentLvl];
+  if (slots[slotIndex] !== null) return;
+
+  const correct = lv.chain[slotIndex];
+  const slotEl  = document.querySelector(`.slot[data-index="${slotIndex}"]`);
+
+  if (correct.id === dragId) {
+    slots[slotIndex] = dragId;
+
+    const placed = document.createElement('div');
+    placed.className = 'placed-card';
+    placed.innerHTML = SVGS[correct.svgId] + `<span class="lbl">${correct.label}</span>`;
+    slotEl.innerHTML = '';
+    slotEl.appendChild(placed);
+    slotEl.classList.add('filled');
+
+    slotEl.classList.remove('anim-pop');
+    void slotEl.offsetWidth;
+    slotEl.classList.add('anim-pop');
+    slotEl.addEventListener('animationend', () => slotEl.classList.remove('anim-pop'), {once:true});
+
+    if (dragEl?.parentNode) dragEl.remove();
+
+    const r = slotEl.getBoundingClientRect();
+    fireParticles(r.left + r.width/2, r.top + r.height/2);
+
+    if (slots.every(s => s !== null)) setTimeout(showWin, 750);
+
+  } else {
+    totalMistakes++;
+    lvlMistakes++;
+    document.getElementById('mistake-count').textContent = totalMistakes;
+
+    slotEl.classList.remove('anim-shake', 'anim-wrongflash');
+    void slotEl.offsetWidth;
+    slotEl.classList.add('anim-shake', 'anim-wrongflash');
+    slotEl.addEventListener('animationend', () => slotEl.classList.remove('anim-shake','anim-wrongflash'), {once:true});
+  }
+  dragId = null; dragEl = null;
+}
+
+/* ═══════════════════════════════════════════
+   WIN SCREEN
+═══════════════════════════════════════════ */
+function showWin() {
+  const lv = LEVELS[currentLvl];
+  document.getElementById('win-level-name').textContent = lv.icon + ' ' + lv.name + ' Complete!';
+
+  const row = document.getElementById('win-chain-row');
+  row.innerHTML = '';
+  lv.chain.forEach((item, i) => {
+    const d = document.createElement('div');
+    d.className = 'win-animal';
+    d.innerHTML = SVGS[item.svgId];
+    d.title = item.label;
+    row.appendChild(d);
+    if (i < lv.chain.length - 1) {
+      const a = document.createElement('span');
+      a.className = 'win-arrow';
+      const isReturn = lv.layoutType === 'cycle' && i === lv.chain.length - 2;
+      a.innerHTML = isReturn
+        ? `<svg width="36" height="20" viewBox="0 0 36 20" fill="none"><path d="M32 5 Q20 2 10 10 Q4 15 6 18" stroke="#90CAF9" stroke-width="2.5" stroke-linecap="round" fill="none"/><polygon points="2,12 4,20 10,15" fill="#90CAF9"/></svg>`
+        : `<svg width="40" height="20" viewBox="0 0 40 20" fill="none"><path d="M3 10 L28 10" stroke="#90CAF9" stroke-width="2.5" stroke-linecap="round"/><polygon points="25,5 37,10 25,15" fill="#90CAF9"/></svg>`;
+      row.appendChild(a);
+    }
+  });
+
+  document.getElementById('win-sub').textContent =
+    lvlMistakes === 0 ? '⭐ Perfect! No mistakes!' : `${lvlMistakes} mistake${lvlMistakes>1?'s':''} on this level.`;
+
+  document.getElementById('next-btn').textContent =
+    currentLvl === LEVELS.length - 1 ? 'See Your Results! 🏆' : 'Next Level →';
+
+  showScreen('screen-win');
+  launchConfetti();
+}
+
+function goNext() {
+  currentLvl++;
+  if (currentLvl >= LEVELS.length) showFinish(); else loadLevel();
+}
+
+/* ═══════════════════════════════════════════
+   FINISH SCREEN
+═══════════════════════════════════════════ */
+function showFinish() {
+  const m = totalMistakes;
+  document.getElementById('final-mistakes').textContent = m;
+  document.getElementById('finish-title').textContent =
+    m === 0 ? '🏆 Perfect Score! All 5 Chains Complete!' : '🎉 All 5 Food Chains Complete!';
+  document.getElementById('finish-rating').textContent =
+    m === 0 ? '🌟🌟🌟 Food Chain Master!' :
+    m <= 5  ? '🌟🌟 Food Chain Expert!'   : '🌟 Food Chain Learner';
+
+  const grid = document.getElementById('all-chains-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach(lv => {
+    const row = document.createElement('div');
+    row.className = 'chain-row-summary';
+    const lbl = document.createElement('span');
+    lbl.className = 'chain-lbl';
+    lbl.textContent = lv.icon + ' ' + lv.name;
+    row.appendChild(lbl);
+    lv.chain.forEach((item, i) => {
+      const e = document.createElement('div');
+      e.className = 'se';
+      e.innerHTML = SVGS[item.svgId];
+      e.title = item.label;
+      row.appendChild(e);
+      if (i < lv.chain.length - 1) {
+        const a = document.createElement('span');
+        a.className = 'sa'; a.textContent = '→';
+        row.appendChild(a);
+      }
+    });
+    grid.appendChild(row);
+  });
+  showScreen('screen-finish');
+  launchConfetti();
+}
+
+/* ═══════════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════════ */
+const PCOLS = ['#f1c40f','#e74c3c','#2ecc71','#3498db','#9b59b6','#e67e22','#1abc9c','#fd79a8'];
+
+function fireParticles(cx, cy) {
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = 7 + Math.random()*9, ang = (Math.PI*2*i)/14, dist = 45 + Math.random()*35;
+    const tx = Math.cos(ang)*dist, ty = Math.sin(ang)*dist;
+    Object.assign(p.style, {
+      left: cx+'px', top: cy+'px', width: sz+'px', height: sz+'px',
+      background: PCOLS[Math.floor(Math.random()*PCOLS.length)],
+      borderRadius: Math.random()>.4 ? '50%' : '3px',
+      transform: 'translate(-50%,-50%)',
+      transition: 'transform .75s ease-out, opacity .75s ease-out'
+    });
+    document.body.appendChild(p);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      p.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(.1)`;
+      p.style.opacity = '0';
+    }));
+    setTimeout(() => p.remove(), 850);
+  }
+}
+
+function launchConfetti() {
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const sz = 7 + Math.random()*10, color = PCOLS[Math.floor(Math.random()*PCOLS.length)];
+      const sx = Math.random()*window.innerWidth, drift = (Math.random()-.5)*180, dur = 1.2 + Math.random()*1.4;
+      Object.assign(p.style, {
+        position:'fixed', left: sx+'px', top:'-20px', width: sz+'px', height: sz+'px',
+        background: color, borderRadius: Math.random()>.5 ? '2px' : '50%',
+        zIndex:'9999', pointerEvents:'none',
+        transition: `transform ${dur}s ease-in, opacity ${dur*.6}s ${dur*.4}s ease-in`
+      });
+      document.body.appendChild(p);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        p.style.transform = `translate(${drift}px, ${window.innerHeight+60}px) rotate(${Math.random()*720}deg)`;
+        p.style.opacity = '0';
+      }));
+      setTimeout(() => p.remove(), (dur+.3)*1000);
+    }, Math.random()*900);
+  }
+}
+
+window.addEventListener('load', runLoading);
+
+/* ═══════════════════════════════════════════
+   SCALE-TO-FIT (phone + big touch screen)
+═══════════════════════════════════════════ */
+(function () {
+  const frame = document.getElementById('game-frame');
+  const baseW = 960, baseH = 620;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    frame.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

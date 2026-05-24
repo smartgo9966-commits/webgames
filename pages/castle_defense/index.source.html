@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castle Defense</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: linear-gradient(160deg, #2a5d2f 0%, #1a3a1f 60%, #102812 100%);
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.game-wrap {
+  width: 900px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, #c8e07a 0%, #a8c95a 60%, #88a843 100%);
+  border: 8px solid #1c3e1c;
+  border-radius: 14px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  transform-origin: 0 0;
+}
+
+#game-canvas { touch-action: none; }
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.screen.active { display: block; }
+
+/* ══════════════════════════════
+   MAIN MENU
+══════════════════════════════ */
+#screen-menu {
+  background: radial-gradient(ellipse at center, #d0e88a 0%, #b0d05c 55%, #90b045 100%);
+}
+#screen-menu.active { display: block; }
+
+.title-stack {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  margin-top: 80px;
+  height: 110px;
+  pointer-events: none;
+}
+.menu-title {
+  position: absolute;
+  left: 0; right: 0;
+  margin: 0;
+  font-family: 'Fredoka One', cursive;
+  font-size: 86px;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+.menu-title-back {
+  color: #0b3654;
+  -webkit-text-stroke: 6px #0b3654;
+  text-shadow:
+    0 2px 0 #0b3654, 0 4px 0 #0b3654,
+    0 6px 0 #082945, 0 8px 0 #082945,
+    0 16px 22px rgba(0,0,0,0.5);
+}
+.menu-title-front {
+  background: linear-gradient(180deg, #c8eaf7 0%, #74b6d7 45%, #2f7099 85%, #1a4a72 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.menu-title-shine {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 42%, rgba(255,255,255,0) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.menu-cannon {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+}
+.menu-cannon.left { left: 80px; bottom: 200px; }
+.menu-cannon.right { right: 80px; bottom: 130px; transform: scaleX(-1); }
+
+.menu-cannon .fireball {
+  position: absolute;
+  top: 38px;
+  right: -34px;
+  width: 36px;
+  height: 26px;
+  background: radial-gradient(ellipse at 30% 50%, #fff5a0 0%, #ff9a1a 40%, #c63a00 100%);
+  border-radius: 50% 60% 60% 50% / 50% 50% 50% 50%;
+  box-shadow: 0 0 16px rgba(255,140,30,0.7);
+}
+.menu-cannon .fireball::after {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 4px;
+  width: 22px;
+  height: 16px;
+  background: radial-gradient(ellipse at right, rgba(255,180,40,0.8), transparent 70%);
+  border-radius: 50%;
+}
+
+.btn-start {
+  position: absolute;
+  left: 50%;
+  bottom: 200px;
+  transform: translateX(-50%);
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  letter-spacing: 4px;
+  color: #ff2a2a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-shadow:
+    -3px -3px 0 #fff,
+    3px -3px 0 #fff,
+    -3px 3px 0 #fff,
+    3px 3px 0 #fff,
+    0 -3px 0 #fff,
+    0 3px 0 #fff,
+    -3px 0 0 #fff,
+    3px 0 0 #fff,
+    -4px -4px 0 #4a0010,
+    4px 4px 0 #4a0010,
+    0 6px 12px rgba(0,0,0,0.35);
+  transition: transform .12s ease;
+}
+.btn-start:hover { transform: translateX(-50%) scale(1.06); }
+.btn-start:active { transform: translateX(-50%) scale(0.97); }
+
+/* ══════════════════════════════
+   INSTRUCTIONS
+══════════════════════════════ */
+#screen-instructions {
+  background: radial-gradient(ellipse at center, #d0e88a 0%, #b0d05c 55%, #90b045 100%);
+}
+.instr-panel {
+  position: absolute;
+  left: 50%;
+  top: 50px;
+  transform: translateX(-50%);
+  width: 680px;
+  height: 380px;
+  background: linear-gradient(180deg, #6ba83c 0%, #4f8a28 100%);
+  border: 5px solid #7a3a18;
+  clip-path: polygon(
+    40px 0%, calc(100% - 40px) 0%, 100% 40px,
+    100% calc(100% - 40px), calc(100% - 40px) 100%,
+    40px 100%, 0 calc(100% - 40px), 0 40px
+  );
+}
+.instr-panel-inner {
+  position: absolute;
+  inset: 14px;
+  background: linear-gradient(180deg, #7cb84a 0%, #5d9a30 100%);
+  clip-path: polygon(
+    30px 0%, calc(100% - 30px) 0%, 100% 30px,
+    100% calc(100% - 30px), calc(100% - 30px) 100%,
+    30px 100%, 0 calc(100% - 30px), 0 30px
+  );
+}
+.instr-icon-box {
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  width: 130px;
+  height: 130px;
+  background: rgba(255,255,255,0.18);
+  border: 3px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.instr-title {
+  position: absolute;
+  left: 210px;
+  top: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  color: #ff2a2a;
+  text-shadow:
+    -2px -2px 0 #fff, 2px -2px 0 #fff,
+    -2px 2px 0 #fff, 2px 2px 0 #fff,
+    0 -2px 0 #fff, 0 2px 0 #fff,
+    -2px 0 0 #fff, 2px 0 0 #fff,
+    -3px -3px 0 #4a0010, 3px 3px 0 #4a0010,
+    0 6px 10px rgba(0,0,0,0.35);
+}
+.instr-text {
+  position: absolute;
+  left: 210px;
+  top: 160px;
+  right: 60px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  line-height: 1.35;
+  color: #fff;
+  text-shadow: 2px 3px 0 rgba(0,0,0,0.35);
+}
+#screen-instructions .btn-start { bottom: 80px; }
+
+/* ══════════════════════════════
+   GAME SCREEN
+══════════════════════════════ */
+#screen-game canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* HUD */
+.hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  background: linear-gradient(180deg, #66b431 0%, #4d8c1f 100%);
+  border-bottom: 3px solid #2e5e1a;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 6px;
+  z-index: 5;
+  font-family: 'Fredoka One', cursive;
+  color: #fff;
+  font-size: 20px;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.35);
+}
+.hud-item {
+  background: rgba(0,0,0,0.18);
+  padding: 4px 18px;
+  border-radius: 22px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hud-item .hud-label { color: #ffe9a0; }
+.hud-item .hud-value { color: #fff; }
+.hud-spacer { flex: 1; }
+.hud-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f0f0f0 0%, #d0d0d0 100%);
+  border: 2px solid #555;
+  color: #333;
+  font-size: 18px;
+  font-family: 'Fredoka One', cursive;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.hud-icon:hover { filter: brightness(1.1); }
+
+/* Bottom buttons */
+.bottom-buttons {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  gap: 12px;
+  z-index: 5;
+}
+.btn-action {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #fff;
+  letter-spacing: 1px;
+  padding: 8px 26px;
+  border: 3px solid #2e5e1a;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #8edc5a 0%, #5cb336 55%, #3e8a20 100%);
+  cursor: pointer;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.3);
+  box-shadow: 0 4px 0 #2e5e1a, 0 6px 12px rgba(0,0,0,0.3);
+  transition: transform .1s, box-shadow .1s;
+}
+.btn-action:hover { filter: brightness(1.08); }
+.btn-action:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #2e5e1a, 0 2px 6px rgba(0,0,0,0.3);
+}
+.btn-action.active {
+  background: linear-gradient(180deg, #e0a04c 0%, #c47c2a 55%, #9b5a14 100%);
+  border-color: #6a3c0e;
+  box-shadow: 0 4px 0 #6a3c0e, 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Ghost cannon preview */
+.ghost-cannon {
+  position: absolute;
+  width: 50px; height: 50px;
+  pointer-events: none;
+  z-index: 4;
+  display: none;
+}
+.ghost-cannon.show { display: block; }
+.ghost-cannon .gc-tile {
+  position: absolute;
+  inset: 1px;
+  background: rgba(180, 255, 120, 0.35);
+  border: 2px dashed rgba(40, 100, 20, 0.7);
+  border-radius: 4px;
+}
+.ghost-cannon.invalid .gc-tile {
+  background: rgba(255, 80, 80, 0.35);
+  border-color: rgba(140, 20, 20, 0.7);
+}
+
+/* ══════════════════════════════
+   MODALS
+══════════════════════════════ */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.modal-backdrop.show { display: flex; }
+
+.modal-panel {
+  width: 420px;
+  background: linear-gradient(180deg, #f4d68a 0%, #e0bb60 100%);
+  border: 4px solid #7a3a18;
+  border-radius: 14px;
+  padding: 18px 22px 22px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+  font-family: 'Fredoka One', cursive;
+  color: #5d3010;
+}
+
+/* Buy modal */
+.cannon-tabs {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.cannon-tab {
+  width: 80px; height: 80px;
+  background: linear-gradient(180deg, #b8d870 0%, #93b450 100%);
+  border: 3px solid #5b8d3a;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .1s;
+}
+.cannon-tab:hover { transform: translateY(-2px); }
+.cannon-tab.selected {
+  background: linear-gradient(180deg, #d4ec90 0%, #b3d670 100%);
+  border-color: #345d18;
+  box-shadow: 0 0 0 3px rgba(80,180,40,0.5);
+}
+.cannon-tab svg { width: 60px; height: 60px; }
+
+.cannon-stats {
+  background: linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.16) 100%);
+  border-radius: 10px;
+  padding: 14px 22px;
+  font-size: 24px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px 14px;
+}
+.cannon-stats .stat-key { color: #5d3010; text-align: left; }
+.cannon-stats .stat-val { color: #b53a00; text-align: right; font-weight: bold; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+.btn-modal {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #fff;
+  padding: 6px 22px;
+  border: 3px solid #2e5e1a;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #8edc5a 0%, #5cb336 55%, #3e8a20 100%);
+  cursor: pointer;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.3);
+  box-shadow: 0 3px 0 #2e5e1a;
+}
+.btn-modal:hover { filter: brightness(1.08); }
+.btn-modal:active { transform: translateY(2px); box-shadow: 0 1px 0 #2e5e1a; }
+.btn-modal.disabled {
+  filter: grayscale(0.5) brightness(0.85);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Pause/help simple panel */
+.modal-panel.simple {
+  width: 360px;
+  text-align: center;
+}
+.modal-panel.simple .modal-title {
+  font-size: 36px;
+  color: #ff2a2a;
+  text-shadow:
+    -2px -2px 0 #fff, 2px -2px 0 #fff,
+    -2px 2px 0 #fff, 2px 2px 0 #fff,
+    0 -2px 0 #fff, 0 2px 0 #fff,
+    -2px 0 0 #fff, 2px 0 0 #fff,
+    0 4px 0 #4a0010;
+  margin-bottom: 14px;
+}
+.modal-panel.simple .modal-body {
+  font-size: 20px;
+  margin-bottom: 18px;
+  color: #4a2410;
+  line-height: 1.35;
+}
+
+/* ══════════════════════════════
+   RESULTS
+══════════════════════════════ */
+#screen-results {
+  background: linear-gradient(160deg, #2a7fc8 0%, #1865a5 60%, #0e4a82 100%);
+}
+.results-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 560px;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+}
+.results-title {
+  font-size: 56px;
+  color: #fff;
+  text-shadow:
+    -2px -2px 0 #1c3a5e, 2px 2px 0 #1c3a5e,
+    -2px 2px 0 #1c3a5e, 2px -2px 0 #1c3a5e,
+    0 6px 14px rgba(0,0,0,0.4);
+  margin-bottom: 14px;
+}
+.results-table {
+  background: linear-gradient(180deg, #2a7fc8 0%, #1865a5 100%);
+  border-radius: 12px 12px 0 0;
+  border: 3px solid #fff;
+  overflow: hidden;
+}
+.results-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.results-row.head {
+  background: linear-gradient(180deg, #1d6cb5 0%, #134f8a 100%);
+  color: #fff;
+  font-size: 30px;
+  padding: 14px 0;
+}
+.results-row.body {
+  background: #e8e8e8;
+  color: #1c3a5e;
+  font-size: 32px;
+  padding: 14px 0;
+}
+.results-row > div { border-right: 2px solid rgba(255,255,255,0.3); }
+.results-row > div:last-child { border-right: none; }
+.results-stars-wrap {
+  background: radial-gradient(ellipse at center, #2a7fc8 0%, #134f8a 100%);
+  border: 3px solid #fff;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 28px 10px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.results-stars-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%),
+    conic-gradient(from 0deg at 50% 50%,
+      rgba(255,255,255,0.06) 0deg, transparent 30deg,
+      rgba(255,255,255,0.06) 60deg, transparent 90deg,
+      rgba(255,255,255,0.06) 120deg, transparent 150deg,
+      rgba(255,255,255,0.06) 180deg, transparent 210deg,
+      rgba(255,255,255,0.06) 240deg, transparent 270deg,
+      rgba(255,255,255,0.06) 300deg, transparent 330deg);
+  z-index: 0;
+}
+.results-stars {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+.results-stars .star {
+  width: 72px; height: 72px;
+}
+.btn-ok {
+  margin-top: 20px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: #fff;
+  letter-spacing: 2px;
+  padding: 10px 50px;
+  border: 3px solid #0d3a64;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #5db1ef 0%, #2a7fc8 50%, #134f8a 100%);
+  cursor: pointer;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.4);
+  box-shadow: 0 5px 0 #0d3a64, 0 8px 16px rgba(0,0,0,0.3);
+  transition: transform .1s, box-shadow .1s;
+}
+.btn-ok:hover { filter: brightness(1.1); }
+.btn-ok:active { transform: translateY(3px); box-shadow: 0 2px 0 #0d3a64; }
+
+.help-corner {
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #5db1ef 0%, #1865a5 100%);
+  border: 3px solid #fff;
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap">
+
+  <!-- ════════════════ MENU ════════════════ -->
+  <div id="screen-menu" class="screen active">
+    <div class="title-stack">
+      <h1 class="menu-title menu-title-back" aria-hidden="true">CASTLE DEFENSE</h1>
+      <h1 class="menu-title menu-title-front">CASTLE DEFENSE</h1>
+      <h1 class="menu-title menu-title-shine" aria-hidden="true">CASTLE DEFENSE</h1>
+    </div>
+    <div class="menu-cannon left">
+      <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mc-tile-l" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#c8e88a"/>
+            <stop offset="1" stop-color="#88a843"/>
+          </linearGradient>
+        </defs>
+        <rect x="8" y="8" width="94" height="94" rx="6" fill="url(#mc-tile-l)" stroke="#4d6f24" stroke-width="3"/>
+        <rect x="22" y="22" width="66" height="66" fill="rgba(255,255,255,0.12)"/>
+        <!-- cannon base wheels -->
+        <ellipse cx="34" cy="80" rx="14" ry="10" fill="#2a2a2a"/>
+        <ellipse cx="76" cy="80" rx="14" ry="10" fill="#2a2a2a"/>
+        <ellipse cx="34" cy="80" rx="6" ry="4" fill="#888"/>
+        <ellipse cx="76" cy="80" rx="6" ry="4" fill="#888"/>
+        <!-- cannon body -->
+        <rect x="22" y="48" width="60" height="22" fill="#444" stroke="#1a1a1a" stroke-width="2"/>
+        <rect x="22" y="48" width="60" height="6" fill="#666"/>
+        <!-- barrel -->
+        <rect x="62" y="44" width="46" height="14" fill="#333" stroke="#1a1a1a" stroke-width="2"/>
+        <rect x="62" y="44" width="46" height="4" fill="#555"/>
+        <circle cx="108" cy="51" r="8" fill="#222"/>
+      </svg>
+      <div class="fireball"></div>
+    </div>
+    <div class="menu-cannon right">
+      <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mc-tile-r" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#c8e88a"/>
+            <stop offset="1" stop-color="#88a843"/>
+          </linearGradient>
+        </defs>
+        <rect x="8" y="8" width="94" height="94" rx="6" fill="url(#mc-tile-r)" stroke="#4d6f24" stroke-width="3"/>
+        <rect x="22" y="22" width="66" height="66" fill="rgba(255,255,255,0.12)"/>
+        <!-- bottle-style cannon -->
+        <ellipse cx="40" cy="78" rx="22" ry="14" fill="#5a3a22"/>
+        <path d="M 22 60 Q 22 50 30 48 L 64 48 Q 76 48 80 56 L 96 60 L 96 76 L 80 80 Q 76 88 64 88 L 30 88 Q 22 86 22 76 Z" fill="#7a5232" stroke="#3b2412" stroke-width="2"/>
+        <circle cx="96" cy="68" r="6" fill="#222"/>
+      </svg>
+      <div class="fireball"></div>
+    </div>
+    <button class="btn-start" id="btn-menu-start">START</button>
+  </div>
+
+  <!-- ════════════════ INSTRUCTIONS ════════════════ -->
+  <div id="screen-instructions" class="screen">
+    <div class="instr-panel">
+      <div class="instr-panel-inner">
+        <div class="instr-icon-box">
+          <svg viewBox="0 0 80 80" width="80" height="80">
+            <rect x="10" y="40" width="60" height="30" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="14" y="20" width="14" height="50" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="52" y="20" width="14" height="50" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="14" y="20" width="4" height="6" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="24" y="20" width="4" height="6" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="52" y="20" width="4" height="6" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <rect x="62" y="20" width="4" height="6" fill="#c8a45e" stroke="#6c4a20" stroke-width="2"/>
+            <path d="M 30 70 L 30 54 Q 30 48 40 48 Q 50 48 50 54 L 50 70 Z" fill="#5c3a1a"/>
+            <line x1="20" y1="10" x2="20" y2="22" stroke="#222" stroke-width="2"/>
+            <line x1="60" y1="10" x2="60" y2="22" stroke="#222" stroke-width="2"/>
+            <polygon points="20,10 32,14 20,18" fill="#cc1a1a"/>
+            <polygon points="60,10 72,14 60,18" fill="#cc1a1a"/>
+          </svg>
+        </div>
+        <div class="instr-title">Instructions</div>
+        <div class="instr-text">Defend the castle by buying cannons to shoot the enemies.</div>
+      </div>
+    </div>
+    <button class="btn-start" id="btn-instr-start">START</button>
+  </div>
+
+  <!-- ════════════════ GAME ════════════════ -->
+  <div id="screen-game" class="screen">
+    <canvas id="game-canvas" width="900" height="600"></canvas>
+
+    <div class="hud">
+      <div class="hud-item"><span class="hud-label">Level:</span> <span class="hud-value" id="hud-level">1</span></div>
+      <div class="hud-item"><span class="hud-label">Score:</span> <span class="hud-value" id="hud-score">0</span></div>
+      <div class="hud-item"><span class="hud-label">Money:</span> <span class="hud-value">$<span id="hud-money">1000</span></span></div>
+      <div class="hud-spacer"></div>
+      <button id="btn-help" class="hud-icon">?</button>
+      <button id="btn-pause" class="hud-icon">⚙</button>
+    </div>
+
+    <div class="bottom-buttons">
+      <button id="btn-buy" class="btn-action">Buy</button>
+      <button id="btn-sell" class="btn-action">Sell</button>
+    </div>
+
+    <div class="ghost-cannon" id="ghost-cannon">
+      <div class="gc-tile"></div>
+      <svg id="ghost-svg" viewBox="0 0 50 50" width="50" height="50" style="position:absolute;inset:0;"></svg>
+    </div>
+
+    <!-- Buy modal -->
+    <div class="modal-backdrop" id="buy-modal">
+      <div class="modal-panel">
+        <div class="cannon-tabs" id="cannon-tabs"></div>
+        <div class="cannon-stats">
+          <div class="stat-key">Power:</div>      <div class="stat-val" id="stat-power">2</div>
+          <div class="stat-key">Frequency:</div>  <div class="stat-val" id="stat-freq">2</div>
+          <div class="stat-key">Range:</div>      <div class="stat-val" id="stat-range">3</div>
+          <div class="stat-key">Price:</div>      <div class="stat-val" id="stat-price">$200</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-modal" id="btn-buy-confirm">Buy</button>
+          <button class="btn-modal" id="btn-buy-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause modal -->
+    <div class="modal-backdrop" id="pause-modal">
+      <div class="modal-panel simple">
+        <div class="modal-title">Paused</div>
+        <div class="modal-body">Take a breath, then jump back in.</div>
+        <div class="modal-actions" style="justify-content:center;">
+          <button class="btn-modal" id="btn-pause-resume">Resume</button>
+          <button class="btn-modal" id="btn-pause-menu">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help modal -->
+    <div class="modal-backdrop" id="help-modal">
+      <div class="modal-panel simple">
+        <div class="modal-title">Instructions</div>
+        <div class="modal-body">Defend the castle by buying cannons to shoot the enemies.</div>
+        <div class="modal-actions" style="justify-content:center;">
+          <button class="btn-modal" id="btn-help-close">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ RESULTS ════════════════ -->
+  <div id="screen-results" class="screen">
+    <button class="help-corner" id="btn-results-help">?</button>
+    <div class="results-panel">
+      <div class="results-title">Results</div>
+      <div class="results-table">
+        <div class="results-row head"><div>Level</div><div>Life</div></div>
+        <div class="results-row body"><div id="result-level">2</div><div id="result-life">0</div></div>
+      </div>
+      <div class="results-stars-wrap">
+        <div class="results-stars" id="result-stars"></div>
+      </div>
+      <button class="btn-ok" id="btn-results-ok">OK</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════ */
+const W = 900, H = 600;
+const HUD_H = 44;
+const PLAY_TOP = HUD_H;
+const TILE = 50;
+const COLS = 18;
+const ROWS = 11;
+const PLAY_OFFSET_Y = PLAY_TOP + 10;
+
+const CANNON_TYPES = [
+  { name: 'Bottle',  power: 2, freq: 2, range: 3, cost: 200 },
+  { name: 'Mortar',  power: 4, freq: 3, range: 4, cost: 500 },
+  { name: 'Sniper',  power: 8, freq: 4, range: 6, cost: 1000 }
+];
+
+// Winding path from left edge to castle on right (pixel coords).
+// Coords laid out on the tile grid for clarity.
+const PATH = (() => {
+  const cx = (c) => c * TILE + TILE / 2;
+  const cy = (r) => PLAY_OFFSET_Y + r * TILE + TILE / 2;
+  return [
+    { x: -40,     y: cy(2) },
+    { x: cx(2),   y: cy(2) },
+    { x: cx(2),   y: cy(5) },
+    { x: cx(7),   y: cy(5) },
+    { x: cx(7),   y: cy(2) },
+    { x: cx(10),  y: cy(2) },
+    { x: cx(10),  y: cy(8) },
+    { x: cx(16),  y: cy(8) },
+    { x: cx(16),  y: cy(4) },
+    { x: cx(14),  y: cy(4) }  // ends near castle gate
+  ];
+})();
+
+const CASTLE = { x: 14 * TILE + TILE / 2, y: PLAY_OFFSET_Y + 2 * TILE + 10 };
+const CASTLE_LIFE_MAX = 10;
+
+/* ════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let canvas, ctx;
+let lastT = 0;
+let running = false;
+let paused = false;
+
+let level = 1;
+let score = 0;
+let money = 1000;
+let castleLife = CASTLE_LIFE_MAX;
+
+let enemies = [];
+let cannons = [];
+let projectiles = [];
+let effects = [];
+
+let spawnQueue = 0;
+let spawnTimer = 0;
+let spawnInterval = 0.9;
+let waveActive = false;
+let interWaveDelay = 0;
+
+let placingType = -1;       // cannon type currently being placed (-1 none)
+let sellMode = false;
+let mouseX = 0, mouseY = 0;
+let hoverCol = -1, hoverRow = -1;
+
+let pathCells = null;       // 2D bool array (true = path)
+let cellCannon = null;      // 2D ref to cannon at cell (or null)
+
+let buyTabIndex = 0;
+
+/* ════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+function initPathCells() {
+  pathCells = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+  cellCannon = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const px = c * TILE + TILE / 2;
+      const py = PLAY_OFFSET_Y + r * TILE + TILE / 2;
+      if (cellOnPath(px, py)) pathCells[r][c] = true;
+    }
+  }
+  // Mark castle's footprint as non-buildable
+  const castleCol = Math.floor(CASTLE.x / TILE);
+  const castleRow = Math.floor((CASTLE.y - PLAY_OFFSET_Y) / TILE);
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const r = castleRow + dr, c = castleCol + dc;
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) pathCells[r][c] = true;
+    }
+  }
+}
+
+function cellOnPath(px, py) {
+  const PATH_HALF = 32;
+  for (let i = 0; i < PATH.length - 1; i++) {
+    if (distToSeg(px, py, PATH[i], PATH[i+1]) < PATH_HALF) return true;
+  }
+  return false;
+}
+
+function distToSeg(px, py, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const L2 = dx*dx + dy*dy;
+  if (L2 === 0) return Math.hypot(px - a.x, py - a.y);
+  let t = ((px - a.x) * dx + (py - a.y) * dy) / L2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (a.x + t*dx), py - (a.y + t*dy));
+}
+
+function resetGame() {
+  level = 1;
+  score = 0;
+  money = 1000;
+  castleLife = CASTLE_LIFE_MAX;
+  enemies = [];
+  cannons = [];
+  projectiles = [];
+  effects = [];
+  spawnQueue = 0;
+  spawnTimer = 0;
+  waveActive = false;
+  interWaveDelay = 1.5;
+  placingType = -1;
+  sellMode = false;
+  initPathCells();
+  updateHud();
+  hideAllModals();
+  document.getElementById('btn-buy').classList.remove('active');
+  document.getElementById('btn-sell').classList.remove('active');
+}
+
+function startWave() {
+  spawnQueue = 5 + (level - 1) * 3;
+  spawnInterval = Math.max(0.35, 0.95 - level * 0.05);
+  spawnTimer = 0.3;
+  waveActive = true;
+}
+
+/* ════════════════════════════════════════════
+   ENEMIES & MOVEMENT
+═══════════════════════════════════════════════ */
+function spawnEnemy() {
+  const hp = 4 + level * 2;
+  const speed = 55 + level * 4;
+  // Pick a tank color variant for visual variety
+  const variants = [
+    { hull: '#4d6b2a', tread: '#1a2410', accent: '#5d7e35' },
+    { hull: '#6b3a1c', tread: '#2a160a', accent: '#854a25' },
+    { hull: '#3a4c5a', tread: '#15202a', accent: '#4c6275' }
+  ];
+  const v = variants[Math.min(2, Math.floor((level - 1) / 3))];
+  enemies.push({
+    x: PATH[0].x, y: PATH[0].y,
+    segment: 0,
+    hp, hpMax: hp,
+    speed,
+    alive: true,
+    reached: false,
+    wobble: Math.random() * Math.PI * 2,
+    angle: 0,
+    turretAngle: 0,
+    tread: 0,
+    variant: v
+  });
+}
+
+function moveEnemy(e, dt) {
+  e.wobble += dt * 6;
+  e.tread += e.speed * dt * 0.06;
+  let budget = e.speed * dt;
+  while (budget > 0 && e.alive && !e.reached) {
+    const tgt = PATH[e.segment + 1];
+    if (!tgt) {
+      e.reached = true;
+      e.alive = false;
+      castleLife = Math.max(0, castleLife - 1);
+      addEffect(CASTLE.x, CASTLE.y - 30, 'crash');
+      return;
+    }
+    const dx = tgt.x - e.x, dy = tgt.y - e.y;
+    const d = Math.hypot(dx, dy);
+    const desiredAngle = Math.atan2(dy, dx);
+    // Smoothly rotate toward desired heading
+    let diff = desiredAngle - e.angle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    e.angle += Math.max(-6 * dt, Math.min(6 * dt, diff));
+    // Turret tracks the castle direction
+    e.turretAngle = Math.atan2(CASTLE.y - e.y, CASTLE.x - e.x);
+    if (budget >= d) {
+      e.x = tgt.x; e.y = tgt.y;
+      e.segment++;
+      budget -= d;
+    } else {
+      e.x += dx / d * budget;
+      e.y += dy / d * budget;
+      budget = 0;
+    }
+  }
+}
+
+/* ════════════════════════════════════════════
+   CANNONS, PROJECTILES, COMBAT
+═══════════════════════════════════════════════ */
+function findTarget(c) {
+  let best = null, bestDist = Infinity;
+  const range = c.range * TILE;
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    const d = Math.hypot(e.x - c.x, e.y - c.y);
+    if (d <= range && d < bestDist) { best = e; bestDist = d; }
+  }
+  return best;
+}
+
+function updateCannons(dt) {
+  for (const c of cannons) {
+    c.cooldown -= dt;
+    const t = findTarget(c);
+    if (t) {
+      const desired = Math.atan2(t.y - c.y, t.x - c.x);
+      let diff = desired - c.angle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const rotSpeed = 8;
+      c.angle += Math.max(-rotSpeed * dt, Math.min(rotSpeed * dt, diff));
+      if (c.cooldown <= 0 && Math.abs(diff) < 0.4) {
+        fireProjectile(c, t);
+        c.cooldown = 1 / c.freq;
+      }
+    }
+  }
+}
+
+function fireProjectile(c, target) {
+  const speed = 420;
+  const a = c.angle;
+  const muzzle = TILE * 0.32;
+  projectiles.push({
+    x: c.x + Math.cos(a) * muzzle,
+    y: c.y + Math.sin(a) * muzzle,
+    vx: Math.cos(a) * speed,
+    vy: Math.sin(a) * speed,
+    power: c.power,
+    target,
+    age: 0,
+    trail: []
+  });
+  addEffect(c.x + Math.cos(a) * muzzle, c.y + Math.sin(a) * muzzle, 'muzzle');
+}
+
+function updateProjectiles(dt) {
+  for (const p of projectiles) {
+    p.age += dt;
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 6) p.trail.shift();
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    // Slight homing toward target
+    if (p.target && p.target.alive) {
+      const dx = p.target.x - p.x, dy = p.target.y - p.y;
+      const d = Math.hypot(dx, dy);
+      const desiredVx = dx / d * 420;
+      const desiredVy = dy / d * 420;
+      p.vx += (desiredVx - p.vx) * 4 * dt;
+      p.vy += (desiredVy - p.vy) * 4 * dt;
+      if (d < 18) {
+        p.target.hp -= p.power;
+        p.dead = true;
+        addEffect(p.target.x, p.target.y, 'hit');
+        if (p.target.hp <= 0) {
+          p.target.alive = false;
+          score += 10 * level;
+          money += 20 + level * 5;
+          addEffect(p.target.x, p.target.y, 'kill');
+        }
+      }
+    }
+    if (p.age > 3) p.dead = true;
+  }
+  projectiles = projectiles.filter(p => !p.dead);
+}
+
+/* ════════════════════════════════════════════
+   EFFECTS (small visual cues)
+═══════════════════════════════════════════════ */
+function addEffect(x, y, type) {
+  effects.push({ x, y, type, t: 0, life: type === 'kill' ? 0.5 : (type === 'crash' ? 0.4 : 0.2) });
+}
+function updateEffects(dt) {
+  for (const e of effects) e.t += dt;
+  effects = effects.filter(e => e.t < e.life);
+}
+
+/* ════════════════════════════════════════════
+   GAME LOOP
+═══════════════════════════════════════════════ */
+function update(dt) {
+  // Wave control
+  if (waveActive) {
+    if (spawnQueue > 0) {
+      spawnTimer -= dt;
+      if (spawnTimer <= 0) {
+        spawnEnemy();
+        spawnQueue--;
+        spawnTimer = spawnInterval;
+      }
+    } else if (enemies.length === 0) {
+      waveActive = false;
+      interWaveDelay = 3.0;
+      level++;
+      money += 100;
+    }
+  } else {
+    interWaveDelay -= dt;
+    if (interWaveDelay <= 0) startWave();
+  }
+
+  for (const e of enemies) moveEnemy(e, dt);
+  enemies = enemies.filter(e => e.alive);
+
+  updateCannons(dt);
+  updateProjectiles(dt);
+  updateEffects(dt);
+
+  if (castleLife <= 0 && running) {
+    running = false;
+    setTimeout(showResults, 800);
+  }
+
+  updateHud();
+}
+
+function loop(t) {
+  if (!lastT) lastT = t;
+  const dt = Math.min(0.05, (t - lastT) / 1000);
+  lastT = t;
+  if (running && !paused) update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* ════════════════════════════════════════════
+   RENDERING
+═══════════════════════════════════════════════ */
+function render() {
+  // Background
+  const g = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, W*0.7);
+  g.addColorStop(0, '#cce28a');
+  g.addColorStop(0.6, '#a8c95a');
+  g.addColorStop(1, '#88a843');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // subtle field texture
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = '#3a5520';
+  for (let y = PLAY_TOP; y < H; y += 24) {
+    ctx.fillRect(0, y, W, 1);
+  }
+  ctx.globalAlpha = 1;
+
+  drawPath();
+
+  if (sellMode) drawGridOverlay();
+
+  drawCastle(CASTLE.x, CASTLE.y);
+
+  for (const e of enemies) drawEnemy(e);
+  for (const c of cannons) drawCannon(c.x, c.y, c.angle, c.type, false);
+  for (const p of projectiles) drawProjectile(p);
+  for (const fx of effects) drawEffect(fx);
+
+  // Cannon ranges in sell mode + cannon highlights
+  if (sellMode) {
+    for (const c of cannons) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.range * TILE, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  // Life bubble above castle when damaged
+  if (castleLife < CASTLE_LIFE_MAX && castleLife > 0) {
+    drawLifeBubble(CASTLE.x, CASTLE.y - 90);
+  }
+
+  // Hovered cell during placement
+  if (placingType >= 0 && hoverCol >= 0 && hoverRow >= 0) {
+    drawCannonRangePreview();
+  }
+}
+
+function drawPath() {
+  // dark border under
+  ctx.strokeStyle = '#7d5a22';
+  ctx.lineWidth = 64;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x, PATH[0].y);
+  for (let i = 1; i < PATH.length; i++) ctx.lineTo(PATH[i].x, PATH[i].y);
+  ctx.stroke();
+
+  // sand fill
+  ctx.strokeStyle = '#f5db8e';
+  ctx.lineWidth = 54;
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x, PATH[0].y);
+  for (let i = 1; i < PATH.length; i++) ctx.lineTo(PATH[i].x, PATH[i].y);
+  ctx.stroke();
+
+  // inner highlight strip
+  ctx.strokeStyle = 'rgba(255, 240, 180, 0.45)';
+  ctx.lineWidth = 32;
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x, PATH[0].y);
+  for (let i = 1; i < PATH.length; i++) ctx.lineTo(PATH[i].x, PATH[i].y);
+  ctx.stroke();
+
+  // Spawn block (wooden crates at start)
+  drawSpawnBlock();
+}
+
+function drawSpawnBlock() {
+  // Enemy depot at path start: parked tanks emerging onto the path
+  const sx = PATH[1].x - 96, sy = PATH[1].y;
+  // sandbag base
+  ctx.save();
+  ctx.fillStyle = '#7a5a30';
+  ctx.strokeStyle = '#4a3618';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 4; i++) {
+    const x = sx - 4 + i * 22, y = sy + 22;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 12, 7, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+  // Two parked tanks facing right
+  drawTank(sx + 10, sy - 4, 0, 0, 0, 0.85, {
+    hull: '#4d6b2a', tread: '#1a2410', accent: '#5d7e35'
+  });
+  drawTank(sx + 50, sy - 4, 0, 0, 0, 0.85, {
+    hull: '#6b3a1c', tread: '#2a160a', accent: '#854a25'
+  });
+}
+
+function drawTank(x, y, angle, turretAngle, treadPhase, alpha, v) {
+  ctx.save();
+  ctx.globalAlpha = alpha || 1;
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(x + 1, y + 14, 18, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  // Treads (left/right of hull when angle=0)
+  ctx.fillStyle = v.tread;
+  ctx.fillRect(-15, -16, 30, 6);
+  ctx.fillRect(-15, 10, 30, 6);
+  // Tread segments — animate by treadPhase
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  const segW = 4;
+  const offset = (treadPhase % 1) * segW;
+  for (let i = -4; i < 8; i++) {
+    const sx = -15 + i * segW + offset;
+    if (sx > -16 && sx < 15 - 1) {
+      ctx.fillRect(sx, -16, 2, 6);
+      ctx.fillRect(sx, 10, 2, 6);
+    }
+  }
+  // tread outline
+  ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(-15, -16, 30, 6);
+  ctx.strokeRect(-15, 10, 30, 6);
+
+  // Hull
+  ctx.fillStyle = v.hull;
+  ctx.fillRect(-14, -11, 28, 22);
+  ctx.strokeStyle = '#0a1004';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(-14, -11, 28, 22);
+  // Hull highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  ctx.fillRect(-13, -10, 26, 5);
+  // Hull rivets
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(-12, -9, 2, 2);
+  ctx.fillRect(10, -9, 2, 2);
+  ctx.fillRect(-12, 7, 2, 2);
+  ctx.fillRect(10, 7, 2, 2);
+  // Front armor plate
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(10, -11); ctx.lineTo(14, -8);
+  ctx.lineTo(14, 8); ctx.lineTo(10, 11);
+  ctx.closePath();
+  ctx.fill();
+
+  // Turret (rotated independently)
+  ctx.save();
+  ctx.rotate(turretAngle - angle);
+  // turret base
+  ctx.fillStyle = v.accent;
+  ctx.beginPath();
+  ctx.arc(0, 0, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#0a1004';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // turret highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath();
+  ctx.arc(-2, -2, 6, Math.PI * 1.1, Math.PI * 1.8);
+  ctx.fill();
+  // barrel
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(4, -2.5, 18, 5);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(4, -2.5, 18, 5);
+  // muzzle
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(20, -3, 3, 6);
+  // hatch
+  ctx.fillStyle = '#0a1004';
+  ctx.beginPath();
+  ctx.arc(-3, 0, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function drawEnemy(e) {
+  drawTank(e.x, e.y, e.angle, e.turretAngle, e.tread, 1, e.variant);
+  // HP bar (axis-aligned, above tank)
+  if (e.hp < e.hpMax) {
+    const bw = 30, bh = 4;
+    const x = e.x - bw/2, y = e.y - 24;
+    ctx.fillStyle = '#330';
+    ctx.fillRect(x - 1, y - 1, bw + 2, bh + 2);
+    ctx.fillStyle = '#a01010';
+    ctx.fillRect(x, y, bw, bh);
+    ctx.fillStyle = '#30c030';
+    ctx.fillRect(x, y, bw * (e.hp / e.hpMax), bh);
+  }
+}
+
+function drawCastle(x, y) {
+  ctx.save();
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 56, 60, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // body
+  ctx.fillStyle = '#caa05a';
+  ctx.fillRect(x - 40, y + 4, 80, 50);
+  ctx.strokeStyle = '#6c4a20';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x - 40, y + 4, 80, 50);
+
+  // brick texture
+  ctx.fillStyle = '#a48045';
+  for (let i = 0; i < 4; i++) {
+    const xo = (i % 2) * 10;
+    ctx.fillRect(x - 38 + xo, y + 10 + i * 10, 6, 4);
+    ctx.fillRect(x - 22 + xo, y + 10 + i * 10, 6, 4);
+    ctx.fillRect(x - 6 + xo, y + 10 + i * 10, 6, 4);
+    ctx.fillRect(x + 10 + xo, y + 10 + i * 10, 6, 4);
+    ctx.fillRect(x + 26 + xo, y + 10 + i * 10, 6, 4);
+  }
+
+  // crenellations top of body
+  for (let i = 0; i < 5; i++) {
+    const cx = x - 36 + i * 18;
+    ctx.fillStyle = '#caa05a';
+    ctx.fillRect(cx, y - 4, 10, 10);
+    ctx.strokeRect(cx, y - 4, 10, 10);
+  }
+
+  // towers
+  drawTower(x - 48, y - 20);
+  drawTower(x + 34, y - 20);
+
+  // gate
+  ctx.fillStyle = '#3c2008';
+  ctx.beginPath();
+  ctx.moveTo(x - 14, y + 54);
+  ctx.lineTo(x - 14, y + 30);
+  ctx.quadraticCurveTo(x, y + 12, x + 14, y + 30);
+  ctx.lineTo(x + 14, y + 54);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#1a0d04';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // gate planks
+  ctx.strokeStyle = 'rgba(255,210,150,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y + 22); ctx.lineTo(x - 6, y + 54);
+  ctx.moveTo(x + 6, y + 22); ctx.lineTo(x + 6, y + 54);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawTower(tx, ty) {
+  // base
+  ctx.fillStyle = '#caa05a';
+  ctx.fillRect(tx, ty, 22, 50);
+  ctx.strokeStyle = '#6c4a20';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(tx, ty, 22, 50);
+  // window
+  ctx.fillStyle = '#3c2008';
+  ctx.fillRect(tx + 7, ty + 16, 8, 12);
+  // crenellations
+  ctx.fillStyle = '#caa05a';
+  ctx.fillRect(tx - 2, ty - 6, 6, 8);
+  ctx.fillRect(tx + 8, ty - 6, 6, 8);
+  ctx.fillRect(tx + 18, ty - 6, 6, 8);
+  ctx.strokeRect(tx - 2, ty - 6, 6, 8);
+  ctx.strokeRect(tx + 8, ty - 6, 6, 8);
+  ctx.strokeRect(tx + 18, ty - 6, 6, 8);
+  // flag pole
+  ctx.strokeStyle = '#222';
+  ctx.beginPath();
+  ctx.moveTo(tx + 11, ty - 24);
+  ctx.lineTo(tx + 11, ty - 4);
+  ctx.stroke();
+  // flag
+  ctx.fillStyle = '#c83018';
+  ctx.beginPath();
+  ctx.moveTo(tx + 11, ty - 24);
+  ctx.lineTo(tx + 24, ty - 20);
+  ctx.lineTo(tx + 11, ty - 14);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawCannon(x, y, angle, type, isGhost) {
+  ctx.save();
+  if (isGhost) ctx.globalAlpha = 0.55;
+  // tile platform
+  ctx.fillStyle = '#a8d976';
+  ctx.fillRect(x - 22, y - 22, 44, 44);
+  ctx.strokeStyle = '#5b8d3a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x - 22, y - 22, 44, 44);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fillRect(x - 18, y - 18, 36, 36);
+
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  if (type === 0) {
+    // Bottle cannon — bulbous body
+    ctx.fillStyle = '#7a5232';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 16, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3b2412';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // neck
+    ctx.fillStyle = '#5a3a22';
+    ctx.fillRect(8, -4, 14, 8);
+    ctx.strokeRect(8, -4, 14, 8);
+    // muzzle
+    ctx.fillStyle = '#2a1a0a';
+    ctx.beginPath();
+    ctx.arc(22, 0, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (type === 1) {
+    // Mortar — squat with vertical-ish barrel
+    ctx.fillStyle = '#3c4d2a';
+    ctx.fillRect(-14, -10, 22, 20);
+    ctx.strokeStyle = '#1a2410';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-14, -10, 22, 20);
+    // wheels
+    ctx.fillStyle = '#1c1c1c';
+    ctx.beginPath(); ctx.arc(-10, 12, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6, 12, 5, 0, Math.PI * 2); ctx.fill();
+    // barrel
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, -5, 18, 10);
+    ctx.strokeRect(0, -5, 18, 10);
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.arc(18, 0, 5, 0, Math.PI * 2); ctx.fill();
+  } else {
+    // Sniper — long barrel
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(-12, -8, 18, 16);
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-12, -8, 18, 16);
+    // long barrel
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(-2, -4, 26, 8);
+    ctx.strokeRect(-2, -4, 26, 8);
+    // muzzle
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.arc(24, 0, 4, 0, Math.PI * 2); ctx.fill();
+    // wheels
+    ctx.fillStyle = '#1c1c1c';
+    ctx.beginPath(); ctx.arc(-8, 10, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4, 10, 5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawProjectile(p) {
+  // Trail
+  for (let i = 0; i < p.trail.length; i++) {
+    const t = p.trail[i];
+    const alpha = (i + 1) / p.trail.length * 0.4;
+    ctx.fillStyle = `rgba(60, 60, 60, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 2 + i * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Ball
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.beginPath();
+  ctx.arc(p.x - 1, p.y - 1, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawEffect(fx) {
+  const k = fx.t / fx.life;
+  ctx.save();
+  if (fx.type === 'hit') {
+    ctx.globalAlpha = 1 - k;
+    ctx.fillStyle = '#fff5a0';
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, 4 + k * 10, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (fx.type === 'kill') {
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = '#ffa030';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2;
+      const r1 = 6 + k * 14;
+      const r2 = 14 + k * 22;
+      ctx.beginPath();
+      ctx.moveTo(fx.x + Math.cos(a) * r1, fx.y + Math.sin(a) * r1);
+      ctx.lineTo(fx.x + Math.cos(a) * r2, fx.y + Math.sin(a) * r2);
+      ctx.stroke();
+    }
+  } else if (fx.type === 'muzzle') {
+    ctx.globalAlpha = 1 - k;
+    ctx.fillStyle = '#ffd060';
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, 5 - k * 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (fx.type === 'crash') {
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = '#a00000';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(fx.x, fx.y, 16 + k * 20, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawGridOverlay() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.32)';
+  ctx.fillRect(0, PLAY_TOP, W, H - PLAY_TOP - 60);
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1;
+  for (let c = 0; c <= COLS; c++) {
+    ctx.beginPath();
+    ctx.moveTo(c * TILE, PLAY_OFFSET_Y);
+    ctx.lineTo(c * TILE, PLAY_OFFSET_Y + ROWS * TILE);
+    ctx.stroke();
+  }
+  for (let r = 0; r <= ROWS; r++) {
+    ctx.beginPath();
+    ctx.moveTo(0, PLAY_OFFSET_Y + r * TILE);
+    ctx.lineTo(W, PLAY_OFFSET_Y + r * TILE);
+    ctx.stroke();
+  }
+  // highlight cannons sellable
+  for (const c of cannons) {
+    ctx.strokeStyle = 'rgba(255, 200, 80, 0.9)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(c.col * TILE + 2, PLAY_OFFSET_Y + c.row * TILE + 2, TILE - 4, TILE - 4);
+  }
+  ctx.restore();
+}
+
+function drawLifeBubble(x, y) {
+  ctx.save();
+  // bubble body
+  const bw = 130, bh = 28;
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  roundRect(ctx, x - bw/2, y - bh/2, bw, bh, 12);
+  ctx.fill();
+  ctx.stroke();
+  // tail
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y + bh/2 - 1);
+  ctx.lineTo(x, y + bh/2 + 10);
+  ctx.lineTo(x + 6, y + bh/2 - 1);
+  ctx.closePath();
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.stroke();
+  // label
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 14px Nunito, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Life:', x - bw/2 + 8, y);
+  // bar
+  const bx = x - bw/2 + 46, by = y - 8, bbw = 70, bbh = 16;
+  ctx.fillStyle = '#222';
+  ctx.fillRect(bx - 1, by - 1, bbw + 2, bbh + 2);
+  ctx.fillStyle = '#330';
+  ctx.fillRect(bx, by, bbw, bbh);
+  const k = castleLife / CASTLE_LIFE_MAX;
+  const grd = ctx.createLinearGradient(bx, by, bx + bbw, by);
+  grd.addColorStop(0, '#5fd234');
+  grd.addColorStop(1, '#2e8e18');
+  ctx.fillStyle = grd;
+  ctx.fillRect(bx, by, bbw * k, bbh);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawCannonRangePreview() {
+  const px = hoverCol * TILE + TILE / 2;
+  const py = PLAY_OFFSET_Y + hoverRow * TILE + TILE / 2;
+  const valid = canPlaceAt(hoverCol, hoverRow);
+  ctx.save();
+  ctx.strokeStyle = valid ? 'rgba(80,220,80,0.8)' : 'rgba(220,60,60,0.8)';
+  ctx.fillStyle = valid ? 'rgba(80,220,80,0.12)' : 'rgba(220,60,60,0.12)';
+  ctx.lineWidth = 2;
+  const r = CANNON_TYPES[placingType].range * TILE;
+  ctx.beginPath();
+  ctx.arc(px, py, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // ghost cannon
+  drawCannon(px, py, 0, placingType, true);
+  ctx.restore();
+}
+
+/* ════════════════════════════════════════════
+   PLACEMENT / SELLING
+═══════════════════════════════════════════════ */
+function canPlaceAt(col, row) {
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
+  if (pathCells[row][col]) return false;
+  if (cellCannon[row][col]) return false;
+  if (placingType < 0) return false;
+  if (money < CANNON_TYPES[placingType].cost) return false;
+  return true;
+}
+
+function placeCannon(col, row) {
+  if (!canPlaceAt(col, row)) return false;
+  const t = CANNON_TYPES[placingType];
+  const c = {
+    col, row,
+    x: col * TILE + TILE / 2,
+    y: PLAY_OFFSET_Y + row * TILE + TILE / 2,
+    type: placingType,
+    power: t.power, freq: t.freq, range: t.range, cost: t.cost,
+    angle: -Math.PI / 4,
+    cooldown: 1 / t.freq
+  };
+  cannons.push(c);
+  cellCannon[row][col] = c;
+  money -= t.cost;
+  placingType = -1;
+  document.getElementById('ghost-cannon').classList.remove('show');
+  document.getElementById('btn-buy').classList.remove('active');
+  updateHud();
+  return true;
+}
+
+function sellCannonAt(col, row) {
+  const c = cellCannon[row][col];
+  if (!c) return false;
+  cellCannon[row][col] = null;
+  cannons = cannons.filter(x => x !== c);
+  money += Math.floor(c.cost * 0.5);
+  updateHud();
+  return true;
+}
+
+/* ════════════════════════════════════════════
+   HUD / UI
+═══════════════════════════════════════════════ */
+function updateHud() {
+  document.getElementById('hud-level').textContent = level;
+  document.getElementById('hud-score').textContent = score;
+  document.getElementById('hud-money').textContent = money;
+}
+
+function showResults() {
+  showScreen('screen-results');
+  document.getElementById('result-level').textContent = level;
+  document.getElementById('result-life').textContent = castleLife;
+  const k = castleLife / CASTLE_LIFE_MAX;
+  let stars;
+  if (k >= 0.9) stars = 5;
+  else if (k >= 0.7) stars = 4;
+  else if (k >= 0.5) stars = 3;
+  else if (k >= 0.3) stars = 2;
+  else stars = 1;
+  renderStars(stars);
+}
+
+function renderStars(filled) {
+  const wrap = document.getElementById('result-stars');
+  wrap.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const lit = i < filled;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('class', 'star');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z');
+    if (lit) {
+      path.setAttribute('fill', '#ffd24a');
+      path.setAttribute('stroke', '#7a4a08');
+    } else {
+      path.setAttribute('fill', '#222');
+      path.setAttribute('stroke', '#000');
+    }
+    path.setAttribute('stroke-width', '1');
+    svg.appendChild(path);
+    wrap.appendChild(svg);
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function hideAllModals() {
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('show'));
+}
+
+/* ════════════════════════════════════════════
+   BUY MODAL
+═══════════════════════════════════════════════ */
+function buildCannonTabs() {
+  const tabs = document.getElementById('cannon-tabs');
+  tabs.innerHTML = '';
+  for (let i = 0; i < CANNON_TYPES.length; i++) {
+    const tab = document.createElement('div');
+    tab.className = 'cannon-tab' + (i === buyTabIndex ? ' selected' : '');
+    tab.dataset.idx = String(i);
+    tab.innerHTML = cannonIconSvg(i);
+    tab.addEventListener('click', () => { buyTabIndex = i; buildCannonTabs(); refreshBuyStats(); });
+    tabs.appendChild(tab);
+  }
+}
+
+function cannonIconSvg(type) {
+  // simple SVG icons matching the canvas style
+  if (type === 0) {
+    return `<svg viewBox="0 0 60 60">
+      <rect x="2" y="2" width="56" height="56" rx="4" fill="#b8d870" stroke="#5b8d3a" stroke-width="2"/>
+      <ellipse cx="22" cy="32" rx="14" ry="10" fill="#7a5232" stroke="#3b2412" stroke-width="2"/>
+      <rect x="28" y="28" width="14" height="8" fill="#5a3a22" stroke="#3b2412" stroke-width="2"/>
+      <circle cx="48" cy="32" r="4" fill="#2a1a0a"/>
+    </svg>`;
+  }
+  if (type === 1) {
+    return `<svg viewBox="0 0 60 60">
+      <rect x="2" y="2" width="56" height="56" rx="4" fill="#b8d870" stroke="#5b8d3a" stroke-width="2"/>
+      <rect x="14" y="20" width="22" height="22" fill="#3c4d2a" stroke="#1a2410" stroke-width="2"/>
+      <rect x="28" y="26" width="20" height="10" fill="#222" stroke="#0a0a0a" stroke-width="2"/>
+      <circle cx="18" cy="46" r="4" fill="#1c1c1c"/>
+      <circle cx="32" cy="46" r="4" fill="#1c1c1c"/>
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 60 60">
+    <rect x="2" y="2" width="56" height="56" rx="4" fill="#b8d870" stroke="#5b8d3a" stroke-width="2"/>
+    <rect x="14" y="24" width="18" height="14" fill="#2a2a2a" stroke="#0a0a0a" stroke-width="2"/>
+    <rect x="22" y="28" width="30" height="6" fill="#1a1a1a" stroke="#000" stroke-width="2"/>
+    <circle cx="18" cy="44" r="4" fill="#1c1c1c"/>
+    <circle cx="30" cy="44" r="4" fill="#1c1c1c"/>
+  </svg>`;
+}
+
+function refreshBuyStats() {
+  const t = CANNON_TYPES[buyTabIndex];
+  document.getElementById('stat-power').textContent = t.power;
+  document.getElementById('stat-freq').textContent = t.freq;
+  document.getElementById('stat-range').textContent = t.range;
+  document.getElementById('stat-price').textContent = '$' + t.cost;
+  const btn = document.getElementById('btn-buy-confirm');
+  if (money < t.cost) btn.classList.add('disabled'); else btn.classList.remove('disabled');
+}
+
+function openBuyModal() {
+  if (sellMode) toggleSellMode();
+  paused = true;
+  buildCannonTabs();
+  refreshBuyStats();
+  document.getElementById('buy-modal').classList.add('show');
+}
+
+function closeBuyModal() {
+  document.getElementById('buy-modal').classList.remove('show');
+  paused = false;
+}
+
+function confirmBuy() {
+  const t = CANNON_TYPES[buyTabIndex];
+  if (money < t.cost) return;
+  placingType = buyTabIndex;
+  closeBuyModal();
+  document.getElementById('btn-buy').classList.add('active');
+  document.getElementById('ghost-svg').innerHTML = ghostInner(placingType);
+}
+
+function ghostInner(type) {
+  // approximate ghost using same SVG icon (without tile background)
+  if (type === 0) {
+    return `<ellipse cx="20" cy="25" rx="13" ry="9" fill="#7a5232" stroke="#3b2412" stroke-width="2"/>
+            <rect x="26" y="22" width="14" height="7" fill="#5a3a22" stroke="#3b2412" stroke-width="2"/>
+            <circle cx="44" cy="25" r="3.5" fill="#2a1a0a"/>`;
+  }
+  if (type === 1) {
+    return `<rect x="13" y="15" width="20" height="18" fill="#3c4d2a" stroke="#1a2410" stroke-width="2"/>
+            <rect x="27" y="20" width="18" height="9" fill="#222" stroke="#0a0a0a" stroke-width="2"/>
+            <circle cx="16" cy="38" r="3.5" fill="#1c1c1c"/>
+            <circle cx="30" cy="38" r="3.5" fill="#1c1c1c"/>`;
+  }
+  return `<rect x="12" y="18" width="18" height="12" fill="#2a2a2a" stroke="#0a0a0a" stroke-width="2"/>
+          <rect x="20" y="22" width="26" height="6" fill="#1a1a1a" stroke="#000" stroke-width="2"/>
+          <circle cx="16" cy="34" r="3.5" fill="#1c1c1c"/>
+          <circle cx="26" cy="34" r="3.5" fill="#1c1c1c"/>`;
+}
+
+function cancelBuy() {
+  closeBuyModal();
+  placingType = -1;
+  document.getElementById('btn-buy').classList.remove('active');
+  document.getElementById('ghost-cannon').classList.remove('show');
+}
+
+function toggleSellMode() {
+  sellMode = !sellMode;
+  document.getElementById('btn-sell').classList.toggle('active', sellMode);
+  if (sellMode && placingType >= 0) {
+    placingType = -1;
+    document.getElementById('btn-buy').classList.remove('active');
+    document.getElementById('ghost-cannon').classList.remove('show');
+  }
+}
+
+/* ════════════════════════════════════════════
+   EVENT HANDLERS
+═══════════════════════════════════════════════ */
+function onCanvasMove(e) {
+  const rect = canvas.getBoundingClientRect();
+  mouseX = (e.clientX - rect.left) * (W / rect.width);
+  mouseY = (e.clientY - rect.top) * (H / rect.height);
+  hoverCol = Math.floor(mouseX / TILE);
+  hoverRow = Math.floor((mouseY - PLAY_OFFSET_Y) / TILE);
+
+  if (placingType >= 0) {
+    const ghost = document.getElementById('ghost-cannon');
+    ghost.classList.add('show');
+    const validCell = hoverCol >= 0 && hoverCol < COLS && hoverRow >= 0 && hoverRow < ROWS;
+    const valid = validCell && canPlaceAt(hoverCol, hoverRow);
+    if (validCell) {
+      const snapX = hoverCol * TILE;
+      const snapY = PLAY_OFFSET_Y + hoverRow * TILE;
+      const left = (snapX / W) * 100;
+      const top = (snapY / H) * 100;
+      const width = (TILE / W) * 100;
+      const height = (TILE / H) * 100;
+      ghost.style.left = left + '%';
+      ghost.style.top = top + '%';
+      ghost.style.width = width + '%';
+      ghost.style.height = height + '%';
+      ghost.classList.toggle('invalid', !valid);
+    } else {
+      ghost.classList.remove('show');
+    }
+  }
+}
+
+function onCanvasClick(e) {
+  if (e.button === 2) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (W / rect.width);
+  const y = (e.clientY - rect.top) * (H / rect.height);
+  const col = Math.floor(x / TILE);
+  const row = Math.floor((y - PLAY_OFFSET_Y) / TILE);
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+
+  if (placingType >= 0) {
+    placeCannon(col, row);
+  } else if (sellMode) {
+    if (cellCannon[row][col]) {
+      sellCannonAt(col, row);
+    }
+  }
+}
+
+function onContextMenu(e) {
+  e.preventDefault();
+  if (placingType >= 0) cancelBuy();
+}
+
+function onKey(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('buy-modal').classList.contains('show')) cancelBuy();
+    else if (placingType >= 0) cancelBuy();
+    else if (sellMode) toggleSellMode();
+    else if (document.getElementById('pause-modal').classList.contains('show')) {
+      document.getElementById('pause-modal').classList.remove('show');
+      paused = false;
+    }
+  }
+}
+
+/* ════════════════════════════════════════════
+   BOOTSTRAP
+═══════════════════════════════════════════════ */
+function startGame() {
+  resetGame();
+  showScreen('screen-game');
+  running = true;
+  paused = false;
+  lastT = 0;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  canvas = document.getElementById('game-canvas');
+  ctx = canvas.getContext('2d');
+
+  // Menu buttons
+  document.getElementById('btn-menu-start').addEventListener('click', () => showScreen('screen-instructions'));
+  document.getElementById('btn-instr-start').addEventListener('click', startGame);
+
+  // Game buttons
+  document.getElementById('btn-buy').addEventListener('click', () => {
+    if (placingType >= 0) { cancelBuy(); return; }
+    if (sellMode) toggleSellMode();
+    openBuyModal();
+  });
+  document.getElementById('btn-sell').addEventListener('click', toggleSellMode);
+
+  document.getElementById('btn-buy-confirm').addEventListener('click', confirmBuy);
+  document.getElementById('btn-buy-cancel').addEventListener('click', cancelBuy);
+
+  document.getElementById('btn-help').addEventListener('click', () => {
+    paused = true;
+    document.getElementById('help-modal').classList.add('show');
+  });
+  document.getElementById('btn-help-close').addEventListener('click', () => {
+    document.getElementById('help-modal').classList.remove('show');
+    paused = false;
+  });
+
+  document.getElementById('btn-pause').addEventListener('click', () => {
+    paused = true;
+    document.getElementById('pause-modal').classList.add('show');
+  });
+  document.getElementById('btn-pause-resume').addEventListener('click', () => {
+    document.getElementById('pause-modal').classList.remove('show');
+    paused = false;
+  });
+  document.getElementById('btn-pause-menu').addEventListener('click', () => {
+    document.getElementById('pause-modal').classList.remove('show');
+    running = false;
+    paused = false;
+    showScreen('screen-menu');
+  });
+
+  // Results buttons
+  document.getElementById('btn-results-ok').addEventListener('click', () => showScreen('screen-menu'));
+  document.getElementById('btn-results-help').addEventListener('click', () => {
+    paused = true;
+    document.getElementById('help-modal').classList.add('show');
+  });
+
+  // Canvas interaction (mouse)
+  canvas.addEventListener('mousemove', onCanvasMove);
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('contextmenu', onContextMenu);
+  document.addEventListener('keydown', onKey);
+
+  // Canvas interaction (touch): touchstart shows ghost, touchmove drags ghost,
+  // short touchend = place (click), long-press without movement = cancel (contextmenu).
+  (function () {
+    const LONG_PRESS_MS = 500;
+    const MOVE_THRESHOLD = 10;
+    let startT = 0, startX = 0, startY = 0, moved = false;
+    canvas.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startT = Date.now();
+      startX = t.clientX; startY = t.clientY;
+      moved = false;
+      onCanvasMove({ clientX: t.clientX, clientY: t.clientY });
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (Math.hypot(t.clientX - startX, t.clientY - startY) > MOVE_THRESHOLD) moved = true;
+      onCanvasMove({ clientX: t.clientX, clientY: t.clientY });
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchend', (e) => {
+      const dt = Date.now() - startT;
+      const t = e.changedTouches[0];
+      if (dt >= LONG_PRESS_MS && !moved) {
+        onContextMenu({ preventDefault: () => {} });
+      } else {
+        onCanvasClick({ clientX: t.clientX, clientY: t.clientY, button: 0 });
+      }
+      e.preventDefault();
+    }, { passive: false });
+  })();
+
+  // Scale-to-fit so the game fills phone / big touch screens
+  (function () {
+    const wrap = document.querySelector('.game-wrap');
+    const baseW = 900, baseH = 600;
+    function fitStage() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const s = Math.min(vw / baseW, vh / baseH);
+      const x = (vw - baseW * s) / 2;
+      const y = (vh - baseH * s) / 2;
+      wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    }
+    window.addEventListener('resize', fitStage);
+    window.addEventListener('orientationchange', fitStage);
+    window.addEventListener('load', fitStage);
+    fitStage();
+  })();
+
+  initPathCells();
+  requestAnimationFrame(loop);
+});
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

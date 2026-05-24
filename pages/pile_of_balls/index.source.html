@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pile of Balls</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,90,90,.10) 0 14%, transparent 15%),
+    radial-gradient(circle at 75% 65%, rgba(255,90,90,.08) 0 18%, transparent 19%),
+    radial-gradient(circle at 85% 15%, rgba(255,90,90,.07) 0 10%, transparent 11%),
+    radial-gradient(circle at 10% 80%, rgba(255,120,120,.06) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 50% 50%, #7a0f23 0%, #4a0c1c 65%, #2c0712 100%);
+  background-attachment: fixed;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 940px;
+  height: 720px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+#board { touch-action: none; }
+
+/* Subtle swirl texture overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 25%, transparent 22%, rgba(255,180,180,.04) 23%, transparent 25%),
+    radial-gradient(circle at 80% 70%, transparent 30%, rgba(255,180,180,.04) 31%, transparent 33%),
+    radial-gradient(circle at 60% 20%, transparent 18%, rgba(255,180,180,.03) 19%, transparent 21%);
+  z-index: 0;
+}
+
+/* ─── Screens ─── */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 900px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.screen.active { display: flex; }
+
+/* ─── TITLE SCREEN ─── */
+#screen-title { gap: 36px; flex-direction: row; flex-wrap: wrap; justify-content: center; position: relative; }
+.title-wrap {
+  position: relative;
+  width: 320px; height: 230px;
+  flex-shrink: 0;
+}
+.badge {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  text-align: center;
+  color: #ffea4f;
+  -webkit-text-stroke: 2px #112a4e;
+  text-shadow: 2px 3px 0 rgba(0,0,0,.45);
+  letter-spacing: 1px;
+}
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.45) 0%, rgba(255,255,255,.0) 45%);
+  pointer-events: none;
+}
+.badge-blue {
+  width: 130px; height: 130px;
+  top: 0; left: 20px;
+  font-size: 36px;
+  background: radial-gradient(circle at 30% 28%, #6ed0f5, #1aa5e6 55%, #086ca8 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge-red {
+  width: 130px; height: 130px;
+  top: 65px; left: 0;
+  font-size: 36px;
+  background: radial-gradient(circle at 30% 28%, #ff7e7e, #d62a2a 55%, #8a0e0e 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.3), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge-yellow {
+  width: 150px; height: 150px;
+  top: 60px; left: 150px;
+  font-size: 40px;
+  background: radial-gradient(circle at 30% 28%, #fff09a, #ffcc1a 50%, #c08a00 100%);
+  box-shadow: inset -8px -10px 18px rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.5);
+}
+.badge span { display: block; transform: translateY(-1px); }
+
+/* Decorative ball clusters scattered on title */
+.deco-cluster {
+  position: absolute;
+  width: 90px; height: 90px;
+  pointer-events: none;
+  opacity: .92;
+  z-index: 0;
+}
+#deco-1 { top: 12%; right: 10%; width: 90px; height: 90px; }
+#deco-2 { bottom: 18%; left: 8%; width: 100px; height: 100px; }
+#deco-3 { bottom: 24%; left: 42%; width: 95px; height: 95px; }
+
+/* ─── START BUTTON ─── */
+.btn-start {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  color: #5b1a00;
+  -webkit-text-stroke: 1px #391000;
+  text-shadow: 2px 2px 0 rgba(255,240,200,.6);
+  padding: 16px 70px;
+  border: 4px solid #b35a18;
+  border-radius: 80px;
+  cursor: pointer;
+  background:
+    radial-gradient(ellipse at 50% 30%, #fff2b8 0%, #ffd96a 35%, #f1a31a 75%, #c97a10 100%);
+  box-shadow:
+    inset 0 6px 14px rgba(255,255,255,.45),
+    inset 0 -8px 18px rgba(150,60,0,.35),
+    0 8px 18px rgba(0,0,0,.55);
+  transition: transform .12s ease, box-shadow .12s ease;
+  letter-spacing: 2px;
+}
+.btn-start:hover { transform: translateY(-2px) scale(1.03); }
+.btn-start:active { transform: translateY(1px) scale(.98); }
+
+/* ─── INSTRUCTIONS / GAME OVER CARDS ─── */
+.info-card {
+  position: relative;
+  max-width: 640px;
+  text-align: center;
+  padding: 40px 36px 36px;
+  border-radius: 28px;
+  background: radial-gradient(ellipse at center, rgba(255,210,120,.42) 0%, rgba(255,150,60,.18) 50%, transparent 80%);
+}
+.info-card h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(34px, 5vw, 46px);
+  color: #fff;
+  text-shadow: 0 3px 0 #2b0915, 2px 4px 14px rgba(0,0,0,.6);
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
+.info-card p {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: clamp(15px, 2.1vw, 19px);
+  color: #fff;
+  text-shadow: 0 2px 0 #2b0915, 1px 2px 6px rgba(0,0,0,.55);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+.info-card .btn-start { margin-top: 18px; }
+
+/* ─── GAME SCREEN ─── */
+#screen-game { gap: 0; max-width: 920px; }
+
+.game-layout {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+  padding: 18px 14px 14px;
+  width: 100%;
+  justify-content: center;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 170px;
+}
+
+.top-icons {
+  display: flex;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 2px solid rgba(255,255,255,.45);
+  color: #fff;
+  font-size: 18px;
+  font-family: 'Fredoka One', cursive;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: background .12s, transform .12s;
+}
+.icon-btn:hover { background: rgba(255,255,255,.25); transform: scale(1.05); }
+
+/* Side stats panel */
+.side-panel {
+  background: linear-gradient(180deg, #16808f 0%, #0a4b59 55%, #06303d 100%);
+  border: 3px solid rgba(255,255,255,.9);
+  border-radius: 18px;
+  padding: 20px 18px;
+  box-shadow: 0 0 22px rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.55);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 170px;
+}
+.stat-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #ff9442;
+  text-shadow: 0 2px 0 #5a1500, 1px 2px 4px rgba(0,0,0,.6);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #5b1a00;
+  -webkit-text-stroke: .5px #391000;
+  background: radial-gradient(ellipse at 50% 30%, #fff2b8 0%, #ffd96a 50%, #f1a31a 100%);
+  border: 2px solid #b35a18;
+  border-radius: 50px;
+  padding: 4px 14px;
+  display: inline-block;
+  box-shadow: inset 0 3px 8px rgba(255,255,255,.4), inset 0 -4px 10px rgba(150,60,0,.3), 0 3px 6px rgba(0,0,0,.45);
+}
+
+/* Next-piece preview floating in top-right of left col */
+.next-preview-wrap {
+  position: relative;
+  width: 88px; height: 88px;
+  align-self: flex-end;
+  margin-top: -8px;
+  margin-bottom: -6px;
+}
+.next-preview {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4d4f6e, #1c1d35 70%, #0a0a18 100%);
+  border: 3px solid rgba(255,255,255,.85);
+  box-shadow: 0 0 12px rgba(255,255,255,.25), 0 6px 14px rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#next-canvas { width: 78px; height: 78px; display: block; }
+
+.play-area {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 35%, #4ec1cf 0%, #19788a 55%, #0a3848 100%);
+  border: 4px solid rgba(255,255,255,.92);
+  border-radius: 22px;
+  box-shadow: 0 0 24px rgba(255,255,255,.22), 0 12px 28px rgba(0,0,0,.6);
+  padding: 10px;
+  flex-shrink: 0;
+}
+#board {
+  display: block;
+  border-radius: 12px;
+  width: 320px;
+  height: 560px;
+  aspect-ratio: 8 / 14;
+}
+
+/* Touch controls — always visible (game targets touch + desktop) */
+.touch-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.touch-btn {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #ffe79a, #f1a31a 70%, #b35a18 100%);
+  border: 3px solid #b35a18;
+  color: #5b1a00;
+  font-size: 28px;
+  font-family: 'Fredoka One', cursive;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 4px 8px rgba(255,255,255,.45), inset 0 -4px 8px rgba(150,60,0,.3), 0 4px 10px rgba(0,0,0,.55);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.touch-btn:active { transform: scale(.93); }
+
+/* Game-over score line */
+#final-score, #final-level {
+  font-family: 'Fredoka One', cursive;
+  color: #ffd96a;
+  -webkit-text-stroke: 1px #5a1500;
+}
+
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="fit-stage"><div class="game-wrap">
+
+<!-- ───── TITLE ───── -->
+<div id="screen-title" class="screen active">
+  <div class="title-wrap">
+    <div class="badge badge-blue"><span>Pile</span></div>
+    <div class="badge badge-red"><span>of</span></div>
+    <div class="badge badge-yellow"><span>Balls</span></div>
+  </div>
+  <button class="btn-start" id="btn-title-start">START</button>
+  <canvas class="deco-cluster" id="deco-1" width="180" height="180"></canvas>
+  <canvas class="deco-cluster" id="deco-2" width="180" height="180"></canvas>
+  <canvas class="deco-cluster" id="deco-3" width="180" height="180"></canvas>
+</div>
+
+<!-- ───── INSTRUCTIONS ───── -->
+<div id="screen-instructions" class="screen">
+  <div class="info-card">
+    <h2>Instructions</h2>
+    <p>Destroy balls by connecting 4 or more balls of the same colour.</p>
+    <p>Use the left and right arrow keys to move, up and down arrow keys to rotate, press the spacebar to drop.</p>
+    <button class="btn-start" id="btn-inst-start">START</button>
+  </div>
+</div>
+
+<!-- ───── GAME ───── -->
+<div id="screen-game" class="screen">
+  <div class="game-layout">
+    <div class="left-col">
+      <div class="top-icons">
+        <button class="icon-btn" id="btn-help" title="Instructions">?</button>
+        <button class="icon-btn" id="btn-pause" title="Pause">&#10074;&#10074;</button>
+      </div>
+      <div class="next-preview-wrap">
+        <div class="next-preview"><canvas id="next-canvas" width="156" height="156"></canvas></div>
+      </div>
+      <div class="side-panel">
+        <div class="stat">
+          <div class="stat-label">Score:</div>
+          <div class="stat-value" id="stat-score">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Level:</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Next Level:</div>
+          <div class="stat-value" id="stat-next">40</div>
+        </div>
+      </div>
+      <div class="touch-controls">
+        <button class="touch-btn" id="t-left">&#9664;</button>
+        <button class="touch-btn" id="t-rotL">&#8634;</button>
+        <button class="touch-btn" id="t-drop">&#11015;</button>
+        <button class="touch-btn" id="t-rotR">&#8635;</button>
+        <button class="touch-btn" id="t-right">&#9654;</button>
+      </div>
+    </div>
+    <div class="play-area">
+      <canvas id="board" width="384" height="672"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ───── GAME OVER ───── -->
+<div id="screen-gameover" class="screen">
+  <div class="info-card">
+    <h2>Game Over</h2>
+    <p>Final Score: <span id="final-score">0</span></p>
+    <p>Level Reached: <span id="final-level">1</span></p>
+    <button class="btn-start" id="btn-restart">Play Again</button>
+  </div>
+</div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+(() => {
+  // ────── Constants — HEX/BRICK GRID ──────
+  // Brick-pack layout: even rows have COLS cells, odd rows have COLS-1 cells
+  // (offset by half a cell). Each ball sits in a "valley" between two balls
+  // below — like cannonballs stacked in a pyramid.
+  const COLS = 8, ROWS = 16;
+  const CELL = 48;                       // horizontal spacing between cell centres
+  const ROW_H = 42;                      // vertical spacing ≈ sqrt(3)/2 * CELL
+  const BALL_R = 22;                     // ball radius
+  const COLORS = ['#E63946', '#1D7AD6', '#3FBF3F', '#F4C430', '#9B59B6'];
+  const FALL_SPEED   = 42;               // cells/second for the settle animation (faster = snappier between pieces)
+  const SLIDE_MIN_MS = 80;               // minimum duration for short ball moves
+  const ROT_ANIM_MS  = 140;              // rotation animation duration
+  const CLEAR_ANIM_MS = 200;             // duration of the match-clear pop animation
+  const LOCK_DELAY_MS = 250;             // grace period before locking when piece can't fall
+
+  // ────── Hex-grid helpers ──────
+  // cellsInRow: even rows = COLS, odd rows = COLS-1 (because of the half-cell offset)
+  function cellsInRow(r)     { return r % 2 === 0 ? COLS : COLS - 1; }
+  function validCell(r, c)   { return r >= 0 && r < ROWS && c >= 0 && c < cellsInRow(r); }
+  function cellX(r, c)       { return (c + 0.5 + (r % 2) * 0.5) * CELL; }
+  function cellY(r)          { return (r + 0.5) * ROW_H; }
+
+  // Six hex-neighbours of (r,c) — 2 same-row + 2 above + 2 below.
+  function neighbors(r, c) {
+    const out = [];
+    if (validCell(r, c - 1)) out.push([r, c - 1]);
+    if (validCell(r, c + 1)) out.push([r, c + 1]);
+    if (r % 2 === 0) {
+      if (validCell(r - 1, c - 1)) out.push([r - 1, c - 1]);
+      if (validCell(r - 1, c    )) out.push([r - 1, c    ]);
+      if (validCell(r + 1, c - 1)) out.push([r + 1, c - 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+    } else {
+      if (validCell(r - 1, c    )) out.push([r - 1, c    ]);
+      if (validCell(r - 1, c + 1)) out.push([r - 1, c + 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+      if (validCell(r + 1, c + 1)) out.push([r + 1, c + 1]);
+    }
+    return out;
+  }
+
+  // The two cells directly BELOW (r,c) in hex terms — a ball needs BOTH to be
+  // filled (or the floor) to rest stable. If either is empty, the ball rolls
+  // down into the valley.
+  function belowCells(r, c) {
+    const out = [];
+    if (r + 1 >= ROWS) return out;
+    if (r % 2 === 0) {
+      if (validCell(r + 1, c - 1)) out.push([r + 1, c - 1]);
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+    } else {
+      if (validCell(r + 1, c    )) out.push([r + 1, c    ]);
+      if (validCell(r + 1, c + 1)) out.push([r + 1, c + 1]);
+    }
+    return out;
+  }
+
+  // ────── State ──────
+  const G = {
+    grid: makeGrid(),
+    piece: null,          // {colors:[c0,c1,c2], row(even), col}
+    next: null,
+    score: 0,
+    level: 1,
+    threshold: 40,
+    dropTimer: 0,
+    dropInterval: 800,
+    paused: false,
+    locked: false,        // input lock during clears
+    gameOver: false,
+    clearAnim: null,      // {cells:[{r,c,color}], t, duration}
+    fallAnim: null,       // {moves:[{fromR,fromC,toR,toC,color}], t, callback}
+    lastTime: 0,
+  };
+
+  function makeGrid() {
+    // Grid is ROWS × COLS, but cells in odd rows beyond `cellsInRow(r)`-1 are
+    // unused (off-board because of the half-cell horizontal offset).
+    const g = [];
+    for (let r = 0; r < ROWS; r++) g.push(new Array(COLS).fill(-1));
+    return g;
+  }
+
+  // ────── Screen router ──────
+  const screens = ['screen-title', 'screen-instructions', 'screen-game', 'screen-gameover'];
+  function show(id) {
+    screens.forEach(s => document.getElementById(s).classList.toggle('active', s === id));
+  }
+
+  // ────── Color helpers ──────
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+  function rgbStr(r, g, b) { return `rgb(${r|0},${g|0},${b|0})`; }
+  function lighten(hex, amt) {
+    const c = hexToRgb(hex);
+    return rgbStr(c.r + (255 - c.r) * amt, c.g + (255 - c.g) * amt, c.b + (255 - c.b) * amt);
+  }
+  function darken(hex, amt) {
+    const c = hexToRgb(hex);
+    return rgbStr(c.r * (1 - amt), c.g * (1 - amt), c.b * (1 - amt));
+  }
+
+  // ────── Ball renderer ──────
+  function drawBall(ctx, cx, cy, r, colorHex, alpha = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // shadow under ball
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.ellipse(cx, cy + r * 0.85, r * 0.78, r * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // body gradient
+    const g = ctx.createRadialGradient(cx - r * 0.32, cy - r * 0.38, r * 0.05, cx, cy, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.18, lighten(colorHex, 0.45));
+    g.addColorStop(0.6, colorHex);
+    g.addColorStop(1, darken(colorHex, 0.4));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    // dark rim
+    ctx.strokeStyle = darken(colorHex, 0.55);
+    ctx.lineWidth = Math.max(1, r * 0.07);
+    ctx.stroke();
+    // glossy highlight
+    ctx.fillStyle = 'rgba(255,255,255,.65)';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 0.32, cy - r * 0.4, r * 0.28, r * 0.18, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    // small bright dot
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.42, cy - r * 0.42, r * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ────── Piece logic ──────
+  function newPieceData() {
+    return {
+      colors: [
+        COLORS[(Math.random() * COLORS.length) | 0],
+        COLORS[(Math.random() * COLORS.length) | 0],
+        COLORS[(Math.random() * COLORS.length) | 0],
+      ],
+    };
+  }
+
+  // The three cells occupied by the falling triangle. Anchor row is always
+  // EVEN (head sits in an even row, bases in the odd row below) so the piece
+  // doesn't visually zigzag as it falls through alternating rows.
+  function pieceCells(piece) {
+    const { row, col, colors } = piece;
+    // From an even row, the two below-cells are (r+1, c-1) and (r+1, c).
+    return [
+      { r: row,     c: col,     color: colors[0] },  // head (top of triangle)
+      { r: row + 1, c: col - 1, color: colors[1] },  // base-left
+      { r: row + 1, c: col,     color: colors[2] },  // base-right
+    ];
+  }
+
+  function fits(piece) {
+    for (const cell of pieceCells(piece)) {
+      if (!validCell(cell.r, cell.c)) return false;
+      if (G.grid[cell.r][cell.c] !== -1) return false;
+    }
+    return true;
+  }
+
+  function spawnPiece() {
+    const data = G.next || newPieceData();
+    G.next = newPieceData();
+    G.piece = {
+      colors: data.colors,
+      row: 0,    // always even
+      col: 3,    // bases at cols 2,3 — both valid (odd row has 7 cells)
+      // Rotation animation state — balls visually orbit the triangle centroid.
+      rotAnimT: 1,              // 1 = no animation in progress
+      rotAnimColors: null,      // ball colours at the START of the current rotation
+      rotAnimDir: 0,            // +1 = CW, -1 = CCW
+    };
+    drawNext();
+    if (!fits(G.piece)) {
+      G.gameOver = true;
+      G.piece = null;
+      endGame();
+    }
+  }
+
+  function move(dx) {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    const test = { ...G.piece, col: G.piece.col + dx };
+    if (fits(test)) {
+      G.piece = test;
+      G.piece.lockDelay = 0;   // give the player more time after a slide
+    }
+  }
+
+  // Triangle has one spatial orientation on the hex grid, so "rotate" cycles
+  // which colour is at each vertex. The renderer animates each ball travelling
+  // along an arc to its next vertex (120° around the centroid).
+  function rotate(dir) {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    const c = G.piece.colors;
+    G.piece.rotAnimColors = [...c];     // snapshot for the animation
+    G.piece.rotAnimDir = dir;
+    G.piece.rotAnimT = 0;
+    // Apply the colour permutation immediately so game logic uses the new state.
+    G.piece.colors = dir > 0
+      ? [c[1], c[2], c[0]]    // CW:  head ← base-left, base-left ← base-right, base-right ← head
+      : [c[2], c[0], c[1]];   // CCW: head ← base-right, base-left ← head,      base-right ← base-left
+  }
+
+  // Anchor row jumps by 2 each step so the piece always stays on even rows.
+  // One "hex step" = 2 grid rows ≈ 2 × ROW_H = 84 px, the same fall speed
+  // feel as one CELL in the old grid.
+  function softDrop() {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return false;
+    const test = { ...G.piece, row: G.piece.row + 2 };
+    if (fits(test)) { G.piece = test; return true; }
+    lockPiece();
+    return false;
+  }
+
+  function hardDrop() {
+    if (!G.piece || G.locked || G.paused || G.gameOver) return;
+    while (fits({ ...G.piece, row: G.piece.row + 2 })) G.piece.row += 2;
+    lockPiece();
+  }
+
+  function lockPiece() {
+    for (const cell of pieceCells(G.piece)) {
+      if (validCell(cell.r, cell.c)) {
+        G.grid[cell.r][cell.c] = cell.color;
+      }
+    }
+    G.piece = null;
+    G.locked = true;
+    // Settle the pile — balls roll into valleys until each rests on two
+    // balls below (or the floor). Then look for 4+ matches.
+    settleAnimated(() => resolveChains(1));
+  }
+
+  // ────── Matches — hex 6-way adjacency ──────
+  function findMatches() {
+    const visited = [];
+    for (let r = 0; r < ROWS; r++) visited.push(new Array(COLS).fill(false));
+    const groups = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
+        if (visited[r][c] || G.grid[r][c] === -1) continue;
+        const color = G.grid[r][c];
+        const stack = [[r, c]];
+        const group = [];
+        while (stack.length) {
+          const [cr, cc] = stack.pop();
+          if (visited[cr][cc]) continue;
+          if (G.grid[cr][cc] !== color) continue;
+          visited[cr][cc] = true;
+          group.push([cr, cc]);
+          for (const [nr, nc] of neighbors(cr, cc)) {
+            stack.push([nr, nc]);
+          }
+        }
+        if (group.length >= 4) groups.push({ color, cells: group });
+      }
+    }
+    return groups;
+  }
+
+  // ────── Pile-physics gravity (settle) ──────
+  // Each ball is stable when BOTH its below-cells are filled (or it's on the
+  // floor). Otherwise it rolls into the empty below-cell. Repeat until every
+  // ball is in a valley. Returns 2-D moves: each ball's original (pre-settle)
+  // (r,c) → final (r,c) so the renderer can animate the roll.
+  function settle() {
+    // Tag each filled cell with its pre-settle position.
+    const origins = new Map();
+    const key = (r, c) => r * COLS + c;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
+        if (G.grid[r][c] !== -1) origins.set(key(r, c), { fromR: r, fromC: c });
+      }
+    }
+    // Iteratively settle balls — bottom-up, repeat until nothing moves.
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let r = ROWS - 2; r >= 0; r--) {
+        for (let c = 0; c < cellsInRow(r); c++) {
+          if (G.grid[r][c] === -1) continue;
+          const below = belowCells(r, c);
+          const empty = below.filter(([br, bc]) => G.grid[br][bc] === -1);
+          if (empty.length === 0) continue;
+          // Pick a destination — prefer randomly between two empties so the
+          // pile shape varies a bit instead of leaning hard one way.
+          const [nr, nc] = empty[Math.floor(Math.random() * empty.length)];
+          origins.set(key(nr, nc), origins.get(key(r, c)));
+          origins.delete(key(r, c));
+          G.grid[nr][nc] = G.grid[r][c];
+          G.grid[r][c] = -1;
+          changed = true;
+        }
+      }
+    }
+    // Build move list for the animation.
+    const moves = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < cellsInRow(r); c++) {
+        if (G.grid[r][c] === -1) continue;
+        const orig = origins.get(key(r, c));
+        if (orig && (orig.fromR !== r || orig.fromC !== c)) {
+          moves.push({
+            fromR: orig.fromR, fromC: orig.fromC,
+            toR: r,            toC: c,
+            color: G.grid[r][c],
+          });
+        }
+      }
+    }
+    return moves;
+  }
+
+  function settleAnimated(callback) {
+    const moves = settle();
+    if (moves.length === 0) { callback(); return; }
+    G.fallAnim = { moves, t: 0, callback };
+  }
+
+  function resolveChains(chain) {
+    const groups = findMatches();
+    if (groups.length === 0) {
+      G.locked = false;
+      if (!G.gameOver) spawnPiece();
+      return;
+    }
+    // collect all cells to clear
+    const cells = [];
+    let total = 0;
+    for (const g of groups) {
+      total += g.cells.length;
+      for (const [r, c] of g.cells) cells.push({ r, c, color: g.color });
+    }
+    G.score += total * 10 * chain;
+    updateHUD();
+    checkLevelUp();
+    // play clear animation, then cascade survivors down, then look for chains
+    G.clearAnim = { cells, t: 0, duration: CLEAR_ANIM_MS };
+    setTimeout(() => {
+      for (const cell of cells) G.grid[cell.r][cell.c] = -1;
+      G.clearAnim = null;
+      settleAnimated(() => resolveChains(chain + 1));
+    }, CLEAR_ANIM_MS);
+  }
+
+  function checkLevelUp() {
+    while (G.score >= G.threshold) {
+      G.level++;
+      G.threshold += 40 * G.level;
+      G.dropInterval = Math.max(120, G.dropInterval * 0.85);
+    }
+    updateHUD();
+  }
+
+  function updateHUD() {
+    document.getElementById('stat-score').textContent = G.score;
+    document.getElementById('stat-level').textContent = G.level;
+    document.getElementById('stat-next').textContent = G.threshold;
+  }
+
+  // ────── Rendering ──────
+  const board = document.getElementById('board');
+  const bctx = board.getContext('2d');
+  const nextCanvas = document.getElementById('next-canvas');
+  const nctx = nextCanvas.getContext('2d');
+
+  function drawBoard() {
+    bctx.clearRect(0, 0, board.width, board.height);
+    // subtle grid background sheen
+    const bg = bctx.createRadialGradient(board.width / 2, board.height * 0.35, 20, board.width / 2, board.height * 0.5, board.height * 0.8);
+    bg.addColorStop(0, 'rgba(255,255,255,.08)');
+    bg.addColorStop(1, 'rgba(0,0,0,0)');
+    bctx.fillStyle = bg;
+    bctx.fillRect(0, 0, board.width, board.height);
+
+    // grid balls
+    const clearSet = new Set();
+    let clearScale = 1, clearAlpha = 1;
+    if (G.clearAnim) {
+      const p = Math.min(1, G.clearAnim.t / G.clearAnim.duration);
+      clearScale = 1 + p * 0.6;
+      clearAlpha = 1 - p;
+      for (const c of G.clearAnim.cells) clearSet.add(c.r + ',' + c.c);
+    }
+    // Cells whose ball is mid-cascade — skip them in the grid pass, draw later.
+    const fallSet = new Set();
+    if (G.fallAnim) {
+      for (const m of G.fallAnim.moves) fallSet.add(m.toR + ',' + m.toC);
+    }
+    // Hex/brick grid rendering — use cellX/cellY so odd rows are offset.
+    for (let r = 0; r < ROWS; r++) {
+      const colsR = cellsInRow(r);
+      for (let c = 0; c < colsR; c++) {
+        const v = G.grid[r][c];
+        if (v === -1) continue;
+        if (fallSet.has(r + ',' + c)) continue;
+        const cx = cellX(r, c);
+        const cy = cellY(r);
+        const key = r + ',' + c;
+        if (clearSet.has(key)) {
+          drawBall(bctx, cx, cy, BALL_R * clearScale, v, clearAlpha);
+        } else {
+          drawBall(bctx, cx, cy, BALL_R, v);
+        }
+      }
+    }
+    // Settling balls — animate hex-grid moves diagonally.
+    if (G.fallAnim) {
+      const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
+      const slideProgress = G.fallAnim.t / SLIDE_MIN_MS;
+      for (const m of G.fallAnim.moves) {
+        const dR = m.toR - m.fromR;
+        const dC = m.toC - m.fromC;
+        const dist = Math.max(Math.abs(dR), Math.abs(dC));
+        const tNorm = dist === 0 ? 1
+          : Math.min(1, Math.min(distMoved, slideProgress * dist) / dist);
+        // Interpolate IN SCREEN SPACE, between cellX/Y(from) and cellX/Y(to).
+        // (Naive r/c lerp on a brick grid would zigzag because odd rows are
+        // offset.) This keeps the path visually straight.
+        const sx = cellX(m.fromR, m.fromC);
+        const sy = cellY(m.fromR);
+        const ex = cellX(m.toR,   m.toC);
+        const ey = cellY(m.toR);
+        const cx = sx + (ex - sx) * tNorm;
+        const cy = sy + (ey - sy) * tNorm;
+        drawBall(bctx, cx, cy, BALL_R, m.color);
+      }
+    }
+    // Falling piece — smooth fall offset + (optional) rotation arc.
+    if (G.piece) {
+      // Smooth fall: glide between rows over dropInterval, but only if the
+      // piece can actually move to its next row (otherwise it'd visually
+      // overlap whatever's blocking it).
+      const canFall = !G.paused && !G.locked && !G.gameOver &&
+                      fits({ ...G.piece, row: G.piece.row + 2 });
+      const fallOffset = canFall ? (G.dropTimer / G.dropInterval) * 2 * ROW_H : 0;
+
+      const cells = pieceCells(G.piece);
+      const px = cells.map(c => cellX(c.r, c.c));
+      const py = cells.map(c => cellY(c.r) + fallOffset);
+
+      if (G.piece.rotAnimT < 1) {
+        // Rotation: each ball orbits the triangle centroid by an eased angle.
+        const cx = (px[0] + px[1] + px[2]) / 3;
+        const cy = (py[0] + py[1] + py[2]) / 3;
+        const eased = 1 - Math.pow(1 - G.piece.rotAnimT, 3); // easeOutCubic
+        const angle = eased * G.piece.rotAnimDir * (2 * Math.PI / 3);
+        const cos = Math.cos(angle), sin = Math.sin(angle);
+        for (let i = 0; i < 3; i++) {
+          const dx = px[i] - cx;
+          const dy = py[i] - cy;
+          // CW rotation in screen space (y-down).
+          const nx = dx * cos - dy * sin;
+          const ny = dx * sin + dy * cos;
+          drawBall(bctx, cx + nx, cy + ny, BALL_R, G.piece.rotAnimColors[i]);
+        }
+      } else {
+        for (let i = 0; i < 3; i++) {
+          drawBall(bctx, px[i], py[i], BALL_R, cells[i].color);
+        }
+      }
+    }
+    // Ghost (landing preview) — drop the piece as far as it can go.
+    if (G.piece && !G.locked && !G.paused) {
+      let ghost = { ...G.piece };
+      while (fits({ ...ghost, row: ghost.row + 2 })) ghost.row += 2;
+      if (ghost.row !== G.piece.row) {
+        for (const cell of pieceCells(ghost)) {
+          bctx.save();
+          bctx.globalAlpha = 0.22;
+          bctx.strokeStyle = cell.color;
+          bctx.lineWidth = 2;
+          bctx.setLineDash([4, 4]);
+          bctx.beginPath();
+          bctx.arc(cellX(cell.r, cell.c), cellY(cell.r), BALL_R * 0.9, 0, Math.PI * 2);
+          bctx.stroke();
+          bctx.restore();
+        }
+      }
+    }
+  }
+
+  function drawNext() {
+    nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    if (!G.next) return;
+    const w = nextCanvas.width;
+    const r = w * 0.17;
+    const cx = w / 2, cy = w / 2;
+    // Triangle ▲: head on top, base = two balls below
+    const positions = [
+      [cx,             cy - r * 0.95],   // head (c0) — top center
+      [cx - r * 0.95,  cy + r * 0.55],   // base-left (c1)
+      [cx + r * 0.95,  cy + r * 0.55],   // base-right (c2)
+    ];
+    positions.forEach((p, i) => drawBall(nctx, p[0], p[1], r, G.next.colors[i]));
+  }
+
+  function drawDecoCluster(canvas, colorA, colorB, colorC) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const w = canvas.width;
+    const r = w * 0.22;
+    const cx = w / 2, cy = w / 2;
+    // Triangle ▲: head on top, base = two balls below
+    drawBall(ctx, cx,             cy - r * 0.95, r, colorA);
+    drawBall(ctx, cx - r * 0.95,  cy + r * 0.55, r, colorB);
+    drawBall(ctx, cx + r * 0.95,  cy + r * 0.55, r, colorC);
+  }
+
+  // ────── Loop ──────
+  function loop(t) {
+    if (!G.lastTime) G.lastTime = t;
+    const dt = t - G.lastTime;
+    G.lastTime = t;
+    if (G.clearAnim) G.clearAnim.t += dt;
+    // advance cascade-gravity animation (now diagonal-capable for the slide)
+    if (G.fallAnim) {
+      G.fallAnim.t += dt;
+      const distMoved = G.fallAnim.t * FALL_SPEED / 1000;
+      const slideProgress = G.fallAnim.t / SLIDE_MIN_MS;
+      const allDone = G.fallAnim.moves.every(m => {
+        const dist = Math.max(Math.abs(m.toR - m.fromR), Math.abs(m.toC - m.fromC));
+        if (dist === 0) return true;
+        // Take whichever rate is slower — long falls use FALL_SPEED, short
+        // slides are stretched to SLIDE_MIN_MS so the head is visible.
+        return Math.min(distMoved, slideProgress * dist) >= dist;
+      });
+      if (allDone) {
+        const cb = G.fallAnim.callback;
+        G.fallAnim = null;
+        cb();
+      }
+    }
+    // Advance piece rotation animation.
+    if (G.piece && G.piece.rotAnimT < 1) {
+      G.piece.rotAnimT = Math.min(1, G.piece.rotAnimT + dt / ROT_ANIM_MS);
+    }
+    if (!G.paused && !G.locked && !G.gameOver && G.piece) {
+      const canFall = fits({ ...G.piece, row: G.piece.row + 2 });
+      if (canFall) {
+        // Reset lock-delay timer — the piece is in the air again (e.g. just
+        // moved sideways over an empty column).
+        G.piece.lockDelay = 0;
+        G.dropTimer += dt;
+        while (G.dropTimer >= G.dropInterval) {
+          G.dropTimer -= G.dropInterval;
+          softDrop();
+        }
+      } else {
+        // Piece is resting on something — give the player a brief grace
+        // period to slide sideways before it commits.
+        G.piece.lockDelay = (G.piece.lockDelay || 0) + dt;
+        if (G.piece.lockDelay >= LOCK_DELAY_MS) lockPiece();
+      }
+    }
+    drawBoard();
+    requestAnimationFrame(loop);
+  }
+
+  // ────── Input ──────
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    switch (e.key) {
+      case 'ArrowLeft':  e.preventDefault(); move(-1); break;
+      case 'ArrowRight': e.preventDefault(); move(1); break;
+      case 'ArrowUp':    e.preventDefault(); rotate(1); break;
+      case 'ArrowDown':  e.preventDefault(); rotate(-1); break;
+      case ' ':          e.preventDefault(); hardDrop(); break;
+      case 'p': case 'P': togglePause(); break;
+      case 'Escape': togglePause(); break;
+    }
+  });
+
+  function bindHold(id, fn) {
+    const el = document.getElementById(id);
+    let timer = null;
+    let interval = null;
+    const start = (e) => {
+      e.preventDefault();
+      fn();
+      timer = setTimeout(() => {
+        interval = setInterval(fn, 90);
+      }, 220);
+    };
+    const stop = () => {
+      if (timer) clearTimeout(timer);
+      if (interval) clearInterval(interval);
+      timer = interval = null;
+    };
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('mouseup', stop);
+    el.addEventListener('mouseleave', stop);
+    el.addEventListener('touchend', stop);
+    el.addEventListener('touchcancel', stop);
+  }
+
+  bindHold('t-left', () => move(-1));
+  bindHold('t-right', () => move(1));
+  document.getElementById('t-rotL').addEventListener('click', () => rotate(-1));
+  document.getElementById('t-rotR').addEventListener('click', () => rotate(1));
+  document.getElementById('t-drop').addEventListener('click', hardDrop);
+
+  // ────── Pause ──────
+  function togglePause() {
+    if (G.gameOver) return;
+    G.paused = !G.paused;
+    document.getElementById('btn-pause').innerHTML = G.paused ? '&#9654;' : '&#10074;&#10074;';
+  }
+  document.getElementById('btn-pause').addEventListener('click', togglePause);
+  document.getElementById('btn-help').addEventListener('click', () => {
+    G.paused = true;
+    document.getElementById('btn-pause').innerHTML = '&#9654;';
+    show('screen-instructions');
+  });
+
+  // ────── Start / Restart ──────
+  function startGame() {
+    G.grid = makeGrid();
+    G.score = 0;
+    G.level = 1;
+    G.threshold = 40;
+    G.dropTimer = 0;
+    G.dropInterval = 800;
+    G.paused = false;
+    G.locked = false;
+    G.gameOver = false;
+    G.piece = null;
+    G.next = null;
+    G.clearAnim = null;
+    G.lastTime = 0;
+    document.getElementById('btn-pause').innerHTML = '&#10074;&#10074;';
+    updateHUD();
+    show('screen-game');
+    spawnPiece();
+  }
+
+  function endGame() {
+    document.getElementById('final-score').textContent = G.score;
+    document.getElementById('final-level').textContent = G.level;
+    setTimeout(() => show('screen-gameover'), 250);
+  }
+
+  document.getElementById('btn-title-start').addEventListener('click', startGame);
+  document.getElementById('btn-inst-start').addEventListener('click', startGame);
+  document.getElementById('btn-restart').addEventListener('click', startGame);
+
+  // ────── Decorative clusters on title ──────
+  drawDecoCluster(document.getElementById('deco-1'), COLORS[1], COLORS[0], COLORS[2]);
+  drawDecoCluster(document.getElementById('deco-2'), '#cccccc', COLORS[3], COLORS[0]);
+  drawDecoCluster(document.getElementById('deco-3'), '#3ec0c0', COLORS[3], COLORS[4]);
+
+  // ────── Go ──────
+  requestAnimationFrame(loop);
+})();
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT (matches maze pattern)
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = 940, baseH = 720;
+  function fitStage() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

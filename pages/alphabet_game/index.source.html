@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alphabet Game</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: linear-gradient(160deg, #fff4e6 0%, #ffe2c2 55%, #ffd194 100%);
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.game-wrap {
+  width: 900px;
+  height: 600px;
+  background: #fdfdfa;
+  border: 8px solid #f47820;
+  border-radius: 14px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+  transform-origin: 0 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.screen.active { display: block; }
+
+/* ── HEADER (menu) ── */
+.header-bar {
+  background: #c41a2d;
+  color: #fff;
+  padding: 12px 24px 14px;
+  text-align: center;
+  position: relative;
+}
+.header-title {
+  font-family: 'Patrick Hand', cursive;
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 3px 0 rgba(0,0,0,0.22);
+}
+.header-title .star {
+  display: inline-block;
+  color: #f6d24a;
+  font-size: 38px;
+  vertical-align: middle;
+  margin: 0 18px;
+  transform: translateY(-4px);
+  filter: drop-shadow(1px 2px 0 rgba(0,0,0,0.25));
+}
+.header-tagline {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px;
+  margin-top: 2px;
+  letter-spacing: 0.4px;
+}
+
+/* ── ALPHABET FOOTER STRIP ── */
+.alphabet-strip {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: #c41a2d;
+  color: #fff;
+  text-align: center;
+  padding: 12px 12px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 36px;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+/* ────────────────────────────
+   MENU SCREEN
+   ──────────────────────────── */
+#screen-menu .menu-body {
+  position: absolute;
+  top: 138px;
+  left: 0; right: 0;
+  bottom: 64px;
+  padding: 14px 30px 0;
+  text-align: center;
+}
+.menu-prompt {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 34px;
+  color: #c41a2d;
+  margin-bottom: 18px;
+}
+.menu-options {
+  display: flex;
+  justify-content: center;
+  gap: 110px;
+}
+.option-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+.option-col:hover .option-pill { transform: scale(1.05); }
+.option-pill {
+  background: #c41a2d;
+  color: #fff;
+  border-radius: 50%/55%;
+  padding: 14px 32px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 28px;
+  line-height: 1.05;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+  transition: transform .15s ease;
+}
+.option-tiles {
+  display: flex;
+  gap: 10px;
+}
+.menu-tile {
+  width: 60px;
+  height: 60px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 40px;
+  color: #fff;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.18);
+}
+.menu-tile.purple { background: #8a2d8c; }
+.menu-tile.blue   { background: #2c7fd0; }
+.menu-tile.red    { background: #c41a2d; }
+.menu-tile.green  { background: #3aa843; }
+.menu-tile.orange { background: #f47820; }
+
+
+/* ────────────────────────────
+   GAME SCREEN
+   ──────────────────────────── */
+#screen-game { background: #fdfdfa; }
+
+.slots-panel {
+  background: #c41a2d;
+  padding: 14px 20px 18px;
+  position: relative;
+}
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 6px 5px;
+}
+.slot {
+  height: 60px;
+  border: 2.5px dashed #f6d24a;
+  border-radius: 7px;
+  position: relative;
+  background: transparent;
+}
+
+.menu-btn {
+  position: absolute;
+  top: 168px; right: 18px;
+  background: #c41a2d;
+  color: #fff;
+  border: 3px solid #fff;
+  border-radius: 50%/60%;
+  padding: 6px 22px 7px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+  z-index: 6;
+  transition: transform .15s ease;
+}
+.menu-btn:hover { transform: scale(1.06); }
+
+.tile-pool {
+  padding: 18px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.tile-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.pool-tile {
+  width: 64px; height: 64px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 44px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+  transition: transform .12s ease, box-shadow .12s ease;
+  position: relative;
+  border: none;
+  line-height: 1;
+}
+.pool-tile:hover { transform: translateY(-2px) scale(1.05); }
+.pool-tile:active { transform: translateY(0) scale(1); }
+.pool-tile.placed { visibility: hidden; pointer-events: none; }
+.pool-tile.shake { animation: shake .42s ease; }
+.pool-tile.purple { background: #8a2d8c; }
+.pool-tile.blue   { background: #2c7fd0; }
+.pool-tile.red    { background: #c41a2d; }
+.pool-tile.green  { background: #3aa843; }
+.pool-tile.orange { background: #f47820; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-10px) rotate(-3deg); }
+  30%      { transform: translateX(10px) rotate(3deg); }
+  45%      { transform: translateX(-8px) rotate(-2deg); }
+  60%      { transform: translateX(8px) rotate(2deg); }
+  80%      { transform: translateX(-4px); }
+}
+
+/* Fly layer (animated tile clone) */
+.fly-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+.flying-tile {
+  position: absolute;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  color: #fff;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.22);
+  transition: transform .42s cubic-bezier(.25,.7,.3,1.1);
+  line-height: 1;
+  transform-origin: top left;
+  will-change: transform;
+}
+
+/* Tile placed inside slot */
+.placed-tile {
+  position: absolute;
+  inset: 2px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 36px;
+  color: #fff;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+  line-height: 1;
+  animation: pop .25s ease;
+}
+.placed-tile.purple { background: #8a2d8c; }
+.placed-tile.blue   { background: #2c7fd0; }
+.placed-tile.red    { background: #c41a2d; }
+.placed-tile.green  { background: #3aa843; }
+.placed-tile.orange { background: #f47820; }
+@keyframes pop {
+  0%   { transform: scale(0.6); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ────────────────────────────
+   WIN SCREEN
+   ──────────────────────────── */
+#screen-win { background: #fdfdfa; }
+#screen-win .slots-panel { padding: 14px 18px 16px; }
+#screen-win .slots-grid { gap: 6px 5px; }
+#screen-win .slot { border-color: transparent; }
+
+#screen-win .win-body {
+  position: absolute;
+  top: 200px;
+  left: 0; right: 0;
+  bottom: 70px;
+  text-align: center;
+  padding: 30px 30px 0;
+}
+.win-title {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 56px;
+  color: #c41a2d;
+  margin-bottom: 18px;
+  text-shadow: 2px 3px 0 rgba(0,0,0,0.06);
+}
+.win-sample {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+.win-sample .menu-tile { width: 70px; height: 70px; font-size: 46px; }
+
+.play-again-btn {
+  background: #c41a2d;
+  color: #fff;
+  border: none;
+  border-radius: 50%/60%;
+  padding: 12px 48px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+  transition: transform .15s ease;
+}
+.play-again-btn:hover { transform: scale(1.04); }
+
+.win-chick {
+  position: absolute;
+  right: 26px;
+  bottom: 82px;
+  background: #c41a2d;
+  border-radius: 50%/55%;
+  width: 140px; height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+}
+.credit {
+  position: absolute;
+  bottom: 76px;
+  left: 24px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  color: #c41a2d;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<!-- ───────── Reusable chick SVG (used in menu + win) ───────── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="chickSym" viewBox="0 0 80 80">
+      <!-- Body -->
+      <ellipse cx="42" cy="50" rx="26" ry="22" fill="#ffd84a" stroke="#caa218" stroke-width="1.5"/>
+      <!-- Head -->
+      <circle cx="42" cy="28" r="18" fill="#ffd84a" stroke="#caa218" stroke-width="1.5"/>
+      <!-- Tuft -->
+      <path d="M40 11 Q42 4 46 10 Q48 5 50 12 Z" fill="#ffd84a" stroke="#caa218" stroke-width="1"/>
+      <!-- Wing -->
+      <path d="M28 46 Q34 38 44 44 Q40 58 28 56 Z" fill="#f5c52b" stroke="#caa218" stroke-width="1.2"/>
+      <!-- Beak -->
+      <polygon points="56,28 67,30 56,34" fill="#f47820" stroke="#9c4a0e" stroke-width="0.8"/>
+      <!-- Eye -->
+      <circle cx="48" cy="24" r="3" fill="#222"/>
+      <circle cx="49" cy="23" r="1" fill="#fff"/>
+      <!-- Legs -->
+      <line x1="36" y1="71" x2="34" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="48" y1="71" x2="50" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="34" y1="78" x2="30" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="34" y1="78" x2="36" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="50" y1="78" x2="54" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="50" y1="78" x2="48" y2="78" stroke="#f47820" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="fit-stage">
+<div class="game-wrap">
+
+  <!-- ═══════════════ MENU SCREEN ═══════════════ -->
+  <section id="screen-menu" class="screen active">
+    <div class="header-bar">
+      <div class="header-title">
+        <span class="star">★</span>Alphabet Game<span class="star">★</span>
+      </div>
+      <div class="header-tagline">Press the letters in correct order to make the alphabet!</div>
+    </div>
+
+    <div class="menu-body">
+      <div class="menu-prompt">Pick a game:</div>
+
+      <div class="menu-options">
+        <!-- Capital -->
+        <div class="option-col" data-mode="upper" role="button" tabindex="0" aria-label="Capital letters game">
+          <div class="option-pill">CAPITAL<br>LETTERS</div>
+          <div class="option-tiles">
+            <div class="menu-tile purple">A</div>
+            <div class="menu-tile blue">B</div>
+            <div class="menu-tile red">C</div>
+          </div>
+        </div>
+
+        <!-- Lowercase -->
+        <div class="option-col" data-mode="lower" role="button" tabindex="0" aria-label="Lowercase letters game">
+          <div class="option-pill">lowercase<br>letters</div>
+          <div class="option-tiles">
+            <div class="menu-tile green">a</div>
+            <div class="menu-tile orange">b</div>
+            <div class="menu-tile blue">c</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="alphabet-strip">ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+  </section>
+
+  <!-- ═══════════════ GAME SCREEN ═══════════════ -->
+  <section id="screen-game" class="screen">
+    <div class="slots-panel">
+      <div class="slots-grid" id="slotsGrid"></div>
+    </div>
+    <button class="menu-btn" id="backBtn" type="button">MENU</button>
+    <div class="tile-pool" id="tilePool"></div>
+    <div class="fly-layer" id="flyLayer"></div>
+  </section>
+
+  <!-- ═══════════════ WIN SCREEN ═══════════════ -->
+  <section id="screen-win" class="screen">
+    <div class="slots-panel">
+      <div class="slots-grid" id="winSlotsGrid"></div>
+    </div>
+    <div class="win-body">
+      <div class="win-title">You got them all!</div>
+      <div class="win-sample" id="winSample">
+        <div class="menu-tile purple">a</div>
+        <div class="menu-tile orange">b</div>
+        <div class="menu-tile blue">c</div>
+      </div>
+      <button class="play-again-btn" id="playAgainBtn" type="button">Play Again?</button>
+    </div>
+    <div class="credit">GAME BY JASMINE CHAPGAR</div>
+    <div class="win-chick">
+      <svg width="92" height="92" viewBox="0 0 80 80"><use href="#chickSym"/></svg>
+    </div>
+    <div class="alphabet-strip" id="winAlphabet">abcdefghijklmnopqrstuvwxyz</div>
+  </section>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+const COLORS = ['purple','orange','green','blue','red'];
+const ROW_SIZES = [6, 7, 7, 6];
+
+const state = {
+  mode: 'upper',
+  expectedIndex: 0,
+};
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function letterAt(i) {
+  return state.mode === 'upper'
+    ? String.fromCharCode(65 + i)
+    : String.fromCharCode(97 + i);
+}
+
+function colorFor(i) { return COLORS[i % COLORS.length]; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function buildSlots(containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  for (let i = 0; i < 26; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.dataset.index = i;
+    c.appendChild(slot);
+  }
+}
+
+function buildPool() {
+  const pool = document.getElementById('tilePool');
+  pool.innerHTML = '';
+  const order = shuffle([...Array(26).keys()]);
+  let cursor = 0;
+  for (const rs of ROW_SIZES) {
+    const row = document.createElement('div');
+    row.className = 'tile-row';
+    for (let k = 0; k < rs; k++) {
+      const idx = order[cursor++];
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = `pool-tile ${colorFor(idx)}`;
+      tile.dataset.index = idx;
+      tile.textContent = letterAt(idx);
+      tile.setAttribute('aria-label', `Letter ${letterAt(idx)}`);
+      tile.addEventListener('click', () => onTileClick(tile, idx));
+      row.appendChild(tile);
+    }
+    pool.appendChild(row);
+  }
+}
+
+
+function onTileClick(tile, idx) {
+  if (tile.classList.contains('placed')) return;
+  if (idx === state.expectedIndex) {
+    placeLetter(tile, idx);
+  } else {
+    tile.classList.remove('shake');
+    void tile.offsetWidth; // restart anim
+    tile.classList.add('shake');
+    setTimeout(() => tile.classList.remove('shake'), 450);
+  }
+}
+
+function placeLetter(tile, idx) {
+  const wrap = document.querySelector('.game-wrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const tileRect = tile.getBoundingClientRect();
+  const slot = document.querySelector(`#slotsGrid .slot[data-index="${idx}"]`);
+  const slotRect = slot.getBoundingClientRect();
+  // Wrap is CSS-scaled by fitStage; convert screen-space rects back to wrap-local px.
+  const s = wrapRect.width / wrap.offsetWidth || 1;
+
+  // Flying clone, sized like the pool tile
+  const fly = document.createElement('div');
+  fly.className = `flying-tile ${colorFor(idx)}`;
+  fly.style.background = colorHex(idx);
+  fly.style.left = ((tileRect.left - wrapRect.left) / s) + 'px';
+  fly.style.top  = ((tileRect.top  - wrapRect.top)  / s) + 'px';
+  fly.style.width  = (tileRect.width  / s) + 'px';
+  fly.style.height = (tileRect.height / s) + 'px';
+  fly.style.fontSize = '44px';
+  fly.textContent = letterAt(idx);
+  document.getElementById('flyLayer').appendChild(fly);
+
+  // Hide pool tile (preserve layout)
+  tile.classList.add('placed');
+
+  // Animate next frame
+  const targetW = (slotRect.width  / s) - 4;
+  const targetX = (slotRect.left - wrapRect.left) / s + 2;
+  const targetY = (slotRect.top  - wrapRect.top)  / s + 2;
+  const dx = targetX - ((tileRect.left - wrapRect.left) / s);
+  const dy = targetY - ((tileRect.top  - wrapRect.top)  / s);
+  const scale = targetW / (tileRect.width / s);
+  requestAnimationFrame(() => {
+    fly.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+  });
+
+  setTimeout(() => {
+    // Place permanent tile in slot
+    const placed = document.createElement('div');
+    placed.className = `placed-tile ${colorFor(idx)}`;
+    placed.textContent = letterAt(idx);
+    slot.appendChild(placed);
+    fly.remove();
+  }, 430);
+
+  state.expectedIndex++;
+  if (state.expectedIndex >= 26) {
+    setTimeout(showWin, 700);
+  }
+}
+
+const COLOR_HEX = {
+  purple: '#8a2d8c',
+  orange: '#f47820',
+  green:  '#3aa843',
+  blue:   '#2c7fd0',
+  red:    '#c41a2d',
+};
+function colorHex(i) { return COLOR_HEX[colorFor(i)]; }
+
+function showWin() {
+  buildSlots('winSlotsGrid');
+  for (let i = 0; i < 26; i++) {
+    const slot = document.querySelector(`#winSlotsGrid .slot[data-index="${i}"]`);
+    const placed = document.createElement('div');
+    placed.className = `placed-tile ${colorFor(i)}`;
+    placed.textContent = letterAt(i);
+    slot.appendChild(placed);
+  }
+  document.getElementById('winAlphabet').textContent =
+    state.mode === 'upper'
+      ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      : 'abcdefghijklmnopqrstuvwxyz';
+  // First 3 letters in sample tiles
+  const sampleTiles = document.querySelectorAll('#winSample .menu-tile');
+  sampleTiles.forEach((t, i) => { t.textContent = letterAt(i); });
+  showScreen('screen-win');
+}
+
+function startGame(mode) {
+  state.mode = mode;
+  state.expectedIndex = 0;
+  document.getElementById('flyLayer').innerHTML = '';
+  buildSlots('slotsGrid');
+  buildPool();
+  showScreen('screen-game');
+}
+
+// ── Event bindings ──
+document.querySelectorAll('.option-col').forEach(col => {
+  const go = () => startGame(col.dataset.mode);
+  col.addEventListener('click', go);
+  col.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+  });
+});
+
+
+document.getElementById('backBtn').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('playAgainBtn').addEventListener('click', () => showScreen('screen-menu'));
+
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = 900, baseH = 600;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

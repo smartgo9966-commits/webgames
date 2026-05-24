@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shapes Splat</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: #1a4a8a;
+}
+
+.fit-stage {
+  position: fixed; inset: 0; overflow: hidden;
+}
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: none;
+}
+.screen.active { display: block; }
+
+/* ═══════════════════════════════════════
+   SCREEN 1 – LEVEL SELECT
+═══════════════════════════════════════ */
+#screen-level {
+  background: linear-gradient(180deg, #70d8f0 0%, #b8ecf8 55%, #d8f5ff 100%);
+  display: none; flex-direction: column; align-items: center;
+}
+#screen-level.active { display: flex; }
+
+/* ghost background shapes */
+#screen-level::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='960' height='540'%3E%3Ccircle cx='80' cy='120' r='70' fill='none' stroke='%2300aacc' stroke-width='3' opacity='0.18'/%3E%3Crect x='820' y='60' width='110' height='110' rx='4' fill='none' stroke='%2300aacc' stroke-width='3' opacity='0.18'/%3E%3Cpolygon points='500,430 560,530 440,530' fill='none' stroke='%2300aacc' stroke-width='3' opacity='0.18'/%3E%3Crect x='30' y='390' width='160' height='90' rx='4' fill='none' stroke='%2300aacc' stroke-width='3' opacity='0.15'/%3E%3Ccircle cx='900' cy='420' r='55' fill='none' stroke='%2300aacc' stroke-width='3' opacity='0.15'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.level-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 58px;
+  color: #0a5a6e;
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.15), 0 0 30px rgba(255,255,255,0.4);
+  margin-top: 24px;
+  position: relative; z-index: 1;
+}
+
+.level-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900;
+  color: #084a5e;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 4px; margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+
+.level-cards {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 0 18px;
+  position: relative; z-index: 1;
+}
+
+.level-card {
+  background: #fffbcc;
+  border: 3px solid #111;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding-bottom: 8px;
+  overflow: hidden;
+}
+.level-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.level-card:active { transform: scale(0.97); }
+
+.card-header {
+  width: 100%;
+  background: #fffbcc;
+  border-bottom: 2px solid #111;
+  padding: 6px 8px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; letter-spacing: 1px;
+  color: #111; text-align: center;
+}
+
+.card-body {
+  padding: 8px 10px;
+  display: flex; flex-direction: column;
+  gap: 6px; align-items: flex-start;
+}
+
+.shape-row {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.shape-label-text {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px; color: #111;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 2 – MODE SELECT
+═══════════════════════════════════════ */
+#screen-mode {
+  background: radial-gradient(ellipse at 30% 40%, #2266cc 0%, #1144aa 40%, #0a2a6e 100%);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 32px;
+}
+#screen-mode.active { display: flex; }
+
+.mode-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 26px; font-weight: 700;
+  color: #fff; font-style: italic;
+  text-shadow: 1px 2px 6px rgba(0,0,0,0.4);
+}
+
+.mode-cards {
+  display: flex; gap: 40px;
+}
+
+.mode-blob {
+  background: #fff;
+  border-radius: 32px;
+  width: 360px;
+  padding: 24px 28px 28px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.mode-pill {
+  background: #0d2d7a;
+  color: #fff;
+  border-radius: 50px;
+  padding: 8px 28px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px; letter-spacing: 1px;
+}
+
+.mode-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #1144aa; text-align: center;
+  font-style: italic; line-height: 1.4;
+}
+
+.speed-btns {
+  display: flex; gap: 20px; margin-top: 4px;
+}
+
+.speed-btn {
+  width: 110px; height: 110px;
+  border-radius: 50%; border: none;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation;
+}
+.speed-btn:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+.speed-btn:active { transform: scale(0.94); }
+
+.btn-fast { background: #0d2d7a; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+.btn-slow { background: #8aabdd; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+.mode-back-btn {
+  position: absolute; top: 14px; left: 14px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.5);
+  color: #fff; border-radius: 50px;
+  padding: 6px 18px;
+  font-family: 'Fredoka One', cursive; font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.mode-back-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* ═══════════════════════════════════════
+   SCREEN 3 – GAMEPLAY
+═══════════════════════════════════════ */
+#screen-game {
+  background: linear-gradient(180deg, #a0dff5 0%, #c8f0ff 60%, #dff8ff 100%);
+}
+
+#game-field {
+  position: absolute; inset: 0;
+}
+
+/* Stats panel */
+#stats-panel {
+  position: absolute;
+  bottom: 14px; right: 16px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 19px; color: #0a3a6e;
+  text-align: right;
+  line-height: 1.55;
+  background: rgba(255,255,255,0.45);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 148px;
+}
+
+/* Target label */
+#target-label {
+  position: absolute;
+  bottom: 20px; left: 20px;
+  background: rgba(255,255,255,0.88);
+  border-radius: 50px;
+  padding: 10px 28px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px; color: #0a2255;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  animation: pulse 2s ease-in-out infinite;
+  border: 2px solid rgba(255,255,255,0.7);
+}
+
+/* Back button in game */
+#game-back {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(255,255,255,0.7);
+  border: 2px solid #0a3a6e;
+  color: #0a3a6e; border-radius: 50px;
+  padding: 5px 16px;
+  font-family: 'Fredoka One', cursive; font-size: 15px;
+  cursor: pointer; z-index: 10;
+  transition: background 0.15s;
+}
+#game-back:hover { background: rgba(255,255,255,0.95); }
+
+/* Shape token */
+.shape-token {
+  position: absolute;
+  cursor: pointer;
+  border: none; background: none; padding: 0;
+  transition: filter 0.1s;
+  transform-origin: center;
+}
+.shape-token:hover { filter: brightness(1.12); }
+.shape-token svg { display: block; }
+
+/* ═══════════════════════════════════════
+   SCREEN 4 – RESULTS
+═══════════════════════════════════════ */
+#screen-results {
+  background: linear-gradient(180deg, #70d8f0 0%, #b8ecf8 55%, #d8f5ff 100%);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+}
+#screen-results.active { display: flex; }
+
+.results-box {
+  background: rgba(255,255,255,0.88);
+  border-radius: 20px;
+  padding: 32px 50px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+
+.results-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 44px; color: #0a5a6e;
+  letter-spacing: 2px;
+}
+
+.results-accuracy {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px; color: #0a2255;
+  line-height: 1;
+}
+
+.results-stats {
+  font-family: 'Nunito', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: #224488; line-height: 1.7;
+}
+
+.results-btns {
+  display: flex; gap: 16px; margin-top: 10px;
+}
+
+.res-btn {
+  border: none; border-radius: 50px;
+  padding: 14px 30px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.res-btn:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+.res-btn:active { transform: scale(0.96); }
+.btn-again { background: #0d2d7a; color: #fff; }
+.btn-change { background: #fff; color: #0d2d7a; border: 3px solid #0d2d7a; }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes popIn {
+  0%   { transform: scale(0) rotate(var(--rot,0deg)); opacity: 0; }
+  70%  { transform: scale(1.15) rotate(var(--rot,0deg)); opacity: 1; }
+  100% { transform: scale(1) rotate(var(--rot,0deg)); opacity: 1; }
+}
+
+@keyframes splat {
+  0%   { transform: scale(1) rotate(var(--rot,0deg)); opacity: 1; }
+  40%  { transform: scale(1.7) rotate(var(--rot,0deg)); opacity: 0.8; }
+  100% { transform: scale(2.2) rotate(var(--rot,0deg)); opacity: 0; }
+}
+
+@keyframes wrongFlash {
+  0%,100% { filter: brightness(1); }
+  25%     { filter: brightness(0.3) sepia(1) saturate(10) hue-rotate(-30deg); }
+  75%     { filter: brightness(0.3) sepia(1) saturate(10) hue-rotate(-30deg); }
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0) rotate(var(--rot,0deg)); }
+  20%     { transform: translateX(-8px) rotate(var(--rot,0deg)); }
+  40%     { transform: translateX(8px) rotate(var(--rot,0deg)); }
+  60%     { transform: translateX(-6px) rotate(var(--rot,0deg)); }
+  80%     { transform: translateX(6px) rotate(var(--rot,0deg)); }
+}
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.04); }
+}
+
+@keyframes drift {
+  0%   { transform: translate(0px, 0px) rotate(var(--rot,0deg)); }
+  25%  { transform: translate(var(--dx1,8px), var(--dy1,-6px)) rotate(var(--rot,0deg)); }
+  50%  { transform: translate(var(--dx2,-5px), var(--dy2,9px)) rotate(var(--rot,0deg)); }
+  75%  { transform: translate(var(--dx3,7px), var(--dy3,4px)) rotate(var(--rot,0deg)); }
+  100% { transform: translate(0px, 0px) rotate(var(--rot,0deg)); }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0px) rotate(var(--rot,0deg)); }
+  50%     { transform: translateY(-6px) rotate(var(--rot,0deg)); }
+}
+
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+<!-- ════ SCREEN 1: LEVEL SELECT ════ -->
+<div class="screen active" id="screen-level">
+  <div class="level-title">SHAPES SPLAT</div>
+  <div class="level-subtitle">Click level below to play</div>
+  <div class="level-cards" id="levelCards"></div>
+</div>
+
+<!-- ════ SCREEN 2: MODE SELECT ════ -->
+<div class="screen" id="screen-mode" style="position:absolute;">
+  <button class="mode-back-btn" onclick="showScreen('screen-level')">&#8592; Back</button>
+  <div class="mode-title">Choose your mode and speed:</div>
+  <div class="mode-cards">
+    <div class="mode-blob">
+      <div class="mode-pill">Relaxed mode</div>
+      <div class="mode-desc">10 questions, untimed.<br>Try to get 100% correct!</div>
+      <div class="speed-btns">
+        <button class="speed-btn btn-fast" onclick="startGame('relaxed','fast')">FAST</button>
+        <button class="speed-btn btn-slow" onclick="startGame('relaxed','slow')">SLOW</button>
+      </div>
+    </div>
+    <div class="mode-blob">
+      <div class="mode-pill">Timed Mode</div>
+      <div class="mode-desc">Answer as quickly and correctly as you can to increase your score.</div>
+      <div class="speed-btns">
+        <button class="speed-btn btn-fast" onclick="startGame('timed','fast')">FAST</button>
+        <button class="speed-btn btn-slow" onclick="startGame('timed','slow')">SLOW</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCREEN 3: GAMEPLAY ════ -->
+<div class="screen" id="screen-game">
+  <button id="game-back" onclick="endGame()">&#8592; Menu</button>
+  <div id="game-field"></div>
+  <div id="target-label">find: <span id="target-word">—</span></div>
+  <div id="stats-panel">
+    <div id="stat-score">SCORE : 0</div>
+    <div id="stat-hits">HITS : 0</div>
+    <div id="stat-miss">MISS : 0</div>
+    <div id="stat-time"></div>
+  </div>
+</div>
+
+<!-- ════ SCREEN 4: RESULTS ════ -->
+<div class="screen" id="screen-results">
+  <div class="results-box">
+    <div class="results-title">GAME OVER!</div>
+    <div class="results-accuracy" id="res-accuracy">0%</div>
+    <div class="results-stats" id="res-stats"></div>
+    <div class="results-btns">
+      <button class="res-btn btn-again" onclick="playAgain()">Play Again</button>
+      <button class="res-btn btn-change" onclick="showScreen('screen-level')">Change Level</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /game-wrap -->
+</div><!-- /fit-stage -->
+
+<script>
+// ─── SVG SHAPE LIBRARY ───────────────────────────────────────────────────────
+
+let _gid = 0;
+function shapeSVG(name, size) {
+  const g = ++_gid; // unique gradient IDs per call — avoids cross-SVG conflicts
+  size = size || 90;
+  const s = size;
+  const h = s;
+
+  const defs = {
+    circle: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="47" fill="#1a237e" stroke="#000d33" stroke-width="2"/>
+      <ellipse cx="36" cy="33" rx="14" ry="9" fill="rgba(255,255,255,0.28)" transform="rotate(-30,36,33)"/>
+    </svg>`,
+
+    triangle: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 96,94 4,94" fill="#cc00cc" stroke="#550055" stroke-width="2"/>
+      <polygon points="50,18 80,80 30,72" fill="rgba(255,255,255,0.18)"/>
+    </svg>`,
+
+    square: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="4" width="92" height="92" fill="#00bb00" stroke="#005500" stroke-width="2"/>
+      <rect x="14" y="12" width="36" height="22" rx="3" fill="rgba(255,255,255,0.2)"/>
+    </svg>`,
+
+    rectangle: `<svg width="${s}" height="${Math.round(h*0.6)}" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="94" height="54" fill="#ffdd00" stroke="#887700" stroke-width="2"/>
+      <rect x="10" y="8" width="35" height="16" rx="3" fill="rgba(255,255,255,0.25)"/>
+    </svg>`,
+
+    oval: `<svg width="${s}" height="${Math.round(h*0.6)}" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="30" rx="47" ry="27" fill="#ff22cc" stroke="#880066" stroke-width="2"/>
+      <ellipse cx="34" cy="18" rx="14" ry="7" fill="rgba(255,255,255,0.28)" transform="rotate(-15,34,18)"/>
+    </svg>`,
+
+    star: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+        fill="#3355ff" stroke="#112299" stroke-width="2"/>
+      <polygon points="50,16 57,36 70,36 61,47 65,65 50,55 35,65 39,47 30,36 43,36"
+        fill="rgba(255,255,255,0.2)"/>
+    </svg>`,
+
+    pentagon: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 97,38 79,96 21,96 3,38" fill="#9922cc" stroke="#440066" stroke-width="2"/>
+      <polygon points="50,18 76,38 67,66 33,66 24,38" fill="rgba(255,255,255,0.18)"/>
+    </svg>`,
+
+    diamond: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,4 96,50 50,96 4,50" fill="#ff6600" stroke="#882200" stroke-width="2"/>
+      <polygon points="50,18 76,50 50,68 30,44" fill="rgba(255,255,255,0.2)"/>
+    </svg>`,
+
+    sphere: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sphG${g}" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#f0e0ff"/>
+          <stop offset="25%" stop-color="#cc77ff"/>
+          <stop offset="60%" stop-color="#8833cc"/>
+          <stop offset="100%" stop-color="#330055"/>
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="47" fill="url(#sphG${g})" stroke="#220044" stroke-width="1.5"/>
+      <ellipse cx="34" cy="28" rx="13" ry="8" fill="rgba(255,255,255,0.55)" transform="rotate(-25,34,28)"/>
+    </svg>`,
+
+    cone: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="conG${g}" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#b8ccff"/>
+          <stop offset="35%" stop-color="#6688ee"/>
+          <stop offset="100%" stop-color="#223388"/>
+        </linearGradient>
+      </defs>
+      <polygon points="50,4 8,91 92,91" fill="url(#conG${g})" stroke="#112266" stroke-width="1.5"/>
+      <ellipse cx="50" cy="91" rx="42" ry="10" fill="#334499" stroke="#112266" stroke-width="1"/>
+      <line x1="50" y1="4" x2="50" y2="91" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+    </svg>`,
+
+    cube: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 95,28 50,51 5,28" fill="#88ee88" stroke="#115511" stroke-width="1.5"/>
+      <polygon points="95,28 95,72 50,95 50,51" fill="#339933" stroke="#115511" stroke-width="1.5"/>
+      <polygon points="5,28 5,72 50,95 50,51" fill="#227722" stroke="#115511" stroke-width="1.5"/>
+      <polygon points="58,18 80,30 62,38 48,28" fill="rgba(255,255,255,0.22)"/>
+    </svg>`,
+
+    cylinder: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cylG${g}" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ff9999"/>
+          <stop offset="30%" stop-color="#ff3333"/>
+          <stop offset="70%" stop-color="#cc1111"/>
+          <stop offset="100%" stop-color="#881111"/>
+        </linearGradient>
+      </defs>
+      <rect x="8" y="26" width="84" height="52" fill="url(#cylG${g})"/>
+      <ellipse cx="50" cy="26" rx="42" ry="14" fill="#ffaaaa" stroke="#881111" stroke-width="1.5"/>
+      <ellipse cx="50" cy="78" rx="42" ry="14" fill="#aa1111" stroke="#881111" stroke-width="1.5"/>
+      <ellipse cx="34" cy="19" rx="13" ry="6" fill="rgba(255,255,255,0.5)" transform="rotate(-15,34,19)"/>
+      <rect x="8" y="26" width="18" height="52" fill="rgba(255,255,255,0.11)"/>
+    </svg>`,
+
+    pyramid: `<svg width="${s}" height="${h}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 10,90 90,90" fill="#ffee44" stroke="#887700" stroke-width="1.5"/>
+      <polygon points="50,5 90,90 96,82" fill="#ccaa22" stroke="#887700" stroke-width="1"/>
+      <ellipse cx="50" cy="90" rx="42" ry="9" fill="#b89900" stroke="#887700" stroke-width="1"/>
+      <polygon points="50,20 70,78 40,72" fill="rgba(255,255,255,0.2)"/>
+    </svg>`,
+  };
+
+  return defs[name] || defs['circle'];
+}
+
+// Small version for level-select cards
+function shapeSmallSVG(name, w, h) {
+  const full = shapeSVG(name, 100);
+  // replace the width/height attributes
+  return full.replace(/width="\d+"/, `width="${w}"`).replace(/height="\d+"/, `height="${h}"`);
+}
+
+// ─── LEVEL DATA ──────────────────────────────────────────────────────────────
+
+const LEVELS = {
+  basic: {
+    label: 'BASIC SHAPES',
+    shapes: ['circle','triangle','square','rectangle'],
+    rotate: false,
+    preview: [
+      {name:'circle',    label:'CIRCLE',    w:44,h:44},
+      {name:'triangle',  label:'TRIANGLE',  w:44,h:44},
+      {name:'square',    label:'SQUARE',    w:40,h:40},
+      {name:'rectangle', label:'RECTANGLE', w:54,h:32},
+    ]
+  },
+  rotation: {
+    label: 'SHAPES W/ROTATION',
+    shapes: ['circle','triangle','square','rectangle','diamond'],
+    rotate: true,
+    preview: [
+      {name:'triangle',  label:'',  w:40,h:40},
+      {name:'circle',    label:'',  w:40,h:40},
+      {name:'rectangle', label:'',  w:50,h:30},
+      {name:'diamond',   label:'',  w:40,h:40},
+    ]
+  },
+  more: {
+    label: 'SHAPES +MORE',
+    shapes: ['circle','triangle','square','rectangle','oval','star','pentagon'],
+    rotate: false,
+    preview: [
+      {name:'oval',      label:'OVAL',     w:54,h:32},
+      {name:'star',      label:'STAR',     w:44,h:44},
+      {name:'pentagon',  label:'PENTAGON', w:44,h:44},
+      {name:'circle',    label:'CIRCLE',   w:38,h:38},
+    ]
+  },
+  '3d': {
+    label: '3-D SHAPES',
+    shapes: ['sphere','cone','cube','cylinder','pyramid'],
+    rotate: false,
+    preview: [
+      {name:'sphere',   label:'SPHERE',   w:42,h:42},
+      {name:'cone',     label:'CONE',     w:42,h:42},
+      {name:'cube',     label:'CUBE',     w:42,h:42},
+      {name:'cylinder', label:'CYLINDER', w:42,h:42},
+      {name:'pyramid',  label:'PYRAMID',  w:42,h:42},
+    ]
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let curLevel = 'basic';
+let curMode  = 'relaxed';
+let curSpeed = 'fast';
+let score = 0, hits = 0, misses = 0;
+let timeLeft = 30, questionsLeft = 10;
+let currentTarget = '';
+let gameTimer = null;
+let roundActive = false;
+
+// ─── SCREEN HELPERS ──────────────────────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── BUILD LEVEL CARDS ───────────────────────────────────────────────────────
+
+function buildLevelCards() {
+  const container = document.getElementById('levelCards');
+  container.innerHTML = '';
+  const keys = ['basic','rotation','more','3d'];
+  const widths = [196, 200, 196, 210];
+
+  keys.forEach((key, i) => {
+    const lvl = LEVELS[key];
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    card.style.width = widths[i] + 'px';
+
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.textContent = lvl.label;
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    lvl.preview.forEach((p, pi) => {
+      const row = document.createElement('div');
+      row.className = 'shape-row';
+      // rotation for rotation level
+      let rotStyle = '';
+      if (key === 'rotation') {
+        const rots = [0, 180, 45, 0];
+        rotStyle = `style="transform:rotate(${rots[pi]}deg);display:inline-block;"`;
+      }
+      row.innerHTML = `<span ${rotStyle}>${shapeSmallSVG(p.name, p.w, p.h)}</span>`;
+      if (p.label) {
+        const lbl = document.createElement('span');
+        lbl.className = 'shape-label-text';
+        lbl.textContent = p.label;
+        row.appendChild(lbl);
+      }
+      body.appendChild(row);
+    });
+
+    card.appendChild(body);
+
+    card.addEventListener('click', () => {
+      curLevel = key;
+      showScreen('screen-mode');
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// ─── START GAME ──────────────────────────────────────────────────────────────
+
+function startGame(mode, speed) {
+  curMode  = mode;
+  curSpeed = speed;
+  score = 0; hits = 0; misses = 0;
+  questionsLeft = 10;
+  timeLeft = speed === 'fast' ? 30 : 60;
+  showScreen('screen-game');
+  updateStats();
+  nextRound();
+
+  if (mode === 'timed') {
+    gameTimer = setInterval(() => {
+      timeLeft--;
+      updateStats();
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+}
+
+// ─── ROUND LOGIC ─────────────────────────────────────────────────────────────
+
+function nextRound() {
+  if (curMode === 'relaxed' && questionsLeft <= 0) { endGame(); return; }
+  roundActive = true;
+
+  const shapes = LEVELS[curLevel].shapes;
+  const rotate = LEVELS[curLevel].rotate;
+
+  // Pick random target
+  currentTarget = shapes[Math.floor(Math.random() * shapes.length)];
+  document.getElementById('target-word').textContent = currentTarget;
+
+  // Build 8 tokens: 1 guaranteed correct + 7 random (may repeat)
+  const pool = [currentTarget];
+  for (let i = 0; i < 7; i++) {
+    pool.push(shapes[Math.floor(Math.random() * shapes.length)]);
+  }
+  // Shuffle pool
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const field = document.getElementById('game-field');
+  field.innerHTML = '';
+
+  // Token sizing
+  const tokenSize = curLevel === '3d' ? 88 : 82;
+  // Placement zones (avoid bottom 80px for stats/label)
+  const tokens = [];
+  const placed = [];
+
+  pool.forEach((shapeName, idx) => {
+    const isRect = shapeName === 'rectangle' || shapeName === 'oval';
+    const tw = isRect ? tokenSize * 1.2 : tokenSize;
+    const th = isRect ? tokenSize * 0.65 : tokenSize;
+
+    // Random rotation for rotation level
+    const rotDeg = rotate ? Math.floor(Math.random() * 340) : 0;
+
+    // Find non-overlapping position
+    let x, y, tries = 0;
+    const margin = 20;
+    const rightBound = 960 - 180; // avoid stats panel
+    const bottomBound = 540 - 90;
+
+    do {
+      x = margin + Math.random() * (rightBound - tw - margin * 2);
+      y = margin + Math.random() * (bottomBound - th - margin * 2);
+      tries++;
+    } while (tries < 40 && placed.some(p => Math.abs(p.x - x) < tw + 16 && Math.abs(p.y - y) < th + 16));
+
+    placed.push({x, y});
+
+    const btn = document.createElement('button');
+    btn.className = 'shape-token';
+    btn.style.left = x + 'px';
+    btn.style.top  = y + 'px';
+    btn.style.setProperty('--rot', rotDeg + 'deg');
+    btn.setAttribute('data-shape', shapeName);
+
+    // Pop-in animation
+    btn.style.animation = `popIn 0.35s ease-out ${idx * 55}ms both`;
+
+    // Drift animation for FAST mode
+    if (curSpeed === 'fast') {
+      const dx1 = (Math.random()*20-10).toFixed(1);
+      const dy1 = (Math.random()*20-10).toFixed(1);
+      const dx2 = (Math.random()*20-10).toFixed(1);
+      const dy2 = (Math.random()*20-10).toFixed(1);
+      const dx3 = (Math.random()*20-10).toFixed(1);
+      const dy3 = (Math.random()*20-10).toFixed(1);
+      const dur  = (4 + Math.random()*4).toFixed(1);
+      btn.style.setProperty('--dx1', dx1+'px');
+      btn.style.setProperty('--dy1', dy1+'px');
+      btn.style.setProperty('--dx2', dx2+'px');
+      btn.style.setProperty('--dy2', dy2+'px');
+      btn.style.setProperty('--dx3', dx3+'px');
+      btn.style.setProperty('--dy3', dy3+'px');
+      // apply drift after pop-in finishes
+      setTimeout(() => {
+        if (btn.isConnected) {
+          btn.style.animation = `drift ${dur}s ease-in-out infinite`;
+        }
+      }, idx * 55 + 380);
+    } else {
+      // Gentle float for SLOW mode
+      const dur = (3 + Math.random()*3).toFixed(1);
+      setTimeout(() => {
+        if (btn.isConnected) {
+          btn.style.animation = `float ${dur}s ease-in-out infinite`;
+        }
+      }, idx * 55 + 380);
+    }
+
+    btn.innerHTML = shapeSVG(shapeName, Math.round(tw), Math.round(th));
+
+    btn.addEventListener('click', () => onTokenClick(btn, shapeName));
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); onTokenClick(btn, shapeName); }, {passive: false});
+
+    field.appendChild(btn);
+  });
+}
+
+function onTokenClick(btn, shapeName) {
+  if (!roundActive) return;
+
+  if (shapeName === currentTarget) {
+    // Correct!
+    roundActive = false;
+    hits++;
+    score += 10;
+    questionsLeft--;
+    updateStats();
+
+    btn.style.pointerEvents = 'none';
+    btn.style.animation = 'splat 0.5s ease-out forwards';
+    setTimeout(() => {
+      if (curMode === 'relaxed' && questionsLeft <= 0) { endGame(); return; }
+      if (curMode === 'timed' && timeLeft <= 0) return;
+      nextRound();
+    }, 550);
+  } else {
+    // Wrong
+    misses++;
+    updateStats();
+    const orig = btn.style.animation;
+    btn.style.animation = 'wrongFlash 0.4s ease, shake 0.4s ease';
+    setTimeout(() => {
+      if (btn.isConnected) btn.style.animation = orig || '';
+    }, 420);
+  }
+}
+
+// ─── STATS UPDATE ────────────────────────────────────────────────────────────
+
+function updateStats() {
+  document.getElementById('stat-score').textContent = 'SCORE : ' + score;
+  document.getElementById('stat-hits').textContent  = 'HITS : '  + hits;
+  document.getElementById('stat-miss').textContent  = 'MISS : '  + misses;
+  const timeEl = document.getElementById('stat-time');
+  if (curMode === 'timed') {
+    timeEl.textContent = 'TIME : ' + timeLeft;
+    timeEl.style.color = timeLeft <= 10 ? '#cc2200' : '';
+  } else {
+    timeEl.textContent = 'Q : ' + questionsLeft + ' left';
+  }
+}
+
+// ─── END GAME ────────────────────────────────────────────────────────────────
+
+function endGame() {
+  roundActive = false;
+  if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
+  const total = hits + misses;
+  const pct   = total > 0 ? Math.round((hits / total) * 100) : 0;
+  document.getElementById('res-accuracy').textContent = pct + '%';
+  document.getElementById('res-stats').innerHTML =
+    `Score: ${score}&nbsp;&nbsp;|&nbsp;&nbsp;Hits: ${hits}&nbsp;&nbsp;|&nbsp;&nbsp;Misses: ${misses}`;
+  showScreen('screen-results');
+}
+
+function playAgain() {
+  startGame(curMode, curSpeed);
+}
+
+// ─── VIEWPORT SCALING ────────────────────────────────────────────────────────
+
+function rescale() {
+  const wrap = document.getElementById('gameWrap');
+  const s = Math.min(window.innerWidth / 960, window.innerHeight / 540);
+  wrap.style.transform = `scale(${s})`;
+  wrap.style.left = Math.max(0, (window.innerWidth  - 960 * s) / 2) + 'px';
+  wrap.style.top  = Math.max(0, (window.innerHeight - 540 * s) / 2) + 'px';
+}
+
+window.addEventListener('resize', rescale);
+window.addEventListener('orientationchange', () => setTimeout(rescale, 200));
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+buildLevelCards();
+rescale();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

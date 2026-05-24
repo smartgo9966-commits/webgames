@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #1872dd;
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.game-wrap {
+  width: 920px;
+  height: 600px;
+  background: #003a36;
+  border: 8px solid #1872dd;
+  border-radius: 14px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  transform-origin: 0 0;
+}
+
+#maze-canvas { touch-action: none; }
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.screen.active { display: block; }
+
+/* ══════════════════════════════
+   MAIN MENU
+══════════════════════════════ */
+#screen-menu {
+  background: #003a36;
+  padding: 22px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px;
+  color: #ffe030;
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+
+.menu-preview {
+  margin-top: 12px;
+  width: 560px;
+  height: 320px;
+  background: #003a36;
+  border-radius: 8px;
+}
+
+.menu-start {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px;
+  color: #ffe030;
+  background: transparent;
+  border: none;
+  margin-top: 18px;
+  cursor: pointer;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: transform .15s, filter .15s;
+}
+.menu-start:hover { transform: scale(1.06); filter: brightness(1.15); }
+.menu-start:active { transform: scale(0.98); }
+
+/* ══════════════════════════════
+   GAME SCREEN
+══════════════════════════════ */
+#screen-game {
+  display: none;
+  background: #003a36;
+}
+#screen-game.active { display: flex; }
+
+.sidebar {
+  width: 140px;
+  background: #003a36;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  border-right: 2px solid #1872dd;
+}
+
+.view-solution {
+  font-family: 'Fredoka One', cursive;
+  font-size: 19px;
+  color: #ffe030;
+  text-align: center;
+  line-height: 1.05;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: filter .15s, background .15s;
+}
+.view-solution:hover { filter: brightness(1.2); background: rgba(255,224,48,0.07); }
+.view-solution.active { background: rgba(255,224,48,0.15); }
+
+.sidebar-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: transform .12s, background .12s;
+}
+.icon-btn:hover { transform: scale(1.08); background: rgba(255,255,255,0.1); }
+.icon-btn .pause-bars { display: flex; gap: 4px; }
+.icon-btn .pause-bars span {
+  width: 4px; height: 16px; background: white; border-radius: 1px;
+}
+
+.stat-box {
+  width: 92px;
+  text-align: center;
+  margin-top: 6px;
+}
+.stat-label {
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+.stat-value {
+  background: #4a0808;
+  color: #ff2020;
+  font-family: 'Fredoka One', cursive;
+  font-size: 34px;
+  border-radius: 6px;
+  padding: 8px 0 6px;
+  line-height: 1;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.35);
+}
+
+.maze-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#maze-canvas {
+  background: #003a36;
+  display: block;
+}
+
+/* ══════════════════════════════
+   MODALS
+══════════════════════════════ */
+.modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.0);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+
+/* Instructions modal — uses game's teal background, no card box */
+#modal-instructions {
+  background: #003a36;
+  flex-direction: column;
+  padding: 60px;
+}
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 44px;
+  color: #ffe030;
+  text-align: center;
+  margin-top: 30px;
+}
+.instr-body {
+  color: #ffe030;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.4;
+  text-align: center;
+  max-width: 560px;
+  margin: 70px auto;
+}
+.instr-ok {
+  font-family: 'Fredoka One', cursive;
+  font-size: 30px;
+  color: #ffe030;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-top: auto;
+  align-self: center;
+  letter-spacing: 2px;
+  transition: transform .15s, filter .15s;
+}
+.instr-ok:hover { transform: scale(1.08); filter: brightness(1.15); }
+
+/* Results modal (score.png) */
+#modal-results .results-card {
+  width: 540px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1872dd;
+  border: 4px solid #ffffff;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  position: relative;
+}
+
+.results-rays {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 50%,
+      rgba(255,255,255,0.0) 0deg,
+      rgba(255,255,255,0.0) 12deg,
+      rgba(255,255,255,0.07) 12deg,
+      rgba(255,255,255,0.07) 24deg);
+  pointer-events: none;
+}
+
+.results-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 44px;
+  color: #ffffff;
+  text-align: center;
+  padding: 16px 0 18px;
+  text-shadow: 0 3px 0 #0e4a8e, 0 5px 10px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.results-help {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #5fb5ee, #2d8fd6);
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: transform .12s;
+}
+.results-help:hover { transform: scale(1.08); }
+
+.time-panel {
+  position: relative;
+  z-index: 2;
+  margin: 0 28px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1872dd;
+}
+.time-panel-header {
+  background: linear-gradient(180deg, #2d8fd6, #1a6cc2);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  text-align: center;
+  padding: 10px 0 8px;
+}
+.time-panel-value {
+  background: #d8dee8;
+  color: #1a3970;
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  text-align: center;
+  padding: 14px 0;
+}
+
+.stars-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 22px 22px 24px;
+}
+.stars-row svg { width: 70px; height: 70px; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.3)); }
+
+.results-ok-wrap {
+  background: #1872dd;
+  padding: 12px 0 22px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.results-ok {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #5fb5ee, #2d8fd6);
+  border: 3px solid #ffffff;
+  border-radius: 14px;
+  padding: 8px 50px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 0 #0e4a8e;
+  box-shadow: 0 5px 0 #0e4a8e, 0 8px 14px rgba(0,0,0,0.3);
+  transition: transform .12s;
+}
+.results-ok:hover { transform: translateY(-2px); }
+.results-ok:active { transform: translateY(2px); box-shadow: 0 2px 0 #0e4a8e; }
+
+/* Mastery modal (explain the score) */
+#modal-mastery .mastery-card {
+  width: 560px;
+  background: linear-gradient(180deg, #bfe7fb, #6cc4ee);
+  border: 4px solid #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  position: relative;
+}
+.mastery-title {
+  background: linear-gradient(180deg, #5fb5ee, #2d8fd6);
+  color: #ffffff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px;
+  text-align: center;
+  padding: 14px 0;
+  text-shadow: 0 3px 0 #0e4a8e;
+}
+.mastery-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f06060, #c12020);
+  color: white;
+  border: 2.5px solid white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+  transition: transform .12s;
+}
+.mastery-close:hover { transform: scale(1.08); }
+
+.mastery-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #1a3970;
+  padding: 10px 0;
+  background: rgba(255,255,255,0.4);
+}
+.mastery-header div { text-align: center; }
+
+.mastery-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,0.5);
+}
+.mastery-row:nth-child(odd) { background: rgba(255,255,255,0.18); }
+
+.mastery-stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.mastery-stars svg { width: 38px; height: 38px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
+
+.mastery-time {
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #1a3970;
+}
+
+/* Pause overlay */
+#modal-pause {
+  background: rgba(0,30,28,0.7);
+  flex-direction: column;
+  color: #ffe030;
+  font-family: 'Fredoka One', cursive;
+  font-size: 50px;
+  gap: 20px;
+}
+.pause-resume {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #ffe030;
+  background: transparent;
+  border: 3px solid #ffe030;
+  border-radius: 14px;
+  padding: 8px 32px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: transform .12s, background .12s;
+}
+.pause-resume:hover { transform: scale(1.05); background: rgba(255,224,48,0.1); }
+.sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap">
+
+  <!-- ════════════ MAIN MENU ════════════ -->
+  <div id="screen-menu" class="screen active">
+    <div class="menu-title">Maze</div>
+    <canvas id="preview-canvas" class="menu-preview" width="560" height="320"></canvas>
+    <button class="menu-start" id="btn-start">START</button>
+  </div>
+
+  <!-- ════════════ GAME ════════════ -->
+  <div id="screen-game" class="screen">
+    <div class="sidebar">
+      <div class="view-solution" id="btn-solution">View<br>Solution</div>
+      <div class="sidebar-icons">
+        <button class="icon-btn" id="btn-help" title="Instructions">?</button>
+        <button class="icon-btn" id="btn-pause" title="Pause">
+          <div class="pause-bars"><span></span><span></span></div>
+        </button>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Moves</div>
+        <div class="stat-value" id="moves-val">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Time</div>
+        <div class="stat-value" id="time-val">0</div>
+      </div>
+    </div>
+    <div class="maze-stage">
+      <canvas id="maze-canvas" width="750" height="510"></canvas>
+    </div>
+  </div>
+
+  <!-- ════════════ INSTRUCTIONS MODAL ════════════ -->
+  <div id="modal-instructions" class="modal">
+    <div class="instr-title">Instructions</div>
+    <div class="instr-body">
+      Use the four arrow keys on your keyboard to move the red ball until it reaches the exit marked by a yellow star.
+    </div>
+    <button class="instr-ok" id="btn-instr-ok">OK</button>
+  </div>
+
+  <!-- ════════════ PAUSE OVERLAY ════════════ -->
+  <div id="modal-pause" class="modal">
+    <div>Paused</div>
+    <button class="pause-resume" id="btn-resume">RESUME</button>
+  </div>
+
+  <!-- ════════════ RESULTS MODAL ════════════ -->
+  <div id="modal-results" class="modal">
+    <div class="results-card">
+      <div class="results-rays"></div>
+      <button class="results-help" id="btn-show-mastery" title="What do the stars mean?">?</button>
+      <div class="results-title">Results</div>
+      <div class="time-panel">
+        <div class="time-panel-header">Time</div>
+        <div class="time-panel-value" id="results-time">0.000s</div>
+      </div>
+      <div class="stars-row" id="results-stars"></div>
+      <div class="results-ok-wrap">
+        <button class="results-ok" id="btn-results-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ MASTERY MODAL ════════════ -->
+  <div id="modal-mastery" class="modal">
+    <div class="mastery-card">
+      <button class="mastery-close" id="btn-mastery-close">✕</button>
+      <div class="mastery-title">Mastery Levels</div>
+      <div class="mastery-header">
+        <div>Mastery</div>
+        <div>Time</div>
+      </div>
+      <div class="mastery-row">
+        <div class="mastery-stars" data-stars="5"></div>
+        <div class="mastery-time">25s</div>
+      </div>
+      <div class="mastery-row">
+        <div class="mastery-stars" data-stars="4"></div>
+        <div class="mastery-time">30s</div>
+      </div>
+      <div class="mastery-row">
+        <div class="mastery-stars" data-stars="3"></div>
+        <div class="mastery-time">50s</div>
+      </div>
+      <div class="mastery-row">
+        <div class="mastery-stars" data-stars="2"></div>
+        <div class="mastery-time">80s</div>
+      </div>
+      <div class="mastery-row">
+        <div class="mastery-stars" data-stars="1"></div>
+        <div class="mastery-time">-</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════════
+const COLS = 25;
+const ROWS = 17;
+const CELL = 30;                 // px per cell on the main canvas
+const WALL_COLOR = '#22dd44';
+const WALL_WIDTH = 2.5;
+const BG_COLOR = '#003a36';
+
+// Star-rating thresholds in seconds
+const THRESHOLDS = [
+  { stars: 5, max: 25 },
+  { stars: 4, max: 30 },
+  { stars: 3, max: 50 },
+  { stars: 2, max: 80 },
+];
+
+// Walls bitmask: N=1, E=2, S=4, W=8 ; cell.walls initialised with all walls present (= 15)
+const N = 1, E = 2, S = 4, W = 8;
+const DX = { [N]: 0, [S]: 0, [E]: 1, [W]: -1 };
+const DY = { [N]: -1, [S]: 1, [E]: 0, [W]: 0 };
+const OPP = { [N]: S, [S]: N, [E]: W, [W]: E };
+
+// ════════════════════════════════════════════════════════════
+//  MAZE GENERATION (iterative recursive backtracker)
+// ════════════════════════════════════════════════════════════
+function makeGrid(cols, rows) {
+  const cells = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      cells.push({ x, y, walls: 15, visited: false });
+    }
+  }
+  return { cols, rows, cells, at(x, y) { return this.cells[y * this.cols + x]; } };
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function generateMaze(cols, rows) {
+  const grid = makeGrid(cols, rows);
+  const start = grid.at(Math.floor(Math.random() * cols), Math.floor(Math.random() * rows));
+  start.visited = true;
+  const stack = [start];
+
+  while (stack.length) {
+    const cur = stack[stack.length - 1];
+    const dirs = shuffle([N, E, S, W]);
+    let advanced = false;
+    for (const d of dirs) {
+      const nx = cur.x + DX[d];
+      const ny = cur.y + DY[d];
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      const nb = grid.at(nx, ny);
+      if (nb.visited) continue;
+      cur.walls &= ~d;
+      nb.walls &= ~OPP[d];
+      nb.visited = true;
+      stack.push(nb);
+      advanced = true;
+      break;
+    }
+    if (!advanced) stack.pop();
+  }
+  // Reset visited (used later for BFS)
+  for (const c of grid.cells) c.visited = false;
+  return grid;
+}
+
+// ════════════════════════════════════════════════════════════
+//  BFS SOLUTION (shortest path)
+// ════════════════════════════════════════════════════════════
+function bfsPath(grid, fromX, fromY, toX, toY) {
+  const visited = new Array(grid.cols * grid.rows).fill(false);
+  const prev = new Array(grid.cols * grid.rows).fill(-1);
+  const idx = (x, y) => y * grid.cols + x;
+  const queue = [[fromX, fromY]];
+  visited[idx(fromX, fromY)] = true;
+
+  while (queue.length) {
+    const [x, y] = queue.shift();
+    if (x === toX && y === toY) break;
+    const cur = grid.at(x, y);
+    for (const d of [N, E, S, W]) {
+      if (cur.walls & d) continue;            // wall present → can't pass
+      const nx = x + DX[d], ny = y + DY[d];
+      if (nx < 0 || ny < 0 || nx >= grid.cols || ny >= grid.rows) continue;
+      if (visited[idx(nx, ny)]) continue;
+      visited[idx(nx, ny)] = true;
+      prev[idx(nx, ny)] = idx(x, y);
+      queue.push([nx, ny]);
+    }
+  }
+  // Walk back
+  const path = [];
+  let cur = idx(toX, toY);
+  if (prev[cur] === -1 && cur !== idx(fromX, fromY)) return [];
+  while (cur !== -1) {
+    const px = cur % grid.cols;
+    const py = Math.floor(cur / grid.cols);
+    path.unshift([px, py]);
+    cur = prev[cur];
+  }
+  return path;
+}
+
+// ════════════════════════════════════════════════════════════
+//  DRAWING
+// ════════════════════════════════════════════════════════════
+function drawMaze(ctx, grid, cellSize, opts = {}) {
+  const { offsetX = 0, offsetY = 0, lineColor = WALL_COLOR, lineWidth = WALL_WIDTH } = opts;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = lineWidth;
+  ctx.beginPath();
+
+  for (let y = 0; y < grid.rows; y++) {
+    for (let x = 0; x < grid.cols; x++) {
+      const cell = grid.at(x, y);
+      const px = offsetX + x * cellSize;
+      const py = offsetY + y * cellSize;
+      if (cell.walls & N) { ctx.moveTo(px, py); ctx.lineTo(px + cellSize, py); }
+      if (cell.walls & W) { ctx.moveTo(px, py); ctx.lineTo(px, py + cellSize); }
+      // Only draw S/E on edges so we don't double-draw interior walls
+      if (y === grid.rows - 1 && (cell.walls & S)) {
+        ctx.moveTo(px, py + cellSize); ctx.lineTo(px + cellSize, py + cellSize);
+      }
+      if (x === grid.cols - 1 && (cell.walls & E)) {
+        ctx.moveTo(px + cellSize, py); ctx.lineTo(px + cellSize, py + cellSize);
+      }
+    }
+  }
+  ctx.stroke();
+}
+
+function drawSolutionPath(ctx, path, cellSize, offsetX = 0, offsetY = 0) {
+  if (!path || path.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,224,48,0.55)';
+  ctx.lineWidth = Math.max(4, cellSize * 0.35);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i < path.length; i++) {
+    const [cx, cy] = path[i];
+    const px = offsetX + cx * cellSize + cellSize / 2;
+    const py = offsetY + cy * cellSize + cellSize / 2;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawBall(ctx, x, y, r) {
+  const grad = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+  grad.addColorStop(0, '#ffb0b0');
+  grad.addColorStop(0.35, '#ff4444');
+  grad.addColorStop(1, '#8a0a0a');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(x - r * 0.4, y - r * 0.45, r * 0.22, r * 0.13, -0.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawStar(ctx, cx, cy, r, fill = '#ffe030', stroke = '#c08800') {
+  const spikes = 5;
+  const inner = r * 0.45;
+  let rot = -Math.PI / 2;
+  const step = Math.PI / spikes;
+  ctx.beginPath();
+  ctx.moveTo(cx + Math.cos(rot) * r, cy + Math.sin(rot) * r);
+  for (let i = 0; i < spikes; i++) {
+    rot += step;
+    ctx.lineTo(cx + Math.cos(rot) * inner, cy + Math.sin(rot) * inner);
+    rot += step;
+    ctx.lineTo(cx + Math.cos(rot) * r, cy + Math.sin(rot) * r);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  ctx.fill();
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════════════════════
+//  STAR SVG (used in modals)
+// ════════════════════════════════════════════════════════════
+function buildStarPolygonPoints(cx, cy, r, inner) {
+  const spikes = 5;
+  let rot = -Math.PI / 2;
+  const step = Math.PI / spikes;
+  const pts = [];
+  for (let i = 0; i < spikes; i++) {
+    pts.push([cx + Math.cos(rot) * r, cy + Math.sin(rot) * r]);
+    rot += step;
+    pts.push([cx + Math.cos(rot) * inner, cy + Math.sin(rot) * inner]);
+    rot += step;
+  }
+  return pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+}
+
+function makeStarSVG(filled, size = 70) {
+  const pts = buildStarPolygonPoints(size / 2, size / 2 + 2, size * 0.45, size * 0.2);
+  const fill = filled ? '#ffd220' : '#222';
+  const stroke = filled ? '#a87000' : '#000';
+  return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function renderStarsInto(el, filledCount, total = 5, size = 70) {
+  el.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = makeStarSVG(i < filledCount, size);
+    el.appendChild(wrap.firstChild);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  grid: null,
+  player: { x: 0, y: 0 },
+  exit: { x: 0, y: 0 },
+  moves: 0,
+  elapsedMs: 0,
+  timerStart: 0,
+  timerInterval: null,
+  timerRunning: false,
+  paused: false,
+  showSolution: false,
+  finished: false,
+};
+
+const canvas = document.getElementById('maze-canvas');
+const ctx = canvas.getContext('2d');
+const previewCanvas = document.getElementById('preview-canvas');
+const previewCtx = previewCanvas.getContext('2d');
+
+function newGame() {
+  state.grid = generateMaze(COLS, ROWS);
+  state.player.x = COLS - 1;
+  state.player.y = 0;
+  state.exit.x = 0;
+  state.exit.y = ROWS - 1;
+  state.moves = 0;
+  state.elapsedMs = 0;
+  state.timerRunning = false;
+  state.paused = false;
+  state.showSolution = false;
+  state.finished = false;
+  document.getElementById('btn-solution').classList.remove('active');
+  document.getElementById('moves-val').textContent = '0';
+  document.getElementById('time-val').textContent = '0';
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+  render();
+}
+
+function render() {
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (state.showSolution && !state.finished) {
+    const path = bfsPath(state.grid, state.player.x, state.player.y, state.exit.x, state.exit.y);
+    drawSolutionPath(ctx, path, CELL);
+  }
+
+  drawMaze(ctx, state.grid, CELL);
+
+  // Exit star
+  const sx = state.exit.x * CELL + CELL / 2;
+  const sy = state.exit.y * CELL + CELL / 2;
+  drawStar(ctx, sx, sy, CELL * 0.42);
+
+  // Player ball
+  const bx = state.player.x * CELL + CELL / 2;
+  const by = state.player.y * CELL + CELL / 2;
+  drawBall(ctx, bx, by, CELL * 0.36);
+}
+
+function renderPreview() {
+  const grid = generateMaze(17, 10);
+  const cell = Math.min(previewCanvas.width / 17, previewCanvas.height / 10);
+  const offX = (previewCanvas.width - cell * 17) / 2;
+  const offY = (previewCanvas.height - cell * 10) / 2;
+  previewCtx.fillStyle = BG_COLOR;
+  previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+  drawMaze(previewCtx, grid, cell, { offsetX: offX, offsetY: offY, lineWidth: 2 });
+  // Decorative ball + star
+  const bx = offX + (17 - 5) * cell + cell / 2;
+  const by = offY + 0 * cell + cell / 2;
+  drawBall(previewCtx, bx, by, cell * 0.35);
+  const stx = offX + (17 - 1) * cell + cell / 2;
+  const sty = offY + (10 - 4) * cell + cell / 2;
+  drawStar(previewCtx, stx, sty, cell * 0.4);
+}
+
+// ════════════════════════════════════════════════════════════
+//  INPUT
+// ════════════════════════════════════════════════════════════
+function tryMove(dir) {
+  if (state.finished || state.paused) return;
+  const cur = state.grid.at(state.player.x, state.player.y);
+  if (cur.walls & dir) return;                                   // wall blocks
+  state.player.x += DX[dir];
+  state.player.y += DY[dir];
+  state.moves += 1;
+  document.getElementById('moves-val').textContent = String(state.moves);
+  if (!state.timerRunning) startTimer();
+  render();
+  if (state.player.x === state.exit.x && state.player.y === state.exit.y) finishGame();
+}
+
+window.addEventListener('keydown', (e) => {
+  if (!document.getElementById('screen-game').classList.contains('active')) return;
+  if (document.querySelector('.modal.active')) return;
+  let dir = 0;
+  switch (e.key) {
+    case 'ArrowUp':    case 'w': case 'W': dir = N; break;
+    case 'ArrowDown':  case 's': case 'S': dir = S; break;
+    case 'ArrowLeft':  case 'a': case 'A': dir = W; break;
+    case 'ArrowRight': case 'd': case 'D': dir = E; break;
+  }
+  if (dir) {
+    e.preventDefault();
+    tryMove(dir);
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════════════════════════
+function startTimer() {
+  state.timerRunning = true;
+  state.timerStart = Date.now() - state.elapsedMs;
+  state.timerInterval = setInterval(tickTimer, 100);
+}
+function tickTimer() {
+  if (state.paused || !state.timerRunning) return;
+  state.elapsedMs = Date.now() - state.timerStart;
+  document.getElementById('time-val').textContent = String(Math.floor(state.elapsedMs / 1000));
+}
+
+// ════════════════════════════════════════════════════════════
+//  FINISH
+// ════════════════════════════════════════════════════════════
+function starsForTime(seconds) {
+  for (const t of THRESHOLDS) if (seconds <= t.max) return t.stars;
+  return 1;
+}
+
+function finishGame() {
+  state.finished = true;
+  state.timerRunning = false;
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+  const secs = state.elapsedMs / 1000;
+  document.getElementById('results-time').textContent = secs.toFixed(3) + 's';
+  const stars = starsForTime(secs);
+  renderStarsInto(document.getElementById('results-stars'), stars, 5, 70);
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  SCREEN / MODAL HELPERS
+// ════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ════════════════════════════════════════════════════════════
+//  WIRING
+// ════════════════════════════════════════════════════════════
+document.getElementById('btn-start').addEventListener('click', () => {
+  newGame();
+  showScreen('screen-game');
+});
+
+document.getElementById('btn-help').addEventListener('click', () => openModal('modal-instructions'));
+document.getElementById('btn-instr-ok').addEventListener('click', () => closeModal('modal-instructions'));
+
+document.getElementById('btn-pause').addEventListener('click', () => {
+  if (state.finished) return;
+  state.paused = true;
+  openModal('modal-pause');
+});
+document.getElementById('btn-resume').addEventListener('click', () => {
+  state.paused = false;
+  if (state.timerRunning) state.timerStart = Date.now() - state.elapsedMs;
+  closeModal('modal-pause');
+});
+
+document.getElementById('btn-solution').addEventListener('click', (e) => {
+  state.showSolution = !state.showSolution;
+  e.currentTarget.classList.toggle('active', state.showSolution);
+  render();
+});
+
+document.getElementById('btn-show-mastery').addEventListener('click', () => {
+  // Render the star rows
+  document.querySelectorAll('#modal-mastery .mastery-stars').forEach(el => {
+    const n = parseInt(el.getAttribute('data-stars'), 10);
+    el.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = makeStarSVG(true, 38);
+      el.appendChild(wrap.firstChild);
+    }
+  });
+  openModal('modal-mastery');
+});
+document.getElementById('btn-mastery-close').addEventListener('click', () => closeModal('modal-mastery'));
+
+document.getElementById('btn-results-ok').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+  renderPreview();
+});
+
+// ════════════════════════════════════════════════════════════
+//  TOUCH: swipe to move
+// ════════════════════════════════════════════════════════════
+(function () {
+  const SWIPE_MIN = 25; // px in screen space
+  let startX = 0, startY = 0, active = false;
+  canvas.addEventListener('touchstart', (e) => {
+    if (!document.getElementById('screen-game').classList.contains('active')) return;
+    if (document.querySelector('.modal.active')) return;
+    const t = e.changedTouches[0];
+    startX = t.clientX; startY = t.clientY; active = true;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => {
+    if (active) e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN) return;
+    let dir = 0;
+    if (Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? E : W;
+    else                              dir = dy > 0 ? S : N;
+    tryMove(dir);
+    e.preventDefault();
+  }, { passive: false });
+})();
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT (transform-origin: top-left + JS-centered)
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = 920, baseH = 600;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+
+// ════════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════════
+renderPreview();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

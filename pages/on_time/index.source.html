@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>On Time!</title>
+  <link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+  <link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0d1b35">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100dvh;
+      margin: 0;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background: #2a5d9f;
+      font-family: 'Arial Black', Arial, sans-serif;
+    }
+
+    .fit-stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .game-wrap {
+      width: 920px;
+      height: 560px;
+      background: #5a9fd4;
+      border: 6px solid #2a5d9f;
+      border-radius: 14px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+      transform-origin: 0 0;
+    }
+
+    /* ── SCREENS ── */
+    .screen { position: absolute; inset: 0; display: none; }
+    .screen.active { display: block; }
+
+    /* ── MAIN MENU ── */
+    #screen-menu { padding: 14px 22px; }
+
+    .game-title {
+      text-align: center;
+      font-size: 82px;
+      font-weight: 900;
+      font-style: italic;
+      color: #ffe030;
+      line-height: 0.9;
+      margin-bottom: 14px;
+      -webkit-text-stroke: 5px #1a1a1a;
+      paint-order: stroke fill;
+      letter-spacing: 4px;
+    }
+
+    .menu-body {
+      display: flex;
+      gap: 22px;
+    }
+
+    .levels-panel {
+      flex: 1.05;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .level-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      cursor: pointer;
+    }
+
+    .level-badge {
+      background: #ffe030;
+      border: 3px solid #c8a000;
+      border-radius: 22px;
+      padding: 9px 13px;
+      font-size: 16px;
+      font-weight: 900;
+      color: #1a3c80;
+      text-align: center;
+      min-width: 92px;
+      box-shadow: 0 4px 0 #9a7800;
+      transition: transform 0.08s, box-shadow 0.08s;
+      user-select: none;
+    }
+    .level-row:hover .level-badge { transform: translateY(-2px); box-shadow: 0 6px 0 #9a7800; }
+    .level-row:active .level-badge { transform: translateY(2px); box-shadow: 0 1px 0 #9a7800; }
+
+    .level-desc {
+      background: white;
+      border-radius: 20px;
+      padding: 9px 15px;
+      font-size: 14px;
+      color: #333;
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+      text-align: center;
+      flex: 1;
+    }
+
+    .instr-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .instr-heading {
+      font-size: 20px;
+      font-style: italic;
+      color: white;
+      text-align: center;
+      margin-bottom: 8px;
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+    }
+
+    .instr-text {
+      font-size: 13px;
+      font-weight: 900;
+      color: #1a2d6b;
+      text-transform: uppercase;
+      line-height: 1.55;
+      margin-bottom: 10px;
+    }
+
+    .instr-bottom {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hint-bubble {
+      background: #ffe030;
+      border: 3px solid #c8a000;
+      border-radius: 50%;
+      width: 170px;
+      height: 170px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .hint-label { font-size: 18px; font-weight: 900; color: #1a2d6b; text-transform: uppercase; margin-bottom: 5px; }
+    .hint-text  { font-size: 10.5px; font-weight: 900; color: #1a2d6b; text-transform: uppercase; line-height: 1.45; }
+
+    /* ── GAME SCREEN ── */
+    .btn-menu {
+      position: absolute;
+      top: 14px; left: 14px;
+      background: #2a5d9f;
+      border: 3px solid #ffe030;
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 8px 18px;
+      cursor: pointer;
+    }
+    .btn-menu:hover { background: #1e4a87; }
+
+    .progress-box {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: #fdf8d0;
+      border: 4px solid #c8a000;
+      border-radius: 8px;
+      padding: 7px 22px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1a3c80;
+      line-height: 1.3;
+      min-width: 105px;
+    }
+
+    #clock-canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      cursor: grab;
+    }
+    #clock-canvas:active { cursor: grabbing; }
+
+    .instr-banner {
+      position: absolute;
+      bottom: 14px; left: 14px; right: 128px;
+      background: #fdf8d0;
+      border: 3px solid #c8a000;
+      border-radius: 8px;
+      padding: 13px 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1a3c80;
+      text-transform: uppercase;
+    }
+
+    .btn-check {
+      position: absolute;
+      bottom: 12px; right: 14px;
+      background: #ffe030;
+      border: 3px solid #c8a000;
+      border-radius: 30px;
+      color: #1a3c80;
+      font-family: inherit;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 14px 22px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #9a7800;
+      transition: transform 0.08s, box-shadow 0.08s;
+    }
+    .btn-check:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 #9a7800; }
+    .btn-check:active { transform: translateY(3px);  box-shadow: 0 1px 0 #9a7800; }
+
+    /* ── FEEDBACK OVERLAY ── */
+    .feedback-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .feedback-overlay.active { display: flex; }
+
+    .feedback-card {
+      background: white;
+      border: 6px solid #2a9a2a;
+      border-radius: 18px;
+      padding: 36px 64px;
+      text-align: center;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+      animation: pop .15s ease-out;
+    }
+    .feedback-card.wrong { border-color: #cc2222; }
+
+    @keyframes pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .feedback-emoji  { font-size: 48px; margin-bottom: 6px; }
+    .feedback-title  { font-size: 40px; font-weight: 900; color: #2a9a2a; }
+    .feedback-title.wrong { color: #cc2222; }
+    .feedback-detail {
+      font-size: 17px; color: #555;
+      font-family: Arial, sans-serif;
+      margin: 8px 0 18px;
+    }
+
+    .btn-next {
+      background: #ffe030;
+      border: 3px solid #c8a000;
+      border-radius: 22px;
+      color: #1a3c80;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 10px 34px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #9a7800;
+    }
+    .btn-next:hover { transform: translateY(-1px); }
+
+    /* ── END SCREEN ── */
+    #screen-end {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+    #screen-end.active { display: flex; }
+
+    .end-title { font-size: 64px; }
+    .end-score {
+      font-size: 28px; font-weight: 900; color: white;
+    }
+    .end-stars { font-size: 42px; letter-spacing: 4px; }
+    .end-btns  { display: flex; gap: 16px; }
+
+    .btn-large {
+      background: #ffe030;
+      border: 3px solid #c8a000;
+      border-radius: 26px;
+      color: #1a3c80;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 12px 32px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #9a7800;
+      transition: transform 0.08s, box-shadow 0.08s;
+    }
+    .btn-large:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #9a7800; }
+    .btn-large:active { transform: translateY(2px);  box-shadow: 0 1px 0 #9a7800; }
+  .sg-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="fit-stage">
+<div class="game-wrap">
+
+  <!-- ════════════════ MAIN MENU ════════════════ -->
+  <div id="screen-menu" class="screen active">
+    <div class="game-title">ON TIME!</div>
+    <div class="menu-body">
+
+      <div class="levels-panel">
+        <div class="level-row" onclick="startLevel(1)">
+          <div class="level-badge">LEVEL 1</div>
+          <div class="level-desc">Set the hour hand on a clock!</div>
+        </div>
+        <div class="level-row" onclick="startLevel(2)">
+          <div class="level-badge">LEVEL 2</div>
+          <div class="level-desc">Set the clock's hour + minute hands (easy)</div>
+        </div>
+        <div class="level-row" onclick="startLevel(3)">
+          <div class="level-badge">LEVEL 3</div>
+          <div class="level-desc">Set the clock's hour + minute hands (medium)</div>
+        </div>
+        <div class="level-row" onclick="startLevel(4)">
+          <div class="level-badge">LEVEL 4</div>
+          <div class="level-desc">Set the clock's hour + minute hands (advanced)</div>
+        </div>
+      </div>
+
+      <div class="instr-panel">
+        <div class="instr-heading">Instructions</div>
+        <div class="instr-text">
+          CLICK + DRAG THE HANDS ON THE CLOCK TO SET THE CLOCK TO THE CORRECT TIME TO ANSWER THE QUESTIONS.
+        </div>
+        <div class="instr-bottom">
+          <canvas id="demo-clock" width="155" height="155"></canvas>
+          <div class="hint-bubble">
+            <div class="hint-label">HINT:</div>
+            <div class="hint-text">THE CLOCK ON THE LEFT SHOWS 1:30. NOTICE THE HOUR HAND IS HALFWAY BETWEEN THE ONE AND THE TWO.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════ GAME SCREEN ════════════════ -->
+  <div id="screen-game" class="screen">
+    <button class="btn-menu" onclick="goToMenu()">MENU</button>
+
+    <div class="progress-box">
+      <div id="progress-text">1 OF 10</div>
+      <div id="score-display">0</div>
+    </div>
+
+    <canvas id="clock-canvas" width="370" height="370"></canvas>
+
+    <div class="instr-banner" id="instr-banner">SET THE CLOCK'S HANDS TO 7:00.</div>
+
+    <button class="btn-check" onclick="checkAnswer()">CHECK</button>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+      <div class="feedback-card" id="feedback-card">
+        <div class="feedback-emoji" id="feedback-emoji">⭐</div>
+        <div class="feedback-title" id="feedback-title">Correct!</div>
+        <div class="feedback-detail" id="feedback-detail"></div>
+        <button class="btn-next" onclick="nextQuestion()">NEXT →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ END SCREEN ════════════════ -->
+  <div id="screen-end" class="screen">
+    <div class="game-title end-title" id="end-title">WELL DONE!</div>
+    <div class="end-score">Score: <span id="final-score">0</span> / 10</div>
+    <div class="end-stars" id="end-stars">⭐⭐⭐</div>
+    <div class="end-btns">
+      <button class="btn-large" onclick="replayLevel()">PLAY AGAIN</button>
+      <button class="btn-large" onclick="goToMenu()">MAIN MENU</button>
+    </div>
+  </div>
+
+</div>
+</div>
+<script>
+// ══════════════════════════════════════════
+//  MATH HELPERS
+// ══════════════════════════════════════════
+
+// clockDeg: 0 = 12-o'clock, increases clockwise
+// Canvas angle: 0 = 3-o'clock → subtract 90°
+function clockToRad(deg) { return (deg - 90) * Math.PI / 180; }
+
+function hourDeg(h, m)  { return (h % 12) * 30 + m * 0.5; }
+function minuteDeg(m)   { return m * 6; }
+
+function angleDiff(a, b) {
+  let d = Math.abs((a % 360) - (b % 360));
+  return d > 180 ? 360 - d : d;
+}
+
+function fmtTime(h, m) { return `${h}:${String(m).padStart(2,'0')}`; }
+
+// ══════════════════════════════════════════
+//  CLOCK RENDERING
+// ══════════════════════════════════════════
+
+function drawClock(canvas, hDeg, mDeg, showMinute) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const r  = Math.min(cx, cy) - 13;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Shadow
+  ctx.save();
+  ctx.shadowColor   = 'rgba(0,0,0,0.28)';
+  ctx.shadowBlur    = 14;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 13, 0, Math.PI * 2);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+  ctx.restore();
+
+  // Black ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 13, 0, Math.PI * 2);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+
+  // White face
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = '#f8f8f8';
+  ctx.fill();
+
+  // Tick marks
+  for (let i = 0; i < 60; i++) {
+    const a    = clockToRad(i * 6);
+    const hour = i % 5 === 0;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * (r - 4),  cy + Math.sin(a) * (r - 4));
+    ctx.lineTo(cx + Math.cos(a) * (r - (hour ? 19 : 11)),
+               cy + Math.sin(a) * (r - (hour ? 19 : 11)));
+    ctx.strokeStyle = hour ? '#222' : '#999';
+    ctx.lineWidth   = hour ? 2.5 : 1;
+    ctx.stroke();
+  }
+
+  // Hour numerals
+  ctx.fillStyle    = '#222';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${Math.round(r * 0.19)}px Arial`;
+  for (let i = 1; i <= 12; i++) {
+    const a = clockToRad(i * 30);
+    ctx.fillText(i, cx + Math.cos(a) * (r - 30), cy + Math.sin(a) * (r - 30));
+  }
+
+  // Hands
+  if (showMinute) drawHand(ctx, cx, cy, mDeg, r * 0.82, r * 0.052, '#1a6e1a', '#2cb52c');
+  drawHand(ctx, cx, cy, hDeg, r * 0.57, r * 0.072, '#1a1a60', '#2828a8');
+
+  // Centre cap
+  ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+  ctx.fillStyle = '#111'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#555'; ctx.fill();
+}
+
+function drawHand(ctx, cx, cy, angleDeg, len, hw, bodyCol, tipCol) {
+  const a  = clockToRad(angleDeg);
+  const dx = Math.cos(a), dy = Math.sin(a); // along hand
+  const px = -dy,         py = dx;           // perpendicular
+
+  const tipX = cx + dx * len,  tipY = cy + dy * len;
+  const abl  = len - hw * 5;                 // arrow-base length
+  const abx  = cx + dx * abl, aby = cy + dy * abl;
+  const tlx  = cx - dx * hw * 2.5, tly = cy - dy * hw * 2.5; // tail
+
+  // Body (trapezoid from tail to arrow-base)
+  ctx.beginPath();
+  ctx.moveTo(tlx + px * hw * 0.6, tly + py * hw * 0.6);
+  ctx.lineTo(abx + px * hw,       aby + py * hw);
+  ctx.lineTo(abx - px * hw,       aby - py * hw);
+  ctx.lineTo(tlx - px * hw * 0.6, tly - py * hw * 0.6);
+  ctx.closePath();
+  ctx.fillStyle = bodyCol;
+  ctx.fill();
+
+  // Arrow tip (triangle)
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(abx + px * hw * 2.2, aby + py * hw * 2.2);
+  ctx.lineTo(abx - px * hw * 2.2, aby - py * hw * 2.2);
+  ctx.closePath();
+  ctx.fillStyle = tipCol;
+  ctx.fill();
+}
+
+// ══════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════
+
+const G = {
+  level: 1, questions: [], current: 0, score: 0,
+  hDeg: 0, mDeg: 0, dragging: null
+};
+
+// ══════════════════════════════════════════
+//  QUESTION GENERATION
+// ══════════════════════════════════════════
+
+function makeQuestions(level) {
+  const qs = [], seen = new Set();
+  while (qs.length < 10) {
+    const h = Math.floor(Math.random() * 12) + 1;
+    let m;
+    if      (level === 1) m = 0;
+    else if (level === 2) m = Math.random() < 0.5 ? 0 : 30;
+    else if (level === 3) m = [0, 15, 30, 45][Math.floor(Math.random() * 4)];
+    else                  m = Math.floor(Math.random() * 12) * 5;
+
+    const key = `${h}:${m}`;
+    if (!seen.has(key)) { seen.add(key); qs.push({ h, m }); }
+  }
+  return qs;
+}
+
+// ══════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ══════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToMenu() {
+  showScreen('screen-menu');
+  redrawDemo();
+}
+
+function replayLevel() { startLevel(G.level); }
+
+// ══════════════════════════════════════════
+//  GAME FLOW
+// ══════════════════════════════════════════
+
+function startLevel(level) {
+  G.level     = level;
+  G.questions = makeQuestions(level);
+  G.current   = 0;
+  G.score     = 0;
+  G.hDeg      = 0;
+  G.mDeg      = 0;
+  G.dragging  = null;
+  showScreen('screen-game');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = G.questions[G.current];
+  document.getElementById('progress-text').textContent  = `${G.current + 1} OF 10`;
+  document.getElementById('score-display').textContent  = G.score;
+
+  const t = fmtTime(q.h, q.m);
+  document.getElementById('instr-banner').textContent =
+    G.level === 1 ? `SET THE HOUR HAND TO ${t}.`
+                  : `SET THE CLOCK'S HANDS TO ${t}.`;
+
+  G.hDeg = 0; G.mDeg = 0;
+  drawClock(gameCanvas(), G.hDeg, G.mDeg, G.level > 1);
+}
+
+function checkAnswer() {
+  const q   = G.questions[G.current];
+  const tH  = hourDeg(q.h, q.m);
+  const tM  = minuteDeg(q.m);
+
+  // Tolerance (degrees) per level
+  const tol = [15, 10, 6, 4][G.level - 1];
+  const hourOk = angleDiff(G.hDeg, tH) <= tol;
+  const minOk  = G.level === 1 || angleDiff(G.mDeg, tM) <= tol;
+  const correct = hourOk && minOk;
+
+  if (correct) G.score++;
+  document.getElementById('score-display').textContent = G.score;
+
+  const card   = document.getElementById('feedback-card');
+  const title  = document.getElementById('feedback-title');
+  const detail = document.getElementById('feedback-detail');
+  const emoji  = document.getElementById('feedback-emoji');
+
+  if (correct) {
+    card.className    = 'feedback-card';
+    title.className   = 'feedback-title';
+    title.textContent = 'Correct!';
+    emoji.textContent = '⭐';
+    detail.textContent = '';
+  } else {
+    card.className    = 'feedback-card wrong';
+    title.className   = 'feedback-title wrong';
+    title.textContent = 'Not quite!';
+    emoji.textContent = '❌';
+    detail.textContent = `The correct time was ${fmtTime(q.h, q.m)}`;
+  }
+
+  document.getElementById('feedback-overlay').classList.add('active');
+}
+
+function nextQuestion() {
+  document.getElementById('feedback-overlay').classList.remove('active');
+  G.current++;
+  if (G.current >= 10) showEndScreen();
+  else loadQuestion();
+}
+
+function showEndScreen() {
+  document.getElementById('final-score').textContent = G.score;
+
+  let msg, stars;
+  if      (G.score === 10) { msg = 'PERFECT!';        stars = '⭐⭐⭐'; }
+  else if (G.score >= 8)   { msg = 'EXCELLENT!';      stars = '⭐⭐⭐'; }
+  else if (G.score >= 6)   { msg = 'WELL DONE!';      stars = '⭐⭐'; }
+  else if (G.score >= 4)   { msg = 'GOOD TRY!';       stars = '⭐'; }
+  else                     { msg = 'KEEP PRACTICING!'; stars = ''; }
+
+  document.getElementById('end-title').textContent = msg;
+  document.getElementById('end-stars').textContent = stars;
+  showScreen('screen-end');
+}
+
+// ══════════════════════════════════════════
+//  INPUT – DRAG CLOCK HANDS
+// ══════════════════════════════════════════
+
+function gameCanvas() { return document.getElementById('clock-canvas'); }
+
+function clientToCanvas(e, canvas) {
+  const r  = canvas.getBoundingClientRect();
+  const sx = canvas.width  / r.width;
+  const sy = canvas.height / r.height;
+  return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
+}
+
+function mouseAngle(pos, canvas) {
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  let deg = Math.atan2(pos.y - cy, pos.x - cx) * 180 / Math.PI + 90;
+  deg = ((deg % 360) + 360) % 360;
+  return deg;
+}
+
+function snapMinute(angle, level) {
+  const snap = { 2: 180, 3: 90, 4: 30 }[level];
+  if (!snap) return angle;
+  return ((Math.round(angle / snap) * snap) % 360 + 360) % 360;
+}
+
+function onDown(e) {
+  const c   = gameCanvas();
+  const pos = clientToCanvas(e, c);
+  const cx  = c.width / 2, cy = c.height / 2;
+  const r   = Math.min(cx, cy) - 13;
+
+  if (Math.hypot(pos.x - cx, pos.y - cy) > r + 14) return;
+
+  const ma    = mouseAngle(pos, c);
+  const hDiff = angleDiff(ma, G.hDeg);
+  const mDiff = G.level > 1 ? angleDiff(ma, G.mDeg) : Infinity;
+
+  if (hDiff <= 30 || mDiff <= 30) {
+    G.dragging = hDiff <= mDiff ? 'hour' : 'minute';
+  } else {
+    // Click anywhere inside → move the closer hand
+    G.dragging = G.level === 1 ? 'hour'
+               : (hDiff < mDiff ? 'hour' : 'minute');
+  }
+}
+
+function onMove(e) {
+  if (!G.dragging) return;
+  const c   = gameCanvas();
+  const pos = clientToCanvas(e, c);
+  let   a   = mouseAngle(pos, c);
+
+  if (G.dragging === 'hour') {
+    // Level 1: snap to nearest hour (every 30°)
+    if (G.level === 1) a = ((Math.round(a / 30) * 30) % 360 + 360) % 360;
+    G.hDeg = a;
+  } else {
+    G.mDeg = snapMinute(a, G.level);
+  }
+
+  drawClock(c, G.hDeg, G.mDeg, G.level > 1);
+}
+
+function onUp() { G.dragging = null; }
+
+// ══════════════════════════════════════════
+//  DEMO CLOCK (main menu)
+// ══════════════════════════════════════════
+
+function redrawDemo() {
+  const dc = document.getElementById('demo-clock');
+  if (dc) drawClock(dc, hourDeg(1, 30), minuteDeg(30), true);
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  redrawDemo();
+
+  const c = document.getElementById('clock-canvas');
+  c.addEventListener('mousedown',  onDown);
+  c.addEventListener('mousemove',  onMove);
+  c.addEventListener('mouseup',    onUp);
+  c.addEventListener('mouseleave', onUp);
+
+  c.addEventListener('touchstart', e => { e.preventDefault(); onDown(e.touches[0]); }, { passive: false });
+  c.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0]); }, { passive: false });
+  c.addEventListener('touchend',   e => { e.preventDefault(); onUp(); },               { passive: false });
+
+  const wrap = document.querySelector('.game-wrap');
+  const baseW = 920, baseH = 560;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

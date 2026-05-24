@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lock Games</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: linear-gradient(160deg, #0d1b35 0%, #1a2f5a 60%, #2a4880 100%);
+    color: #fff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: min(96vw, 640px);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  h1 { margin: 0 0 6px; font-size: 24px; }
+  p.sub { margin: 0 0 20px; font-size: 14px; opacity: 0.75; }
+  label { display: block; margin: 14px 0 6px; font-size: 13px; opacity: 0.8; }
+  input[type="text"] {
+    width: 100%; padding: 12px 14px; font-size: 18px; letter-spacing: 4px;
+    background: rgba(0,0,0,0.25); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+    font-family: ui-monospace, monospace;
+  }
+  button {
+    appearance: none; border: none; cursor: pointer;
+    background: #ffd24a; color: #0d1b35;
+    padding: 14px 22px; font-size: 16px; font-weight: 700;
+    border-radius: 10px; margin-top: 16px;
+    font-family: inherit;
+  }
+  button:hover { background: #ffdd6e; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .secondary { background: rgba(255,255,255,0.12); color: #fff; margin-left: 8px; }
+  .secondary:hover { background: rgba(255,255,255,0.20); }
+  #log {
+    margin-top: 18px; padding: 12px 14px;
+    background: rgba(0,0,0,0.30); border-radius: 10px;
+    font-family: ui-monospace, monospace; font-size: 12px;
+    max-height: 280px; overflow: auto;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .ok { color: #8df58d; }
+  .err { color: #ff8d8d; }
+  .info { color: #ffd24a; }
+  details { margin-top: 14px; font-size: 13px; opacity: 0.85; }
+  summary { cursor: pointer; }
+  code { background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Lock Games</h1>
+  <p class="sub">Encrypt every game in your <code>pages</code> folder with an 8-digit PIN.</p>
+
+  <label for="pin">PIN (8 digits)</label>
+  <input id="pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••••••" autocomplete="off">
+
+  <div>
+    <button id="lockBtn">Lock All Games</button>
+    <button id="downloadBtn" class="secondary" style="display:none">Download ZIP</button>
+  </div>
+
+  <div id="log"></div>
+
+  <details>
+    <summary>How this works</summary>
+    <p>Source files are kept as <code>index.source.html</code>; the served <code>index.html</code> becomes an encrypted loader. View Source on a locked page shows only base64 ciphertext.</p>
+    <p>First run: if no <code>index.source.html</code> exists yet, the tool copies the current <code>index.html</code> to <code>index.source.html</code> before encrypting.</p>
+    <p>Uses PBKDF2-SHA256 (500 000 iterations) + AES-GCM. Each file gets a fresh random salt and IV.</p>
+    <p>If your browser supports the File System Access API (Chrome / Edge), files are written in place. Otherwise a ZIP downloads — extract it over your <code>pages/</code> folder.</p>
+  </details>
+</div>
+
+<script>
+const PBKDF2_ITERATIONS = 500000;
+const logEl = document.getElementById('log');
+
+function log(msg, kind) {
+  const line = document.createElement('div');
+  if (kind) line.className = kind;
+  line.textContent = msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function bytesToB64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+
+async function deriveKey(pin, salt) {
+  const baseKey = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin),
+    'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt']
+  );
+}
+
+async function encrypt(plaintext, pin) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pin, salt);
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    new TextEncoder().encode(plaintext)
+  );
+  return {
+    salt: bytesToB64(salt),
+    iv: bytesToB64(iv),
+    data: bytesToB64(new Uint8Array(ct)),
+  };
+}
+
+function buildLoader(depth, params) {
+  const up = depth === 1 ? '../' : '../../';
+  const sib = depth === 1 ? './' : '../';
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>Locked</title>',
+    '<link rel="icon" type="image/jpeg" href="' + up + 'assets/images/logo-blue.jpeg">',
+    '<link rel="apple-touch-icon" href="' + up + 'assets/images/icon-192.png">',
+    '<link rel="manifest" href="' + sib + 'manifest.webmanifest">',
+    '<meta name="theme-color" content="#0d1b35">',
+    '<script src="' + sib + '_lib/lock.js"><\/script>',
+    '</head>',
+    '<body>',
+    '<script>LOCK.boot(' + JSON.stringify(params) + ');<\/script>',
+    '</body>',
+    '</html>',
+    ''
+  ].join('\n');
+}
+
+function stripOldAuthScript(html) {
+  return html.replace(/<script src="\.\.?\/(?:\.\.\/)?auth\.js"><\/script>\s*\n?/g, '');
+}
+
+async function getFileText(handle) {
+  const f = await handle.getFile();
+  return await f.text();
+}
+
+async function writeFile(parent, name, content) {
+  const handle = await parent.getFileHandle(name, { create: true });
+  const w = await handle.createWritable();
+  await w.write(content);
+  await w.close();
+}
+
+async function walkDirHandle(handle, path, results) {
+  for await (const entry of handle.values()) {
+    const p = path ? path + '/' + entry.name : entry.name;
+    if (entry.kind === 'directory' && !entry.name.startsWith('_') && entry.name !== 'tools') {
+      await walkDirHandle(entry, p, results);
+    } else if (entry.kind === 'file' && entry.name === 'index.html') {
+      results.push({ kind: 'html', handle: entry, parent: handle, path: p, depth: p.split('/').length });
+    } else if (entry.kind === 'file' && entry.name === 'index.source.html') {
+      results.push({ kind: 'source', handle: entry, parent: handle, path: p, depth: p.split('/').length });
+    }
+  }
+}
+
+async function lockInPlace(dirHandle, pin) {
+  const found = [];
+  await walkDirHandle(dirHandle, '', found);
+
+  const byDir = new Map();
+  for (const f of found) {
+    const dirKey = f.path.split('/').slice(0, -1).join('/');
+    if (!byDir.has(dirKey)) byDir.set(dirKey, { parent: f.parent, depth: f.depth, source: null, current: null });
+    const slot = byDir.get(dirKey);
+    if (f.kind === 'source') slot.source = f.handle;
+    else slot.current = f.handle;
+  }
+
+  let count = 0;
+  for (const [dirKey, slot] of byDir) {
+    let sourceHandle = slot.source;
+    if (!sourceHandle) {
+      if (!slot.current) continue;
+      let currentText = await getFileText(slot.current);
+      if (/LOCK\.boot\(/.test(currentText)) {
+        log('skip ' + dirKey + '/index.html (already locked, no source)', 'err');
+        continue;
+      }
+      currentText = stripOldAuthScript(currentText);
+      await writeFile(slot.parent, 'index.source.html', currentText);
+      sourceHandle = await slot.parent.getFileHandle('index.source.html');
+      log('saved ' + dirKey + '/index.source.html (first-run backup)', 'info');
+    }
+
+    const src = await getFileText(sourceHandle);
+
+    const params = await encrypt(src, pin);
+    const loader = buildLoader(slot.depth, params);
+    await writeFile(slot.parent, 'index.html', loader);
+    log('locked ' + dirKey + '/index.html', 'ok');
+    count++;
+  }
+  return count;
+}
+
+async function lockToZip(pin) {
+  log('Browser does not support writing files in place — falling back to ZIP download.', 'info');
+  log('You will need to manually provide each source file. Use Node CLI instead for batch mode.', 'err');
+  throw new Error('ZIP fallback not implemented for full directory — please use Chrome/Edge.');
+}
+
+document.getElementById('lockBtn').addEventListener('click', async () => {
+  logEl.innerHTML = '';
+  const pin = document.getElementById('pin').value.trim();
+  if (!/^\d{8}$/.test(pin)) { log('PIN must be exactly 8 digits.', 'err'); return; }
+
+  if (!window.showDirectoryPicker) {
+    log('Your browser does not support File System Access API.', 'err');
+    log('Use Chrome or Edge, OR run: node tools/lock.js ' + pin, 'info');
+    return;
+  }
+
+  try {
+    log('Pick the "pages" folder when prompted…', 'info');
+    const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    if (dirHandle.name !== 'pages') {
+      log('Expected to pick a folder named "pages" but you picked "' + dirHandle.name + '". Continuing anyway.', 'info');
+    }
+    log('Encrypting (this takes a moment per file because of PBKDF2)…', 'info');
+    const n = await lockInPlace(dirHandle, pin);
+    log('Done. Locked ' + n + ' page(s).', 'ok');
+  } catch (e) {
+    if (e && e.name === 'AbortError') { log('Cancelled.', 'err'); return; }
+    log('Error: ' + (e && e.message ? e.message : e), 'err');
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>
