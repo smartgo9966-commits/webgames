@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Match</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#6a1d8a">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #2a0a3a;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(160deg, #6a1d8a 0%, #a82ac0 55%, #d854c8 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(20, 10, 40, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(30, 228, 214, .6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 20px;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 74px; color: #fff;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 0 #4a0a64, 0 6px 18px rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 16px;
+}
+.menu-title .brain-ico { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #ffe0ff;
+  margin-top: 6px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 18px; margin-top: 26px; }
+.level-btn {
+  width: 175px; height: 175px;
+  background: rgba(255,255,255,0.92);
+  border: 4px solid #4a0a64;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #4a0a64, 0 12px 22px rgba(0,0,0,0.3);
+  transition: transform .12s, box-shadow .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #4a0a64, 0 16px 28px rgba(0,0,0,0.35); }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #4a0a64; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #6a1d8a; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px; color: #6a1d8a; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 17px; color: #4a0a64; text-align: center;
+  line-height: 1.1;
+}
+
+/* ═══════ INSTRUCTIONS ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 28px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px; color: #fff;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #4a0a64;
+}
+.instr-step-row {
+  display: flex; gap: 30px; margin-top: 26px; align-items: center;
+}
+.instr-card {
+  background: rgba(255,255,255,0.92); border: 3px solid #4a0a64;
+  border-radius: 18px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 170px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px; color: #6a1d8a;
+  margin-top: 10px; text-align: center;
+}
+.demo-card {
+  width: 70px; height: 90px;
+  border-radius: 10px;
+  border: 3px solid #4a0a64;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+}
+.demo-card.back {
+  background: linear-gradient(135deg, #6a1d8a, #d854c8);
+  color: #fff;
+}
+.demo-card.front {
+  background: #fff;
+}
+.demo-pair {
+  display: flex; gap: 8px;
+}
+.instr-arrow { font-size: 38px; color: #fff; }
+.instr-tip {
+  margin-top: 24px;
+  background: rgba(255,255,255,0.18);
+  padding: 14px 24px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #fff; text-align: center;
+  max-width: 760px; line-height: 1.4;
+  border: 2px dashed rgba(255,255,255,0.6);
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 22px; }
+
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #4a0a64;
+  color: #6a1d8a;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #4a0a64, 0 8px 16px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #4a0a64, 0 12px 22px rgba(0,0,0,0.25); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a0a64; }
+.btn.primary { background: #4a0a64; color: #fff; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 12px 20px 16px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 14px;
+  padding: 8px 18px;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #fff;
+  letter-spacing: 1px;
+}
+.hud .item .val { color: #ffe080; font-size: 24px; }
+.hud .spacer { flex: 1; }
+.hud .stars-strip { display: flex; gap: 4px; font-size: 22px; }
+.hud .stars-strip .star { color: rgba(255,255,255,0.35); }
+.hud .stars-strip .star.lit { color: #ffd040; text-shadow: 0 0 6px rgba(255,208,64,0.8); }
+
+.board {
+  flex: 1; margin-top: 14px;
+  display: grid; gap: 12px;
+  justify-content: center; align-content: center;
+}
+
+.card {
+  perspective: 1000px;
+  cursor: pointer;
+}
+.card-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.card.matched .card-inner { transform: rotateY(180deg); }
+.card.matched { animation: matched-pulse 0.6s ease; }
+@keyframes matched-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.card-face {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border: 3px solid #4a0a64;
+}
+.card-back {
+  background: linear-gradient(135deg, #6a1d8a 0%, #a82ac0 50%, #d854c8 100%);
+  position: relative;
+  overflow: hidden;
+}
+.card-back::before {
+  content: '✦';
+  font-size: 38px;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 0 14px rgba(255,255,255,0.6);
+}
+.card-back::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(255,255,255,0.35);
+  border-radius: 8px;
+  pointer-events: none;
+}
+.card-front {
+  background: #fff;
+  transform: rotateY(180deg);
+  font-family: 'Fredoka One', cursive;
+  color: #4a0a64;
+  text-align: center;
+  padding: 6px;
+  overflow: hidden;
+}
+.card-front svg { width: 80%; height: 80%; }
+.card-front .text-big {
+  font-size: 38px; line-height: 1;
+}
+.card-front .text-mid {
+  font-size: 22px; line-height: 1.05;
+}
+.card-front .dots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  width: 80%;
+  justify-items: center;
+}
+.card-front .dots .dot {
+  width: 14px; height: 14px;
+  background: #d854c8;
+  border-radius: 50%;
+  border: 2px solid #6a1d8a;
+}
+.card.matched .card-front {
+  background: #d8fcd0;
+  border-color: #2a8a18;
+  color: #2a8a18;
+}
+.card.matched .card-front .dot {
+  background: #4ab048; border-color: #2a8a18;
+}
+
+/* ═══════ MODAL ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: #fff; border: 5px solid #4a0a64;
+  border-radius: 24px; padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 520px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px; color: #6a1d8a;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #d854c8;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 48px; margin: 12px 0;
+}
+.modal-stars .star { color: #d8c8d8; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffc500; transform: scale(1.1); text-shadow: 0 0 12px rgba(255,197,0,.7); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #4a0a64;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #6a1d8a;
+  margin: 4px 0 14px;
+}
+.modal-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* ═══════ CONFETTI ═══════ */
+#confetti {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 30;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="brain-ico">🧠</span><span>MEMORY MATCH</span></div>
+    <div class="menu-subtitle">Flip cards and find matching pairs!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Animals<br>6 pairs</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">Counting<br>8 pairs</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">Sums<br>8 pairs</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Opposites<br>10 pairs</span></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo-pair">
+          <div class="demo-card back">✦</div>
+          <div class="demo-card back">✦</div>
+        </div>
+        <div class="lbl">TAP TWO CARDS</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-pair">
+          <div class="demo-card front">🐱</div>
+          <div class="demo-card front">🐱</div>
+        </div>
+        <div class="lbl">MATCH? STAY!</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-pair">
+          <div class="demo-card front">🐱</div>
+          <div class="demo-card front">🐶</div>
+        </div>
+        <div class="lbl">NO MATCH? FLIP BACK!</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      🧠 Find every pair to clear the board. Fewer wrong tries → more stars!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🏆 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">🎯 <span class="val" id="hud-pairs">0/6</span></div>
+      <div class="item">❌ <span class="val" id="hud-misses">0</span></div>
+      <div class="spacer"></div>
+      <div class="item">⭐ <span class="stars-strip" id="hud-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span></span></div>
+      <button class="btn" style="font-size:16px;padding:6px 14px;box-shadow:0 3px 0 #4a0a64" id="btn-restart">↺ RESTART</button>
+    </div>
+    <div class="board" id="board"></div>
+    <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  ANIMAL SVGS (reused from word_wizard style, compact versions)
+// ════════════════════════════════════════════════════════════
+const ANIMAL_SVGS = {
+  CAT: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="40,80 60,30 80,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="120,80 140,30 160,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+    <circle cx="100" cy="115" r="60" fill="#ff9030" stroke="#7a3a08" stroke-width="4"/>
+    <circle cx="78" cy="105" r="9" fill="#fff"/><circle cx="78" cy="107" r="5" fill="#1a1a1a"/>
+    <circle cx="122" cy="105" r="9" fill="#fff"/><circle cx="122" cy="107" r="5" fill="#1a1a1a"/>
+    <polygon points="92,125 108,125 100,135" fill="#7a3a08"/>
+    <path d="M 100 135 Q 92 145 80 140" stroke="#7a3a08" stroke-width="3" fill="none"/>
+    <path d="M 100 135 Q 108 145 120 140" stroke="#7a3a08" stroke-width="3" fill="none"/>
+  </svg>`,
+  DOG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+    <ellipse cx="150" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+    <circle cx="100" cy="115" r="58" fill="#d0a070" stroke="#5a3010" stroke-width="4"/>
+    <circle cx="78" cy="105" r="8" fill="#1a1a1a"/>
+    <circle cx="122" cy="105" r="8" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="132" rx="14" ry="10" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="155" rx="8" ry="10" fill="#ff6a8a"/>
+  </svg>`,
+  BIRD: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="115" rx="55" ry="50" fill="#ff8030" stroke="#7a3a08" stroke-width="4"/>
+    <ellipse cx="100" cy="80" rx="34" ry="32" fill="#ffaa60" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="120,82 145,75 120,90" fill="#ffd040" stroke="#7a3a08" stroke-width="2"/>
+    <circle cx="108" cy="74" r="6" fill="#fff"/>
+    <circle cx="109" cy="75" r="3" fill="#1a1a1a"/>
+  </svg>`,
+  FROG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="130" rx="78" ry="46" fill="#7ad06a" stroke="#2a5a18" stroke-width="4"/>
+    <circle cx="65" cy="72" r="26" fill="#9ae27a" stroke="#2a5a18" stroke-width="3"/>
+    <circle cx="135" cy="72" r="26" fill="#9ae27a" stroke="#2a5a18" stroke-width="3"/>
+    <circle cx="65" cy="74" r="8" fill="#1a1a1a"/>
+    <circle cx="135" cy="74" r="8" fill="#1a1a1a"/>
+    <path d="M 60 130 Q 100 160 140 130" stroke="#2a5a18" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  FISH: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="95" cy="100" rx="70" ry="45" fill="#4aaadf" stroke="#0c4a78" stroke-width="4"/>
+    <polygon points="160,100 195,60 195,140" fill="#4aaadf" stroke="#0c4a78" stroke-width="3"/>
+    <circle cx="55" cy="92" r="10" fill="#fff" stroke="#0c4a78" stroke-width="2"/>
+    <circle cx="55" cy="92" r="5" fill="#1a1a1a"/>
+    <path d="M 30 110 Q 50 130 70 115" stroke="#0c4a78" stroke-width="3" fill="none"/>
+  </svg>`,
+  BUNNY: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="70" cy="55" rx="14" ry="36" fill="#fff" stroke="#7a3a8a" stroke-width="3"/>
+    <ellipse cx="130" cy="55" rx="14" ry="36" fill="#fff" stroke="#7a3a8a" stroke-width="3"/>
+    <ellipse cx="70" cy="60" rx="6" ry="22" fill="#ffc0d0"/>
+    <ellipse cx="130" cy="60" rx="6" ry="22" fill="#ffc0d0"/>
+    <circle cx="100" cy="120" r="55" fill="#fff" stroke="#7a3a8a" stroke-width="4"/>
+    <circle cx="82" cy="115" r="6" fill="#1a1a1a"/>
+    <circle cx="118" cy="115" r="6" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="135" rx="6" ry="4" fill="#ff70a0"/>
+    <path d="M 100 140 Q 90 150 82 146" stroke="#7a3a8a" stroke-width="2" fill="none"/>
+    <path d="M 100 140 Q 110 150 118 146" stroke="#7a3a8a" stroke-width="2" fill="none"/>
+  </svg>`
+};
+
+// ════════════════════════════════════════════════════════════
+//  LEVEL DEFINITIONS
+//  Each pair: { a: cardContent, b: cardContent }
+//  cardContent: { type:'animal', key:'CAT' } | { type:'text', text:'5', size?:'big'|'mid' }
+//             | { type:'dots', count:5 } | { type:'emoji', char:'🔥' }
+// ════════════════════════════════════════════════════════════
+
+function animal(k){ return { type:'animal', key:k }; }
+function txt(s, size){ return { type:'text', text:s, size: size || 'big' }; }
+function dots(n){ return { type:'dots', count:n }; }
+function emoji(c){ return { type:'emoji', char:c }; }
+
+const LEVELS = {
+  1: { // Animals
+    cols: 4, rows: 3,
+    pairs: [
+      { a: animal('CAT'),   b: animal('CAT') },
+      { a: animal('DOG'),   b: animal('DOG') },
+      { a: animal('BIRD'),  b: animal('BIRD') },
+      { a: animal('FROG'),  b: animal('FROG') },
+      { a: animal('FISH'),  b: animal('FISH') },
+      { a: animal('BUNNY'), b: animal('BUNNY') }
+    ],
+    starThresholds: [2, 5] // ≤2 misses=3★, ≤5=2★, more=1★
+  },
+  2: { // Counting (number ↔ dots)
+    cols: 4, rows: 4,
+    pairs: [
+      { a: txt('1'), b: dots(1) },
+      { a: txt('2'), b: dots(2) },
+      { a: txt('3'), b: dots(3) },
+      { a: txt('4'), b: dots(4) },
+      { a: txt('5'), b: dots(5) },
+      { a: txt('6'), b: dots(6) },
+      { a: txt('7'), b: dots(7) },
+      { a: txt('8'), b: dots(8) }
+    ],
+    starThresholds: [4, 9]
+  },
+  3: { // Sums (equation ↔ answer)
+    cols: 4, rows: 4,
+    pairs: [
+      { a: txt('1+2','mid'), b: txt('3') },
+      { a: txt('2+3','mid'), b: txt('5') },
+      { a: txt('4+2','mid'), b: txt('6') },
+      { a: txt('5+2','mid'), b: txt('7') },
+      { a: txt('6+2','mid'), b: txt('8') },
+      { a: txt('3+6','mid'), b: txt('9') },
+      { a: txt('7+3','mid'), b: txt('10') },
+      { a: txt('5+6','mid'), b: txt('11') }
+    ],
+    starThresholds: [5, 10]
+  },
+  4: { // Opposites
+    cols: 5, rows: 4,
+    pairs: [
+      { a: txt('HOT','mid'),   b: txt('COLD','mid') },
+      { a: txt('BIG','mid'),   b: txt('SMALL','mid') },
+      { a: txt('DAY','mid'),   b: txt('NIGHT','mid') },
+      { a: txt('UP','mid'),    b: txt('DOWN','mid') },
+      { a: txt('FAST','mid'),  b: txt('SLOW','mid') },
+      { a: txt('IN','mid'),    b: txt('OUT','mid') },
+      { a: txt('NEW','mid'),   b: txt('OLD','mid') },
+      { a: txt('FULL','mid'),  b: txt('EMPTY','mid') },
+      { a: txt('OPEN','mid'),  b: txt('CLOSED','mid') },
+      { a: txt('HAPPY','mid'), b: txt('SAD','mid') }
+    ],
+    starThresholds: [7, 14]
+  }
+};
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  cards: [],          // array of {id, pairId, content, matched, flipped}
+  flipped: [],        // ids of currently face-up unmatched cards (max 2)
+  pairsFound: 0,
+  totalPairs: 0,
+  misses: 0,
+  locked: false       // true during the 700ms mismatch peek
+};
+let pendingLevel = 1;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function shuffle(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function contentEqual(a, b){
+  // Two card contents form a "pair" if their pairId matches (assigned at deal time).
+  // This helper isn't used for matching — pairId comparison is.
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level){
+  state.level = level;
+  state.cards = [];
+  state.flipped = [];
+  state.pairsFound = 0;
+  state.misses = 0;
+  state.locked = false;
+
+  const cfg = LEVELS[level];
+  state.totalPairs = cfg.pairs.length;
+
+  // Build cards array: each pair → two cards with same pairId
+  let id = 0;
+  cfg.pairs.forEach((p, i) => {
+    state.cards.push({ id: id++, pairId: i, content: p.a, matched: false, flipped: false });
+    state.cards.push({ id: id++, pairId: i, content: p.b, matched: false, flipped: false });
+  });
+  shuffle(state.cards);
+
+  renderBoard();
+  renderHUD();
+  showScreen('screen-game');
+}
+
+function renderHUD(){
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-pairs').textContent = state.pairsFound + '/' + state.totalPairs;
+  document.getElementById('hud-misses').textContent = state.misses;
+
+  // Stars: based on threshold table
+  const thresh = LEVELS[state.level].starThresholds;
+  let stars = 1;
+  if (state.misses <= thresh[1]) stars = 2;
+  if (state.misses <= thresh[0]) stars = 3;
+  const starsEl = document.getElementById('hud-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < stars ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+}
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  const cfg = LEVELS[state.level];
+  // Compute card size: fit the board area (≈920×400 available after HUD)
+  const maxW = 880, maxH = 400;
+  const gap = 12;
+  const cellW = Math.floor((maxW - gap * (cfg.cols - 1)) / cfg.cols);
+  const cellH = Math.floor((maxH - gap * (cfg.rows - 1)) / cfg.rows);
+  const cell = Math.min(cellW, cellH, 130);
+
+  board.style.gridTemplateColumns = `repeat(${cfg.cols}, ${cell}px)`;
+  board.style.gridTemplateRows = `repeat(${cfg.rows}, ${cell}px)`;
+  board.style.gap = gap + 'px';
+  board.innerHTML = '';
+
+  state.cards.forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'card' + (card.flipped ? ' flipped' : '') + (card.matched ? ' matched' : '');
+    el.dataset.id = card.id;
+    el.innerHTML =
+      `<div class="card-inner">
+         <div class="card-face card-back"></div>
+         <div class="card-face card-front">${renderContent(card.content, cell)}</div>
+       </div>`;
+    el.addEventListener('click', () => onCardClick(card.id));
+    board.appendChild(el);
+  });
+}
+
+function renderContent(c, cellSize){
+  if (c.type === 'animal'){
+    return ANIMAL_SVGS[c.key] || '';
+  }
+  if (c.type === 'text'){
+    const cls = c.size === 'mid' ? 'text-mid' : 'text-big';
+    // Scale font size proportional to cell
+    const fontPx = c.size === 'mid'
+      ? Math.max(16, Math.floor(cellSize * 0.22))
+      : Math.max(24, Math.floor(cellSize * 0.4));
+    return `<span class="${cls}" style="font-size:${fontPx}px">${c.text}</span>`;
+  }
+  if (c.type === 'dots'){
+    let html = '<div class="dots">';
+    for (let i = 0; i < c.count; i++) html += '<div class="dot"></div>';
+    html += '</div>';
+    return html;
+  }
+  if (c.type === 'emoji'){
+    return `<span class="text-big" style="font-size:${Math.floor(cellSize*0.5)}px">${c.char}</span>`;
+  }
+  return '';
+}
+
+function onCardClick(id){
+  if (state.locked) return;
+  const card = state.cards.find(c => c.id === id);
+  if (!card || card.matched || card.flipped) return;
+
+  card.flipped = true;
+  state.flipped.push(id);
+
+  // Update only the one card's DOM
+  const el = document.querySelector(`.card[data-id="${id}"]`);
+  if (el) el.classList.add('flipped');
+
+  if (state.flipped.length === 2){
+    state.locked = true;
+    const [aId, bId] = state.flipped;
+    const a = state.cards.find(c => c.id === aId);
+    const b = state.cards.find(c => c.id === bId);
+    if (a.pairId === b.pairId){
+      // Match!
+      setTimeout(() => {
+        a.matched = true; b.matched = true;
+        a.flipped = false; b.flipped = false;  // matched supersedes flipped state
+        document.querySelector(`.card[data-id="${aId}"]`).classList.add('matched');
+        document.querySelector(`.card[data-id="${bId}"]`).classList.add('matched');
+        state.flipped = [];
+        state.pairsFound++;
+        renderHUD();
+        state.locked = false;
+        if (state.pairsFound === state.totalPairs){
+          setTimeout(onLevelComplete, 600);
+        }
+      }, 400);
+    } else {
+      // No match — flip back after a peek
+      state.misses++;
+      renderHUD();
+      setTimeout(() => {
+        a.flipped = false; b.flipped = false;
+        document.querySelector(`.card[data-id="${aId}"]`).classList.remove('flipped');
+        document.querySelector(`.card[data-id="${bId}"]`).classList.remove('flipped');
+        state.flipped = [];
+        state.locked = false;
+      }, 750);
+    }
+  }
+}
+
+function onLevelComplete(){
+  triggerConfetti();
+  const thresh = LEVELS[state.level].starThresholds;
+  let stars = 1;
+  if (state.misses <= thresh[1]) stars = 2;
+  if (state.misses <= thresh[0]) stars = 3;
+
+  document.getElementById('results-title').textContent = 'LEVEL ' + state.level + ' COMPLETE!';
+  document.getElementById('results-body').textContent =
+    stars === 3 ? 'Sharp memory! 🧠' :
+    stars === 2 ? 'Nice work — almost perfect!' :
+    'You did it — try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Misses: <b>' + state.misses + '</b>';
+
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => el.classList.toggle('lit', i < stars));
+  document.getElementById('btn-results-next').style.display =
+    state.level < 4 ? 'inline-block' : 'none';
+
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#ff5050','#ffae42','#ffd040','#4ab048','#3a8acc','#a44acc','#ff70a0','#5af4e6'];
+  for (let i = 0; i < 100; i++){
+    confettiParticles.push({
+      x: w / 2 + (Math.random() - 0.5) * 140,
+      y: h / 2,
+      vx: (Math.random() - 0.5) * 9,
+      vy: -Math.random() * 9 - 4,
+      g: 0.26,
+      color: pick(colors),
+      size: Math.random() * 7 + 4,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.3,
+      life: 60 + Math.random() * 30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length - 1; i >= 0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel));
+document.getElementById('btn-restart').addEventListener('click', () => startLevel(state.level));
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

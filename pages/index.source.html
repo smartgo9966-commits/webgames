@@ -1992,6 +1992,103 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       MEMORY MATCH CARD
+  ══════════════════════════════ -->
+  <div class="game-card mma" onclick="location.href='memory_match/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mmaBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#6a1d8a"/>
+            <stop offset="55%" stop-color="#a82ac0"/>
+            <stop offset="100%" stop-color="#d854c8"/>
+          </linearGradient>
+          <linearGradient id="mmaBack" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#6a1d8a"/>
+            <stop offset="100%" stop-color="#d854c8"/>
+          </linearGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#mmaBg)"/>
+
+        <!-- Title -->
+        <text x="190" y="34" fill="#fff" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="26" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#4a0a64" stroke-width="3" stroke-linejoin="round">Memory Match</text>
+        <text x="78" y="36" font-size="26" text-anchor="middle">🧠</text>
+
+        <!-- Row of cards: 2 face-up matched cats, 1 face-down, 1 face-up dog -->
+        <g transform="translate(28 60)">
+          <!-- card 1: cat (matched/green) -->
+          <rect x="0" y="0" width="74" height="92" rx="10" fill="#d8fcd0" stroke="#2a8a18" stroke-width="3"/>
+          <g transform="translate(37 50) scale(0.32)">
+            <polygon points="40,80 60,30 80,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+            <polygon points="120,80 140,30 160,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+            <circle cx="100" cy="115" r="60" fill="#ff9030" stroke="#7a3a08" stroke-width="4"/>
+            <circle cx="78" cy="105" r="9" fill="#fff"/><circle cx="78" cy="107" r="5" fill="#1a1a1a"/>
+            <circle cx="122" cy="105" r="9" fill="#fff"/><circle cx="122" cy="107" r="5" fill="#1a1a1a"/>
+            <polygon points="92,125 108,125 100,135" fill="#7a3a08"/>
+          </g>
+          <!-- card 2: cat (matched/green) -->
+          <rect x="84" y="0" width="74" height="92" rx="10" fill="#d8fcd0" stroke="#2a8a18" stroke-width="3"/>
+          <g transform="translate(121 50) scale(0.32)">
+            <polygon points="40,80 60,30 80,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+            <polygon points="120,80 140,30 160,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+            <circle cx="100" cy="115" r="60" fill="#ff9030" stroke="#7a3a08" stroke-width="4"/>
+            <circle cx="78" cy="105" r="9" fill="#fff"/><circle cx="78" cy="107" r="5" fill="#1a1a1a"/>
+            <circle cx="122" cy="105" r="9" fill="#fff"/><circle cx="122" cy="107" r="5" fill="#1a1a1a"/>
+            <polygon points="92,125 108,125 100,135" fill="#7a3a08"/>
+          </g>
+          <!-- card 3: face-down (back) -->
+          <rect x="168" y="0" width="74" height="92" rx="10" fill="url(#mmaBack)" stroke="#4a0a64" stroke-width="3"/>
+          <text x="205" y="60" text-anchor="middle" font-size="34" fill="#fff">✦</text>
+          <rect x="173" y="5" width="64" height="82" rx="7" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-dasharray="4 4"/>
+          <!-- card 4: face-up dog -->
+          <rect x="252" y="0" width="74" height="92" rx="10" fill="#fff" stroke="#4a0a64" stroke-width="3"/>
+          <g transform="translate(289 50) scale(0.32)">
+            <ellipse cx="50" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+            <ellipse cx="150" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+            <circle cx="100" cy="115" r="58" fill="#d0a070" stroke="#5a3010" stroke-width="4"/>
+            <circle cx="78" cy="105" r="8" fill="#1a1a1a"/>
+            <circle cx="122" cy="105" r="8" fill="#1a1a1a"/>
+            <ellipse cx="100" cy="132" rx="14" ry="10" fill="#1a1a1a"/>
+          </g>
+        </g>
+
+        <!-- Sparkles -->
+        <text x="350" y="60" font-size="20" fill="#ffe080">✨</text>
+        <text x="22" y="180" font-size="16" fill="#ffe080">✨</text>
+        <text x="340" y="170" font-size="18" fill="#ffe080">✨</text>
+
+        <!-- Star row showing rating -->
+        <g transform="translate(140 162)" font-size="20">
+          <text x="0" y="0" fill="#ffd040">★</text>
+          <text x="22" y="0" fill="#ffd040">★</text>
+          <text x="44" y="0" fill="#ffd040">★</text>
+        </g>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(0,0,0,.35)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.95)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Flip cards and find every matching pair!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🧠 Memory Match</div>
+      <div class="card-desc">Classic flip-and-find pairs across four themed levels: animals, counting (number ↔ dots), sums (4+2 ↔ 6), and opposites (HOT ↔ COLD). Fewer misses → more stars.</div>
+      <div class="card-tags">
+        <span class="tag">Tap to Play</span>
+        <span class="tag">4 Levels</span>
+        <span class="tag">Memory</span>
+        <span class="tag">Matching</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="memory_match/">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
