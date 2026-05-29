@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Lab</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#d8b4f0">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #d8b4f0;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8c8f8 0%, #fcd8c0 45%, #c8f0d0 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(40, 20, 60, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(30, 228, 214, .6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 20px;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 76px; color: #4a1078;
+  letter-spacing: 5px;
+  text-shadow: 0 4px 0 #f8a8d8, 0 6px 18px rgba(0,0,0,0.2);
+  display: flex; align-items: center; gap: 16px;
+}
+.menu-title .palette-ico { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #6a2098;
+  margin-top: 4px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 18px; margin-top: 28px; }
+.level-btn {
+  width: 175px; height: 175px;
+  background: rgba(255,255,255,0.95);
+  border: 4px solid #4a1078;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #4a1078, 0 12px 22px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #4a1078, 0 16px 28px rgba(0,0,0,0.25); }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #4a1078; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #4a1078; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px; color: #4a1078; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px; color: #6a2098; text-align: center;
+  line-height: 1.15;
+}
+
+/* ═══════ INSTRUCTIONS ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px; color: #4a1078;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #f8a8d8;
+}
+.instr-step-row {
+  display: flex; gap: 28px; margin-top: 22px; align-items: center;
+}
+.instr-card {
+  background: rgba(255,255,255,0.92); border: 3px solid #4a1078;
+  border-radius: 18px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 170px; gap: 10px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px; color: #4a1078; text-align: center;
+}
+.demo-row { display: flex; gap: 6px; }
+.demo-pot {
+  width: 36px; height: 44px; border-radius: 8px 8px 12px 12px;
+  border: 3px solid #4a1078;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 4px; font-family: 'Fredoka One', cursive;
+  font-size: 14px; color: #fff;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+.demo-pot.r { background: #dc4040; }
+.demo-pot.y { background: #f0d840; color: #6a4a08; text-shadow: none; }
+.demo-pot.b { background: #3c6ad0; }
+.demo-bowl {
+  width: 70px; height: 60px; border-radius: 0 0 40px 40px;
+  border: 4px solid #4a1078; border-top: none;
+  position: relative;
+  background: #fff;
+}
+.demo-bowl::before {
+  content: ''; position: absolute;
+  inset: 4px 6px; border-radius: 0 0 32px 32px;
+  background: var(--demo-color, #f08030);
+}
+.instr-arrow { font-size: 38px; color: #4a1078; }
+.instr-tip {
+  margin-top: 22px;
+  background: rgba(255,255,255,0.65);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #4a1078; text-align: center;
+  max-width: 740px; line-height: 1.4;
+  border: 2px dashed #4a1078;
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 20px; }
+
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #4a1078;
+  color: #4a1078;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #4a1078, 0 8px 16px rgba(0,0,0,0.15);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #4a1078, 0 12px 22px rgba(0,0,0,0.2); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a1078; }
+.btn.primary { background: #4a1078; color: #fff; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+.btn.go { background: #2bb04a; color: #fff; border-color: #155a18; box-shadow: 0 5px 0 #155a18, 0 8px 16px rgba(0,0,0,0.15); }
+.btn.go:hover { box-shadow: 0 7px 0 #155a18, 0 12px 22px rgba(0,0,0,0.2); }
+.btn.go:active { box-shadow: 0 2px 0 #155a18; }
+.btn.warn { background: #f08820; color: #fff; border-color: #8a4a10; box-shadow: 0 5px 0 #8a4a10, 0 8px 16px rgba(0,0,0,0.15); }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 12px 20px 16px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(255,255,255,0.6);
+  border: 2px solid #4a1078;
+  border-radius: 14px;
+  padding: 8px 18px;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #4a1078;
+  letter-spacing: 1px;
+}
+.hud .item .val { font-size: 22px; }
+.hud .spacer { flex: 1; }
+.hud .stars-strip { display: flex; gap: 4px; font-size: 20px; }
+.hud .stars-strip .star { color: rgba(74, 16, 120, 0.3); }
+.hud .stars-strip .star.lit { color: #ffc500; text-shadow: 0 0 4px rgba(255,197,0,0.6); }
+
+.play-area {
+  flex: 1; display: flex;
+  margin-top: 14px;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.target-pane {
+  width: 220px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.55);
+  border: 3px solid #4a1078;
+  border-radius: 18px;
+  padding: 14px 10px;
+}
+.target-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #4a1078;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.target-swatch {
+  width: 160px; height: 140px;
+  border-radius: 18px;
+  border: 4px solid #4a1078;
+  background: #f08030;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.2), inset 0 0 0 2px rgba(255,255,255,0.4);
+}
+.target-name {
+  margin-top: 12px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 24px; color: #4a1078;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.mix-pane {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 14px;
+}
+.bowl-wrap {
+  position: relative;
+  width: 280px; height: 240px;
+}
+.bowl-wrap svg { width: 100%; height: 100%; }
+.bowl-fill { transition: fill 0.35s ease; }
+.bowl-wrap.swirl svg .bowl-fill { animation: swirl 0.5s; }
+@keyframes swirl {
+  0%   { transform: scale(0.9); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.recipe-strip {
+  margin-top: 8px;
+  min-height: 32px;
+  display: flex; gap: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 320px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 18px; color: #4a1078;
+}
+.recipe-strip .drop {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid #4a1078;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2);
+}
+.recipe-strip .empty {
+  font-family: 'Patrick Hand', cursive;
+  color: rgba(74,16,120,0.5);
+  font-size: 18px;
+}
+
+.action-row {
+  margin-top: 12px;
+  display: flex; gap: 14px;
+}
+
+.pots-pane {
+  width: 200px; flex-shrink: 0;
+  background: rgba(255,255,255,0.55);
+  border: 3px solid #4a1078;
+  border-radius: 18px;
+  padding: 14px 10px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+}
+.pots-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; color: #4a1078;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.pots-grid {
+  display: flex; flex-direction: column;
+  gap: 10px; align-items: center;
+}
+.pot {
+  width: 76px; height: 86px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.pot:hover { transform: translateY(-2px); }
+.pot:active { transform: scale(0.95); }
+.pot svg { width: 100%; height: 100%; }
+.pot .pot-label {
+  position: absolute;
+  bottom: 4px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  color: #fff;
+  pointer-events: none;
+}
+.pot.k .pot-label { color: #fff; }
+.pot.w .pot-label { color: #4a1078; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+
+/* ═══════ TOAST ═══════ */
+.toast {
+  position: absolute;
+  top: 64px; left: 50%; transform: translateX(-50%);
+  background: rgba(74,16,120,0.92); color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; letter-spacing: 1px;
+  padding: 10px 24px; border-radius: 22px;
+  opacity: 0; transition: opacity .25s;
+  pointer-events: none;
+  z-index: 40;
+}
+.toast.show { opacity: 1; }
+
+/* ═══════ MODAL ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: #fff; border: 5px solid #4a1078;
+  border-radius: 24px; padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 520px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px; color: #4a1078;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #f8a8d8;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 48px; margin: 12px 0;
+}
+.modal-stars .star { color: #d8c8d8; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffc500; transform: scale(1.1); text-shadow: 0 0 12px rgba(255,197,0,.7); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #4a1078;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #6a2098;
+  margin: 4px 0 14px;
+}
+.modal-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+#confetti { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="palette-ico">🎨</span><span>COLOR LAB</span></div>
+    <div class="menu-subtitle">Mix the paints to match the target color!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Primaries</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">Tints &amp; shades</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">Dark colors</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Recipe ratios</span></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo-row">
+          <div class="demo-pot r">R</div>
+          <div class="demo-pot y">Y</div>
+          <div class="demo-pot b">B</div>
+        </div>
+        <div class="lbl">TAP A PAINT POT</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-bowl" style="--demo-color:#f08030"></div>
+        <div class="lbl">WATCH THE BOWL<br>CHANGE COLOR</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-bowl" style="--demo-color:#f08030"></div>
+        <div class="lbl">MATCH THE TARGET<br>→ PRESS ✓</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      🧪 Add 1 RED + 1 YELLOW to make orange. Black darkens, white lightens. On Level 4, the <i>ratio</i> matters — 2 Red + 1 Yellow makes a different color than 1 Red + 1 Yellow!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🏆 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">🎯 <span class="val" id="hud-target">1/5</span></div>
+      <div class="item">❌ <span class="val" id="hud-wrong">0</span></div>
+      <div class="spacer"></div>
+      <div class="item">⭐ <span class="stars-strip" id="hud-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span></span></div>
+    </div>
+
+    <div class="play-area">
+      <div class="target-pane">
+        <div class="target-label">TARGET COLOR</div>
+        <div class="target-swatch" id="target-swatch"></div>
+        <div class="target-name" id="target-name">ORANGE</div>
+      </div>
+
+      <div class="mix-pane">
+        <div class="bowl-wrap" id="bowl-wrap">
+          <svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="bowlHi" cx="35%" cy="30%" r="40%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+              </radialGradient>
+            </defs>
+            <!-- Bowl outline -->
+            <path d="M 30 80 Q 30 220 140 220 Q 250 220 250 80 Z"
+                  fill="#fff" stroke="#4a1078" stroke-width="5"/>
+            <!-- Paint fill (inside bowl) -->
+            <path class="bowl-fill" id="bowl-fill"
+                  d="M 42 92 Q 42 208 140 208 Q 238 208 238 92 Z"
+                  fill="#e0d0e0"/>
+            <!-- Highlight -->
+            <ellipse cx="100" cy="130" rx="30" ry="14" fill="url(#bowlHi)"/>
+            <!-- Rim -->
+            <ellipse cx="140" cy="80" rx="115" ry="22" fill="none" stroke="#4a1078" stroke-width="5"/>
+            <ellipse cx="140" cy="80" rx="110" ry="18" fill="rgba(255,255,255,0.3)"/>
+          </svg>
+        </div>
+        <div class="recipe-strip" id="recipe-strip"></div>
+        <div class="action-row">
+          <button class="btn go" id="btn-match">✓ MATCH!</button>
+          <button class="btn warn" id="btn-empty">🗑 EMPTY</button>
+        </div>
+      </div>
+
+      <div class="pots-pane">
+        <div class="pots-label">PAINTS</div>
+        <div class="pots-grid" id="pots-grid"></div>
+      </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  RECIPES LOOKUP
+//  Keys are alphabetically sorted code+count pairs (B < K < R < W < Y).
+// ════════════════════════════════════════════════════════════
+const RECIPES = {
+  'R1':       { color: '#dc4040', name: 'RED' },
+  'Y1':       { color: '#f0d840', name: 'YELLOW' },
+  'B1':       { color: '#3c6ad0', name: 'BLUE' },
+  'W1':       { color: '#ffffff', name: 'WHITE' },
+  'K1':       { color: '#202020', name: 'BLACK' },
+  'R1Y1':     { color: '#f08030', name: 'ORANGE' },
+  'B1R1':     { color: '#8430a0', name: 'PURPLE' },
+  'B1Y1':     { color: '#50b860', name: 'GREEN' },
+  'R1W1':     { color: '#f4b0c0', name: 'PINK' },
+  'B1W1':     { color: '#a0c8f0', name: 'SKY BLUE' },
+  'W1Y1':     { color: '#fcf0b0', name: 'CREAM' },
+  'K1W1':     { color: '#a0a0a0', name: 'GRAY' },
+  'B1R1Y1':   { color: '#8a5028', name: 'BROWN' },
+  'B1R1W1':   { color: '#c4a0d0', name: 'LAVENDER' },
+  'B1W1Y1':   { color: '#b0e0b8', name: 'MINT' },
+  'K1R1':     { color: '#6a1818', name: 'MAROON' },
+  'B1K1':     { color: '#102050', name: 'NAVY' },
+  'K1Y1':     { color: '#6a6010', name: 'OLIVE' },
+  'B1K1Y1':   { color: '#205828', name: 'FOREST' },
+  'R2Y1':     { color: '#e85820', name: 'RED-ORANGE' },
+  'B1Y2':     { color: '#8ad030', name: 'YELLOW-GREEN' },
+  'R1W2':     { color: '#fad0d8', name: 'LIGHT PINK' },
+  'B1W2':     { color: '#cae0f4', name: 'POWDER BLUE' },
+  'K1R1Y1':   { color: '#9a5a18', name: 'DARK ORANGE' }
+};
+
+// ════════════════════════════════════════════════════════════
+//  POT VISUALS (pot color + label code + display name)
+// ════════════════════════════════════════════════════════════
+const POT_DATA = {
+  R: { fill: '#dc4040', stroke: '#7a1010', name: 'RED' },
+  Y: { fill: '#f0d840', stroke: '#7a6010', name: 'YELLOW' },
+  B: { fill: '#3c6ad0', stroke: '#102050', name: 'BLUE' },
+  W: { fill: '#ffffff', stroke: '#6a6a6a', name: 'WHITE' },
+  K: { fill: '#202020', stroke: '#000000', name: 'BLACK' }
+};
+
+// ════════════════════════════════════════════════════════════
+//  LEVELS
+// ════════════════════════════════════════════════════════════
+const LEVELS = {
+  1: { pots: ['R','Y','B','W'],     targets: ['R1', 'R1Y1', 'B1Y1', 'B1R1', 'R1W1'] },
+  2: { pots: ['R','Y','B','W'],     targets: ['B1R1Y1', 'B1W1', 'W1Y1', 'B1W1Y1', 'B1R1W1'] },
+  3: { pots: ['R','Y','B','W','K'], targets: ['K1R1', 'B1K1Y1', 'B1K1', 'K1W1', 'K1Y1'] },
+  4: { pots: ['R','Y','B','W','K'], targets: ['R2Y1', 'B1Y2', 'R1W2', 'K1R1Y1', 'B1W2'] }
+};
+const TARGETS_PER_LEVEL = 5;
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  targetIdx: 0,
+  targetKey: '',
+  recipe: { R:0, Y:0, B:0, W:0, K:0 },
+  recipeOrder: [],         // codes in order added (for visual recipe strip)
+  wrongTries: 0,
+  perfectTargets: 0,
+  firstTryThisTarget: true,
+  starsByLevel: { 1:0, 2:0, 3:0, 4:0 }
+};
+let pendingLevel = 1;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function gcd(a,b){ return b === 0 ? a : gcd(b, a % b); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function recipeKey(recipe){
+  const codes = Object.keys(recipe).filter(k => recipe[k] > 0).sort();
+  if (codes.length === 0) return '';
+  let g = recipe[codes[0]];
+  for (const c of codes) g = gcd(g, recipe[c]);
+  return codes.map(c => c + (recipe[c] / g)).join('');
+}
+
+function lookupColor(recipe){
+  const key = recipeKey(recipe);
+  if (!key) return { color: '#e0d0e0', name: '' };  // empty bowl
+  if (RECIPES[key]) return RECIPES[key];
+  return { color: '#7a6a5a', name: '' };  // muddy mix
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 1500);
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level){
+  state.level = level;
+  state.targetIdx = 0;
+  state.wrongTries = 0;
+  state.perfectTargets = 0;
+  renderPots();
+  loadTarget(0);
+  showScreen('screen-game');
+}
+
+function loadTarget(idx){
+  state.targetIdx = idx;
+  state.targetKey = LEVELS[state.level].targets[idx];
+  state.firstTryThisTarget = true;
+  resetRecipe();
+  renderTarget();
+  renderHUD();
+}
+
+function resetRecipe(){
+  state.recipe = { R:0, Y:0, B:0, W:0, K:0 };
+  state.recipeOrder = [];
+  renderBowl();
+  renderRecipeStrip();
+}
+
+function renderHUD(){
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-target').textContent = (state.targetIdx + 1) + '/' + TARGETS_PER_LEVEL;
+  document.getElementById('hud-wrong').textContent = state.wrongTries;
+  const stars = calcStars();
+  const starsEl = document.getElementById('hud-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < stars ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+}
+
+function calcStars(){
+  if (state.wrongTries === 0) return 3;
+  if (state.wrongTries <= 4) return 2;
+  return 1;
+}
+
+function renderTarget(){
+  const t = RECIPES[state.targetKey];
+  if (!t) return;
+  document.getElementById('target-swatch').style.background = t.color;
+  document.getElementById('target-name').textContent = t.name;
+}
+
+function renderBowl(){
+  const mix = lookupColor(state.recipe);
+  const fill = document.getElementById('bowl-fill');
+  fill.setAttribute('fill', mix.color);
+  // Trigger swirl animation
+  const wrap = document.getElementById('bowl-wrap');
+  wrap.classList.remove('swirl');
+  void wrap.offsetWidth;
+  wrap.classList.add('swirl');
+}
+
+function renderRecipeStrip(){
+  const strip = document.getElementById('recipe-strip');
+  strip.innerHTML = '';
+  if (state.recipeOrder.length === 0){
+    const e = document.createElement('span');
+    e.className = 'empty';
+    e.textContent = '(bowl is empty)';
+    strip.appendChild(e);
+    return;
+  }
+  state.recipeOrder.forEach(code => {
+    const d = document.createElement('div');
+    d.className = 'drop';
+    d.style.background = POT_DATA[code].fill;
+    d.style.borderColor = POT_DATA[code].stroke;
+    strip.appendChild(d);
+  });
+}
+
+function renderPots(){
+  const grid = document.getElementById('pots-grid');
+  grid.innerHTML = '';
+  const pots = LEVELS[state.level].pots;
+  for (const code of pots){
+    const d = POT_DATA[code];
+    const el = document.createElement('div');
+    el.className = 'pot ' + code.toLowerCase();
+    el.innerHTML = `
+      <svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+        <!-- Jar outline -->
+        <path d="M 18 30 L 18 95 Q 18 105 30 105 L 70 105 Q 82 105 82 95 L 82 30 Z"
+              fill="rgba(255,255,255,0.5)" stroke="${d.stroke}" stroke-width="3.5"/>
+        <!-- Paint fill inside jar -->
+        <path d="M 22 38 L 22 92 Q 22 101 30 101 L 70 101 Q 78 101 78 92 L 78 38 Z"
+              fill="${d.fill}"/>
+        <!-- Glass highlight -->
+        <path d="M 30 50 Q 26 70 30 90" stroke="rgba(255,255,255,0.6)" stroke-width="3" fill="none"/>
+        <!-- Lid/rim -->
+        <ellipse cx="50" cy="30" rx="34" ry="8" fill="rgba(255,255,255,0.4)" stroke="${d.stroke}" stroke-width="3"/>
+        <!-- Drip -->
+        <circle cx="50" cy="22" r="5" fill="${d.fill}" stroke="${d.stroke}" stroke-width="2"/>
+      </svg>
+      <span class="pot-label">${d.name}</span>
+    `;
+    el.addEventListener('click', () => onPotClick(code));
+    grid.appendChild(el);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  CLICK HANDLERS
+// ════════════════════════════════════════════════════════════
+function onPotClick(code){
+  state.recipe[code]++;
+  state.recipeOrder.push(code);
+  // Cap recipe size at 8 drops to avoid clutter
+  if (state.recipeOrder.length > 8){
+    const removed = state.recipeOrder.shift();
+    state.recipe[removed]--;
+  }
+  renderBowl();
+  renderRecipeStrip();
+}
+
+function onMatchClick(){
+  const userKey = recipeKey(state.recipe);
+  if (!userKey){
+    toast('Add some paint first!');
+    return;
+  }
+  if (userKey === state.targetKey){
+    // WIN
+    if (state.firstTryThisTarget) state.perfectTargets++;
+    triggerConfetti();
+    toast('🎨 Perfect! Next color…');
+    setTimeout(() => {
+      const next = state.targetIdx + 1;
+      if (next >= TARGETS_PER_LEVEL){
+        endLevel();
+      } else {
+        loadTarget(next);
+      }
+    }, 1300);
+  } else {
+    state.wrongTries++;
+    state.firstTryThisTarget = false;
+    toast('Not quite — try again!');
+    renderHUD();
+  }
+}
+
+function onEmptyClick(){
+  if (state.recipeOrder.length === 0) return;
+  state.wrongTries++;
+  state.firstTryThisTarget = false;
+  resetRecipe();
+  renderHUD();
+}
+
+function endLevel(){
+  const stars = calcStars();
+  state.starsByLevel[state.level] = Math.max(state.starsByLevel[state.level], stars);
+  document.getElementById('results-title').textContent = 'LEVEL ' + state.level + ' COMPLETE!';
+  document.getElementById('results-body').textContent =
+    stars === 3 ? "You're a color master! 🎨" :
+    stars === 2 ? 'Great mixing!' :
+    'You did it — try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Perfect first-try targets: <b>' + state.perfectTargets + ' / ' + TARGETS_PER_LEVEL +
+    '</b><br>Wrong tries: <b>' + state.wrongTries + '</b>';
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => el.classList.toggle('lit', i < stars));
+  document.getElementById('btn-results-next').style.display =
+    state.level < 4 ? 'inline-block' : 'none';
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#dc4040','#f0d840','#3c6ad0','#50b860','#8430a0','#f08030','#f4b0c0','#5af4e6'];
+  for (let i = 0; i < 80; i++){
+    confettiParticles.push({
+      x: w/2 + (Math.random()-0.5)*140,
+      y: h/2,
+      vx: (Math.random()-0.5)*8,
+      vy: -Math.random()*8 - 4,
+      g: 0.26,
+      color: pick(colors),
+      size: Math.random()*6 + 4,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      life: 60 + Math.random()*30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length - 1; i >= 0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel));
+
+document.getElementById('btn-match').addEventListener('click', onMatchClick);
+document.getElementById('btn-empty').addEventListener('click', onEmptyClick);
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw/baseW, vh/baseH);
+    const x = (vw - baseW*s)/2;
+    const y = (vh - baseH*s)/2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
