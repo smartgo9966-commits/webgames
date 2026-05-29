@@ -138,73 +138,139 @@ body::before {
 /* Play footer */
 .card-footer { padding: 4px 24px 24px; }
 .play-btn {
+  --btn-glow: rgba(0,0,0,.35);
+  position: relative;
+  overflow: hidden;
   display: block; text-align: center; text-decoration: none;
-  font-family: 'Fredoka One', cursive; font-size: 20px;
-  padding: 13px 0; border-radius: 14px;
-  letter-spacing: .5px;
-  transition: transform .15s, box-shadow .15s, filter .15s;
+  font-family: 'Fredoka One', cursive; font-size: 19px;
+  padding: 14px 0; border-radius: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.32),
+    inset 0 -3px 0 rgba(0,0,0,.22),
+    0 7px 20px var(--btn-glow),
+    0 2px 0 rgba(0,0,0,.18);
+  transition: transform .22s cubic-bezier(.2,.7,.2,1),
+              box-shadow .22s ease,
+              filter .15s ease;
 }
-.play-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+/* glossy top sheen */
+.play-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 55%);
+  pointer-events: none;
+}
+/* shine sweep (off-screen by default) */
+.play-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: -45%;
+  width: 38%;
+  background: linear-gradient(115deg,
+    transparent 0%,
+    rgba(255,255,255,.55) 50%,
+    transparent 100%);
+  transform: skewX(-22deg);
+  pointer-events: none;
+  transition: left .6s cubic-bezier(.2,.7,.2,1);
+}
+.play-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -3px 0 rgba(0,0,0,.24),
+    0 14px 28px var(--btn-glow),
+    0 2px 0 rgba(0,0,0,.18);
+}
+.play-btn:hover::after { left: 130%; }
+.play-btn:active {
+  transform: translateY(0);
+  filter: brightness(.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.32),
+    0 3px 10px var(--btn-glow);
+  transition-duration: .08s;
+}
+/* nudge the play arrow rightward on hover */
+.play-btn::first-letter {
+  display: inline-block;
+  transition: transform .25s cubic-bezier(.2,.7,.2,1);
+}
+.play-btn:hover::first-letter { transform: translateX(4px); }
 
 /* ── FOOD CHAIN THEME ── */
 .fc .card-title { color: #1B5E20; }
 .fc .tag        { background: #E8F5E9; color: #2E7D32; }
-.fc .play-btn   { background: linear-gradient(135deg,#388E3C,#1B5E20); color: white; box-shadow: 0 5px 18px rgba(46,125,50,.45); }
+.fc .play-btn   { background: linear-gradient(135deg,#388E3C,#1B5E20); color: white; --btn-glow:rgba(46,125,50,.45); }
 
 /* ── ON TIME THEME ── */
 .ot .card-title { color: #0d2a5e; }
 .ot .tag        { background: #E3F2FD; color: #1565C0; }
-.ot .play-btn   { background: linear-gradient(135deg,#2a5d9f,#1a3a70); color: #ffe030; box-shadow: 0 5px 18px rgba(42,93,159,.45); }
+.ot .play-btn   { background: linear-gradient(135deg,#2a5d9f,#1a3a70); color: #ffe030; --btn-glow:rgba(42,93,159,.45); }
 
 /* ── TEN FRAME THEME ── */
 .tfm .card-title { color: #33691E; }
 .tfm .tag        { background: #F9FBE7; color: #558B2F; }
-.tfm .play-btn   { background: linear-gradient(135deg,#558B2F,#33691E); color: #FFE030; box-shadow: 0 5px 18px rgba(85,139,47,.45); }
+.tfm .play-btn   { background: linear-gradient(135deg,#558B2F,#33691E); color: #FFE030; --btn-glow:rgba(85,139,47,.45); }
 
 /* ── ANIMAL CELL THEME ── */
 .ac .card-title { color: #7A1040; }
 .ac .tag        { background: #FCE4EC; color: #880E4F; }
-.ac .play-btn   { background: linear-gradient(135deg,#9C1A50,#5D0033); color: #FFB0D0; box-shadow: 0 5px 18px rgba(136,14,79,.45); }
+.ac .play-btn   { background: linear-gradient(135deg,#9C1A50,#5D0033); color: #FFB0D0; --btn-glow:rgba(136,14,79,.45); }
 
 /* ── ANIMAL PAINT THEME ── */
 .ap .card-title { color: #C04400; }
 .ap .tag        { background: #FFF3E0; color: #E65100; }
-.ap .play-btn   { background: linear-gradient(135deg,#FF6D00,#C04400); color: #FFEE00; box-shadow: 0 5px 18px rgba(230,81,0,.45); }
+.ap .play-btn   { background: linear-gradient(135deg,#FF6D00,#C04400); color: #FFEE00; --btn-glow:rgba(230,81,0,.45); }
 
 /* ── SMART BOARD THEME ── */
 .sb .card-title { color: #1A237E; }
 .sb .tag        { background: #E8EAF6; color: #283593; }
-.sb .play-btn   { background: linear-gradient(135deg,#3949AB,#1A237E); color: #FFD700; box-shadow: 0 5px 18px rgba(57,73,171,.45); }
+.sb .play-btn   { background: linear-gradient(135deg,#3949AB,#1A237E); color: #FFD700; --btn-glow:rgba(57,73,171,.45); }
 
 /* ── PILE OF BALLS THEME ── */
 .pb .card-title { color: #8a0e25; }
 .pb .tag        { background: #FFE0E5; color: #8a0e25; }
-.pb .play-btn   { background: linear-gradient(135deg,#F1A31A,#C91A1A); color: #FFE030; box-shadow: 0 5px 18px rgba(201,26,26,.45); }
+.pb .play-btn   { background: linear-gradient(135deg,#F1A31A,#C91A1A); color: #FFE030; --btn-glow:rgba(201,26,26,.45); }
 
 /* ── MAZE THEME ── */
 .mz .card-title { color: #006e3a; }
 .mz .tag        { background: #DCFCE4; color: #006e3a; }
-.mz .play-btn   { background: linear-gradient(135deg,#22dd44,#006e3a); color: #ffe030; box-shadow: 0 5px 18px rgba(0,110,58,.45); }
+.mz .play-btn   { background: linear-gradient(135deg,#22dd44,#006e3a); color: #ffe030; --btn-glow:rgba(0,110,58,.45); }
 
 /* ── CASTLE DEFENSE THEME ── */
 .cd .card-title { color: #5d3010; }
 .cd .tag        { background: #F4E4C4; color: #6c4a20; }
-.cd .play-btn   { background: linear-gradient(135deg,#8edc5a,#3e8a20); color: #ffe9a0; box-shadow: 0 5px 18px rgba(62,138,32,.45); }
+.cd .play-btn   { background: linear-gradient(135deg,#8edc5a,#3e8a20); color: #ffe9a0; --btn-glow:rgba(62,138,32,.45); }
 
 /* ── ALPHABET GAME THEME ── */
 .ab .card-title { color: #c41a2d; }
 .ab .tag        { background: #FFE5E8; color: #c41a2d; }
-.ab .play-btn   { background: linear-gradient(135deg,#f47820,#c41a2d); color: #ffe9a0; box-shadow: 0 5px 18px rgba(196,26,45,.45); }
+.ab .play-btn   { background: linear-gradient(135deg,#f47820,#c41a2d); color: #ffe9a0; --btn-glow:rgba(196,26,45,.45); }
 
 /* ── SHAPES SPLAT THEME ── */
 .ss .card-title { color: #0a5a6e; }
 .ss .tag        { background: #E0F7FA; color: #00838F; }
-.ss .play-btn   { background: linear-gradient(135deg,#0a8aaa,#0a5a6e); color: #fffde7; box-shadow: 0 5px 18px rgba(10,90,110,.45); }
+.ss .play-btn   { background: linear-gradient(135deg,#0a8aaa,#0a5a6e); color: #fffde7; --btn-glow:rgba(10,90,110,.45); }
 
 /* ── AREA SHAPE GAME THEME ── */
 .asg .card-title { color: #0d2d6a; }
 .asg .tag        { background: #E3F0FB; color: #1a4a8a; }
-.asg .play-btn   { background: linear-gradient(135deg,#2a72c6,#0d2d6a); color: #ffffff; box-shadow: 0 5px 18px rgba(13,45,106,.45); }
+.asg .play-btn   { background: linear-gradient(135deg,#2a72c6,#0d2d6a); color: #ffffff; --btn-glow:rgba(13,45,106,.45); }
+
+/* ── CALCULATOR PUZZLE THEME ── */
+.cg .card-title { color: #0a5a6e; }
+.cg .tag        { background: #D1EDF5; color: #0a5a6e; }
+.cg .play-btn   { background: linear-gradient(135deg,#0a8aaa,#0a5a6e); color: #ffe030; --btn-glow:rgba(10,90,110,.45); }
+
+/* ── NUMBER TWINS THEME ── */
+.nt .card-title { color: #5a6e28; }
+.nt .tag        { background: #F0EAC8; color: #5a6e28; }
+.nt .play-btn   { background: linear-gradient(135deg,#a4c258,#6e8530); color: #ffffff; --btn-glow:rgba(110,133,48,.50); }
 
 /* ── FOOTER ── */
 footer {
@@ -1438,6 +1504,314 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="area_shape_game/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       CALCULATOR PUZZLE CARD
+  ══════════════════════════════ -->
+  <div class="game-card cg" onclick="location.href='calculator_game/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cgBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#0a5a6e"/>
+            <stop offset="60%" stop-color="#0a8aaa"/>
+            <stop offset="100%" stop-color="#04303d"/>
+          </linearGradient>
+          <radialGradient id="cgCircle" cx="35%" cy="32%" r="65%">
+            <stop offset="0%"  stop-color="#eef9fd"/>
+            <stop offset="100%" stop-color="#b8dfee"/>
+          </radialGradient>
+          <radialGradient id="cgBlank" cx="35%" cy="32%" r="65%">
+            <stop offset="0%"  stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#fff8c4"/>
+          </radialGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#cgBg)"/>
+
+        <!-- decorative dots -->
+        <circle cx="22" cy="22" r="1.6" fill="rgba(255,255,255,.45)"/>
+        <circle cx="358" cy="30" r="1.8" fill="rgba(255,255,255,.4)"/>
+        <circle cx="40" cy="190" r="1.6" fill="rgba(255,255,255,.35)"/>
+        <circle cx="345" cy="180" r="1.6" fill="rgba(255,255,255,.4)"/>
+
+        <!-- Row 1 equation: 5 + ? = 12 -->
+        <circle cx="60" cy="68" r="26" fill="url(#cgCircle)" stroke="#0a2840" stroke-width="2.5"/>
+        <text x="60" y="76" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#0a2840">5</text>
+        <text x="98" y="76" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#ffe030">+</text>
+        <circle cx="138" cy="68" r="26" fill="url(#cgBlank)" stroke="#f9b800" stroke-width="2.5" stroke-dasharray="4,3"/>
+        <text x="138" y="78" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#aaa">?</text>
+        <text x="178" y="76" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#ffe030">=</text>
+        <circle cx="218" cy="68" r="26" fill="url(#cgCircle)" stroke="#0a2840" stroke-width="2.5"/>
+        <text x="218" y="76" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#0a2840">12</text>
+
+        <!-- vertical operators (under 5 and ?): -, - -->
+        <text x="60" y="108" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#ffe030">-</text>
+        <text x="138" y="108" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#ffe030">-</text>
+        <text x="218" y="108" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#ffe030">-</text>
+
+        <!-- Row 2: 3 + ? = 7 -->
+        <circle cx="60" cy="138" r="26" fill="url(#cgCircle)" stroke="#0a2840" stroke-width="2.5"/>
+        <text x="60" y="146" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#0a2840">3</text>
+        <text x="98" y="146" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#ffe030">+</text>
+        <circle cx="138" cy="138" r="26" fill="url(#cgBlank)" stroke="#f9b800" stroke-width="2.5" stroke-dasharray="4,3"/>
+        <text x="138" y="148" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#aaa">?</text>
+        <text x="178" y="146" text-anchor="middle" font-family="Arial Black,Arial" font-size="24" font-weight="900" fill="#ffe030">=</text>
+        <circle cx="218" cy="138" r="26" fill="url(#cgCircle)" stroke="#0a2840" stroke-width="2.5"/>
+        <text x="218" y="146" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#0a2840">7</text>
+
+        <!-- mini keypad on the right -->
+        <rect x="278" y="50" width="86" height="120" rx="10" fill="rgba(10,40,64,.65)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+        <g font-family="Arial Black,Arial" font-size="13" font-weight="900" text-anchor="middle" fill="#0a2840">
+          <rect x="286" y="58"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="297" y="74">1</text>
+          <rect x="310" y="58"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="321" y="74">2</text>
+          <rect x="334" y="58"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="345" y="74">3</text>
+          <rect x="286" y="84"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="297" y="100">4</text>
+          <rect x="310" y="84"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="321" y="100">5</text>
+          <rect x="334" y="84"  width="22" height="22" rx="4" fill="#eaf5fa"/><text x="345" y="100">6</text>
+          <rect x="286" y="110" width="22" height="22" rx="4" fill="#eaf5fa"/><text x="297" y="126">7</text>
+          <rect x="310" y="110" width="22" height="22" rx="4" fill="#eaf5fa"/><text x="321" y="126">8</text>
+          <rect x="334" y="110" width="22" height="22" rx="4" fill="#eaf5fa"/><text x="345" y="126">9</text>
+          <rect x="286" y="136" width="22" height="22" rx="4" fill="#ffe030"/><text x="297" y="152" fill="#4a2a00">C</text>
+          <rect x="310" y="136" width="22" height="22" rx="4" fill="#eaf5fa"/><text x="321" y="152">0</text>
+          <rect x="334" y="136" width="22" height="22" rx="4" fill="#ffe030"/><text x="345" y="152" fill="#4a2a00">←</text>
+        </g>
+
+        <!-- Bottom label -->
+        <rect x="0" y="178" width="380" height="32" fill="rgba(0,0,0,.32)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.95)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Fill the empty circles to solve every equation</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🧮 Calculator Puzzle</div>
+      <div class="card-desc">Each row and column makes a math equation — fill the empty circles so every one balances! Five levels from simple sums to a 5×5 cross-math grid.</div>
+      <div class="card-tags">
+        <span class="tag">Tap to Play</span>
+        <span class="tag">5 Levels</span>
+        <span class="tag">Mental Math</span>
+        <span class="tag">Logic</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="calculator_game/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       NUMBER TWINS GAME CARD
+  ══════════════════════════════ -->
+  <div class="game-card nt" onclick="location.href='number_twins/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ntBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#d8cc92"/>
+            <stop offset="55%"  stop-color="#cabd7a"/>
+            <stop offset="100%" stop-color="#a89a58"/>
+          </linearGradient>
+          <radialGradient id="ntRed" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#f08070"/>
+            <stop offset="60%"  stop-color="#c8302a"/>
+            <stop offset="100%" stop-color="#6e0e0a"/>
+          </radialGradient>
+          <radialGradient id="ntGreen" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#7cd078"/>
+            <stop offset="60%"  stop-color="#2f8f3a"/>
+            <stop offset="100%" stop-color="#175020"/>
+          </radialGradient>
+          <radialGradient id="ntBlue" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#6aa8e0"/>
+            <stop offset="60%"  stop-color="#2c75c4"/>
+            <stop offset="100%" stop-color="#173f7d"/>
+          </radialGradient>
+          <radialGradient id="ntYellow" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#f5d860"/>
+            <stop offset="60%"  stop-color="#dfb01a"/>
+            <stop offset="100%" stop-color="#9a780b"/>
+          </radialGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#ntBg)"/>
+
+        <!-- subtle weave texture -->
+        <g opacity="0.18" fill="rgba(110,90,30,1)">
+          <rect x="0" y="0" width="380" height="1"/>
+          <rect x="0" y="10" width="380" height="1"/>
+          <rect x="0" y="20" width="380" height="1"/>
+          <rect x="0" y="30" width="380" height="1"/>
+          <rect x="0" y="40" width="380" height="1"/>
+        </g>
+
+        <!-- connecting cream path -->
+        <path d="M 60 80 L 60 160 L 200 160 L 200 110 L 320 110"
+              fill="none" stroke="#f4e4bc" stroke-width="6"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+
+        <!-- balls along the path: 4 + 5 = 9, 3 + 6 = 9 -->
+        <g transform="translate(60 80)">
+          <circle r="22" fill="url(#ntRed)" stroke="#5a0e0e" stroke-width="2"/>
+          <ellipse cx="-7" cy="-8" rx="7" ry="4" fill="rgba(255,255,255,.28)"/>
+          <text y="7" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#fff">4</text>
+        </g>
+        <g transform="translate(200 160)">
+          <circle r="22" fill="url(#ntGreen)" stroke="#175020" stroke-width="2"/>
+          <ellipse cx="-7" cy="-8" rx="7" ry="4" fill="rgba(255,255,255,.32)"/>
+          <text y="7" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#fff">5</text>
+        </g>
+        <g transform="translate(320 110)">
+          <circle r="22" fill="url(#ntBlue)" stroke="#173f7d" stroke-width="2"/>
+          <ellipse cx="-7" cy="-8" rx="7" ry="4" fill="rgba(255,255,255,.32)"/>
+          <text y="7" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#fff">3</text>
+        </g>
+        <g transform="translate(105 35)">
+          <circle r="22" fill="url(#ntYellow)" stroke="#9a780b" stroke-width="2"/>
+          <ellipse cx="-7" cy="-8" rx="7" ry="4" fill="rgba(255,255,255,.32)"/>
+          <text y="7" text-anchor="middle" font-family="Arial Black,Arial" font-size="20" font-weight="900" fill="#5a3a0a">6</text>
+        </g>
+
+        <!-- title -->
+        <text x="190" y="35" text-anchor="middle"
+              font-family="Arial Black,Arial" font-size="32" font-weight="900"
+              fill="#cc2a2a" stroke="#f8e8c8" stroke-width="3"
+              paint-order="stroke fill">Number Twins</text>
+
+        <!-- "Add to 9" pill bottom-right -->
+        <rect x="240" y="170" width="120" height="28" rx="14"
+              fill="rgba(255,250,220,.85)" stroke="#5a6e28" stroke-width="2"/>
+        <text x="300" y="190" text-anchor="middle"
+              font-family="Arial Black,Arial" font-size="15" font-weight="900"
+              fill="#4a5a18">Add to 9</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🔗 Number Twins</div>
+      <div class="card-desc">Tap pairs of numbered balls that add up to the target — but only if you can connect them with a line that turns at most twice. Twelve levels, sums 5 → 16.</div>
+      <div class="card-tags">
+        <span class="tag">Tap to Play</span>
+        <span class="tag">12 Levels</span>
+        <span class="tag">Mental Math</span>
+        <span class="tag">Logic</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="number_twins/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       MATH MAN CARD
+  ══════════════════════════════ -->
+  <div class="game-card mm" onclick="location.href='math_man/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mmBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#0a3a26"/>
+            <stop offset="100%" stop-color="#04201a"/>
+          </linearGradient>
+          <radialGradient id="mmGhost" cx="35%" cy="32%" r="70%">
+            <stop offset="0%"  stop-color="#ff9070"/>
+            <stop offset="60%" stop-color="#f08820"/>
+            <stop offset="100%" stop-color="#8a4a08"/>
+          </radialGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#mmBg)"/>
+
+        <!-- Title -->
+        <text x="190" y="32" fill="#ffffff" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="26" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#04201a" stroke-width="3" stroke-linejoin="round">Math Man</text>
+
+        <!-- Pac-Man maze walls (decorative green lines) -->
+        <g stroke="#1bc04a" stroke-width="3" stroke-linecap="round" fill="none">
+          <!-- Outer border -->
+          <rect x="22" y="50" width="336" height="118" rx="3"/>
+          <!-- Inner horizontal walls -->
+          <line x1="50"  y1="70" x2="120" y2="70"/>
+          <line x1="150" y1="70" x2="230" y2="70"/>
+          <line x1="260" y1="70" x2="330" y2="70"/>
+          <line x1="40"  y1="100" x2="90"  y2="100"/>
+          <line x1="120" y1="100" x2="180" y2="100"/>
+          <line x1="210" y1="100" x2="270" y2="100"/>
+          <line x1="295" y1="100" x2="340" y2="100"/>
+          <line x1="60"  y1="130" x2="140" y2="130"/>
+          <line x1="170" y1="130" x2="230" y2="130"/>
+          <line x1="260" y1="130" x2="320" y2="130"/>
+          <line x1="40"  y1="150" x2="100" y2="150"/>
+          <line x1="160" y1="150" x2="220" y2="150"/>
+          <line x1="280" y1="150" x2="340" y2="150"/>
+          <!-- Verticals -->
+          <line x1="90"  y1="70" x2="90"  y2="100"/>
+          <line x1="180" y1="70" x2="180" y2="100"/>
+          <line x1="270" y1="70" x2="270" y2="100"/>
+          <line x1="140" y1="100" x2="140" y2="130"/>
+          <line x1="230" y1="100" x2="230" y2="130"/>
+          <line x1="100" y1="130" x2="100" y2="150"/>
+        </g>
+
+        <!-- Yellow dots scattered along corridors -->
+        <g fill="#ffeb3b">
+          <circle cx="35"  cy="85"  r="2.5"/>
+          <circle cx="70"  cy="85"  r="2.5"/>
+          <circle cx="105" cy="85"  r="2.5"/>
+          <circle cx="200" cy="85"  r="2.5"/>
+          <circle cx="245" cy="85"  r="2.5"/>
+          <circle cx="290" cy="85"  r="2.5"/>
+          <circle cx="50"  cy="115" r="2.5"/>
+          <circle cx="160" cy="115" r="2.5"/>
+          <circle cx="320" cy="115" r="2.5"/>
+          <circle cx="200" cy="160" r="2.5"/>
+          <circle cx="250" cy="160" r="2.5"/>
+        </g>
+
+        <!-- Red star power-up -->
+        <polygon points="62,160 65,152 73,152 67,146 70,138 62,143 54,138 57,146 51,152 59,152"
+                 fill="#ff3030" stroke="#7a0c0c" stroke-width="1.5" stroke-linejoin="round"/>
+
+        <!-- Pac-Man (yellow) on left chasing the orange ghost -->
+        <g transform="translate(155 115)">
+          <path d="M 0 0 L 20 -10 A 22 22 0 1 1 20 10 Z"
+                fill="#ffeb3b" stroke="#b89b00" stroke-width="2"/>
+          <circle cx="8" cy="-9" r="3" fill="#0a3a26"/>
+        </g>
+
+        <!-- Orange ghost with fraction 1/2 -->
+        <g transform="translate(280 115)">
+          <path d="M -22 12 L -22 -8 A 22 22 0 0 1 22 -8 L 22 12 L 17 18 L 12 12 L 7 18 L 2 12 L -3 18 L -8 12 L -13 18 L -18 12 Z"
+                fill="url(#mmGhost)" stroke="#5a2c08" stroke-width="1.8"/>
+          <circle cx="-8" cy="-4" r="4" fill="#fff"/><circle cx="-7" cy="-3" r="2" fill="#000"/>
+          <circle cx="8"  cy="-4" r="4" fill="#fff"/><circle cx="9"  cy="-3" r="2" fill="#000"/>
+          <!-- Fraction label "1/2" -->
+          <text x="0" y="3" text-anchor="middle"
+                font-family="'Patrick Hand',cursive" font-size="11" font-weight="bold"
+                fill="#fff">1</text>
+          <rect x="-6" y="5" width="12" height="1.2" fill="#fff"/>
+          <text x="0" y="14" text-anchor="middle"
+                font-family="'Patrick Hand',cursive" font-size="11" font-weight="bold"
+                fill="#fff">2</text>
+        </g>
+
+        <!-- Bottom label band -->
+        <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.32)"/>
+        <text x="190" y="192" fill="rgba(255,255,255,.92)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Eat the ghost whose fraction reduces to the target</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">👻 Math Man</div>
+      <div class="card-desc">Steer Math Man through the maze and gobble only the ghost whose fraction reduces to the target. Spacebar scatters ghosts; stars freeze them. Four levels — halves to ninths.</div>
+      <div class="card-tags">
+        <span class="tag">Arrow Keys</span>
+        <span class="tag">4 Levels</span>
+        <span class="tag">Fractions</span>
+        <span class="tag">Pac-Man</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="math_man/">▶ Play Now!</a>
     </div>
   </div>
 

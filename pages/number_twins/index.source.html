@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Twins</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#88a040">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100dvh;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: #4a4528;
+  font-family: 'Nunito', sans-serif;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+
+/* ── BEIGE WEAVE TEXTURE (shared background) ── */
+.tan-bg {
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(110,90,30,.12) 0 1px,
+      transparent 1px 5px),
+    repeating-linear-gradient(-45deg,
+      rgba(255,255,255,.05) 0 1px,
+      transparent 1px 5px),
+    linear-gradient(135deg, #d8cc92 0%, #cabd7a 100%);
+}
+
+/* ── SCREENS ── */
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ════════════════════════════════════════
+   TITLE SCREEN
+════════════════════════════════════════ */
+.title-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+.title-start-btn {
+  position: absolute;
+  left: 50%; top: 235px;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* ── BIG GREEN PILL BUTTON ── */
+.btn-green {
+  background: linear-gradient(180deg, #a4c258 0%, #88a040 55%, #6e8530 100%);
+  color: #ffffff;
+  border: 2px solid #5a6e28;
+  border-radius: 60px;
+  padding: 12px 46px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #3e4e1c, 0 6px 14px rgba(0,0,0,.18);
+  text-transform: uppercase;
+  transition: transform .1s ease;
+}
+.btn-green:hover { filter: brightness(1.06); }
+.btn-green:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #3e4e1c, 0 3px 8px rgba(0,0,0,.18);
+}
+.title-start-btn.btn-green:active { transform: translateX(-50%) translateY(2px); }
+
+/* ════════════════════════════════════════
+   LEVEL SELECT
+════════════════════════════════════════ */
+.level-grid {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 30px;
+}
+
+.level-btn {
+  background: linear-gradient(180deg, #a4c258 0%, #88a040 55%, #6e8530 100%);
+  color: #ffffff;
+  border: 2px solid #5a6e28;
+  border-radius: 28px;
+  padding: 9px 36px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 21px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 3px 0 #3e4e1c, 0 5px 10px rgba(0,0,0,.15);
+  transition: transform .1s ease;
+}
+.level-btn:hover { filter: brightness(1.06); }
+.level-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #3e4e1c, 0 2px 6px rgba(0,0,0,.15);
+}
+
+.back-btn {
+  position: absolute;
+  top: 16px; left: 16px;
+  background: rgba(255, 252, 230, 0.7);
+  border: 2px solid #5a6e28;
+  color: #4a5a18;
+  border-radius: 24px;
+  padding: 6px 18px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+}
+.back-btn:hover { background: rgba(255, 252, 230, 0.95); }
+
+/* ════════════════════════════════════════
+   INSTRUCTIONS SCREEN
+════════════════════════════════════════ */
+.intro-content {
+  position: absolute;
+  inset: 26px 60px 24px 60px;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.intro-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 44px;
+  color: #5aa050;
+  -webkit-text-stroke: 2px #2e5e2a;
+  paint-order: stroke fill;
+  text-shadow: 2px 3px 0 rgba(0,0,0,.12);
+  letter-spacing: 1px;
+}
+.intro-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #5a4a20;
+  text-align: center;
+  max-width: 620px;
+  line-height: 1.35;
+}
+.intro-examples {
+  background: rgba(210, 180, 110, 0.45);
+  border: 2px solid rgba(110, 90, 40, 0.55);
+  border-radius: 16px;
+  padding: 14px 22px;
+  display: flex; gap: 18px;
+  align-items: center;
+}
+.example-svg {
+  width: 170px; height: 110px;
+  display: block;
+}
+
+/* ════════════════════════════════════════
+   GAME SCREEN
+════════════════════════════════════════ */
+#screen-game .game-layout {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  padding: 16px 18px 14px 16px;
+  gap: 8px;
+}
+.left-panel {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+.timer-card {
+  background: rgba(255, 252, 220, 0.78);
+  border: 2px solid #5a6e28;
+  border-radius: 18px;
+  padding: 10px 16px 12px;
+  width: 180px;
+  text-align: left;
+  margin-top: 4px;
+}
+.timer-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: #5a4a20;
+  letter-spacing: 1px;
+}
+.timer-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 30px;
+  color: #2e5a20;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+.target-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: #5a4a20;
+  margin-top: 70px;
+  letter-spacing: 1px;
+}
+.menu-btn {
+  margin-top: 14px;
+  background: linear-gradient(180deg, #a4c258 0%, #88a040 55%, #6e8530 100%);
+  color: #fff;
+  border: 2px solid #5a6e28;
+  border-radius: 24px;
+  padding: 8px 30px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 0 #3e4e1c;
+  transition: transform .1s ease;
+}
+.menu-btn:hover { filter: brightness(1.06); }
+.menu-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3e4e1c; }
+.icon-row {
+  position: absolute;
+  bottom: 8px; left: 8px;
+  display: flex; gap: 14px;
+}
+.icon-btn {
+  width: 42px; height: 42px;
+  background: rgba(255, 252, 220, 0.78);
+  border: 2px solid #5a6e28;
+  border-radius: 50%;
+  color: #4a5a18;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.icon-btn:hover { background: rgba(255, 252, 220, 0.95); }
+
+.board-wrap {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+.board-frame {
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(120,100,40,.08) 0 1px,
+      transparent 1px 5px),
+    linear-gradient(135deg, #d8cc92 0%, #cabd7a 100%);
+  border: 4px solid #3a5a30;
+  border-radius: 6px;
+  position: relative;
+  padding: 8px;
+}
+.board-grid {
+  position: relative;
+}
+.grid-cell {
+  position: absolute;
+  border: 1px solid rgba(58, 90, 48, 0.16);
+}
+.ball {
+  position: absolute;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.45);
+  transition: transform .12s ease, opacity .25s ease;
+}
+.ball:hover { transform: scale(1.06); }
+.ball.selected { z-index: 4; animation: pulseBall 0.8s ease-in-out infinite; }
+.ball.selected::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 3px solid #f5d040;
+  box-shadow: 0 0 14px rgba(245,208,64,0.85), inset 0 0 6px rgba(245,208,64,0.5);
+  pointer-events: none;
+}
+.ball.removing { opacity: 0; transform: scale(0.35); pointer-events: none; }
+.ball.shake { animation: shake 0.36s ease; }
+
+@keyframes pulseBall {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.10); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+#path-canvas {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  left: 0; top: 0;
+}
+
+/* ════════════════════════════════════════
+   WIN SCREEN
+════════════════════════════════════════ */
+.win-content {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 250, 220, 0.92);
+  border: 3px solid #5a6e28;
+  border-radius: 22px;
+  padding: 32px 56px 28px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.28);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+.win-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  color: #d23030;
+  -webkit-text-stroke: 4px #f8e8c8;
+  paint-order: stroke fill;
+  letter-spacing: 2px;
+}
+.win-time {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: #4a3a10;
+}
+.win-best {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  color: #5a4a20;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+}
+.win-buttons {
+  display: flex; gap: 14px; margin-top: 10px;
+}
+.win-buttons .btn-green {
+  font-size: 22px;
+  padding: 10px 28px;
+}
+</style>
+</head>
+<body>
+<div class="fit-stage">
+  <div class="game-wrap tan-bg" id="gameWrap">
+
+    <!-- ═══ TITLE SCREEN ═══ -->
+    <div id="screen-title" class="screen active">
+      <svg class="title-svg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="dRed" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#f08070"/>
+            <stop offset="60%"  stop-color="#c8302a"/>
+            <stop offset="100%" stop-color="#6e0e0a"/>
+          </radialGradient>
+          <radialGradient id="dGreen" cx="35%" cy="32%">
+            <stop offset="0%"   stop-color="#7cd078"/>
+            <stop offset="60%"  stop-color="#2f8f3a"/>
+            <stop offset="100%" stop-color="#175020"/>
+          </radialGradient>
+        </defs>
+
+        <!-- decorative connecting line -->
+        <path d="M 110 280 L 110 470 L 470 470 L 470 380 L 800 380 L 800 110 L 880 110"
+              fill="none" stroke="#f4e4bc" stroke-width="10" stroke-linejoin="round"
+              stroke-linecap="round" opacity="0.85"/>
+
+        <!-- title -->
+        <text x="480" y="170" text-anchor="middle"
+              font-family="Fredoka One, cursive" font-size="82" font-weight="900"
+              fill="#cc2a2a" stroke="#f8e8c8" stroke-width="6"
+              paint-order="stroke fill"
+              style="filter: drop-shadow(2px 4px 0 rgba(0,0,0,.18))">Number Twins</text>
+
+        <!-- decorative balls -->
+        <g transform="translate(110 280)">
+          <circle r="40" fill="url(#dRed)" stroke="#5a0e0e" stroke-width="2.5"/>
+          <ellipse cx="-13" cy="-15" rx="13" ry="8" fill="rgba(255,255,255,.28)"/>
+          <text y="11" text-anchor="middle" font-family="Fredoka One,cursive"
+                font-size="34" fill="#fff">4</text>
+        </g>
+        <g transform="translate(880 110)">
+          <circle r="40" fill="url(#dGreen)" stroke="#175020" stroke-width="2.5"/>
+          <ellipse cx="-13" cy="-15" rx="13" ry="8" fill="rgba(255,255,255,.32)"/>
+          <text y="11" text-anchor="middle" font-family="Fredoka One,cursive"
+                font-size="34" fill="#fff">7</text>
+        </g>
+        <g transform="translate(800 380)">
+          <circle r="40" fill="url(#dRed)" stroke="#5a0e0e" stroke-width="2.5"/>
+          <ellipse cx="-13" cy="-15" rx="13" ry="8" fill="rgba(255,255,255,.28)"/>
+          <text y="11" text-anchor="middle" font-family="Fredoka One,cursive"
+                font-size="34" fill="#fff">6</text>
+        </g>
+        <g transform="translate(470 470)">
+          <circle r="40" fill="url(#dGreen)" stroke="#175020" stroke-width="2.5"/>
+          <ellipse cx="-13" cy="-15" rx="13" ry="8" fill="rgba(255,255,255,.32)"/>
+          <text y="11" text-anchor="middle" font-family="Fredoka One,cursive"
+                font-size="34" fill="#fff">3</text>
+        </g>
+      </svg>
+      <button class="btn-green title-start-btn" onclick="goLevels()">START</button>
+    </div>
+
+    <!-- ═══ LEVEL SELECT ═══ -->
+    <div id="screen-levels" class="screen">
+      <button class="back-btn" onclick="goTitle()">← Back</button>
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
+
+    <!-- ═══ INSTRUCTIONS ═══ -->
+    <div id="screen-intro" class="screen">
+      <button class="back-btn" onclick="goLevels()">← Back</button>
+      <div class="intro-content">
+        <div class="intro-title">Instructions</div>
+        <div class="intro-text">
+          Match pairs of balls that add up to <span id="introSum">9</span>. Balls
+          can only be matched if they can be connected by a line that turns at
+          most twice.
+        </div>
+        <div class="intro-examples">
+          <!-- example 1: L-shape (✓) -->
+          <svg class="example-svg" viewBox="0 0 170 110">
+            <defs>
+              <radialGradient id="exR1" cx="35%" cy="32%"><stop offset="0%" stop-color="#f08070"/><stop offset="100%" stop-color="#a02020"/></radialGradient>
+              <radialGradient id="exG1" cx="35%" cy="32%"><stop offset="0%" stop-color="#7cd078"/><stop offset="100%" stop-color="#175020"/></radialGradient>
+            </defs>
+            <path d="M 30 30 L 30 80 L 140 80" fill="none" stroke="#f4e4bc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <g transform="translate(30 30)"><circle r="15" fill="url(#exR1)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">4</text></g>
+            <g transform="translate(85 30)"><circle r="15" fill="url(#exG1)" stroke="#175020" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">5</text></g>
+            <g transform="translate(140 80)"><circle r="15" fill="url(#exR1)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">6</text></g>
+            <text x="80" y="103" text-anchor="middle" font-size="22" fill="#3a8a3a" font-family="Fredoka One,cursive">✓</text>
+          </svg>
+
+          <!-- example 2: U-shape (✓) -->
+          <svg class="example-svg" viewBox="0 0 170 110">
+            <defs>
+              <radialGradient id="exR2" cx="35%" cy="32%"><stop offset="0%" stop-color="#f08070"/><stop offset="100%" stop-color="#a02020"/></radialGradient>
+              <radialGradient id="exG2" cx="35%" cy="32%"><stop offset="0%" stop-color="#7cd078"/><stop offset="100%" stop-color="#175020"/></radialGradient>
+            </defs>
+            <path d="M 60 28 L 110 28 L 110 82 L 60 82" fill="none" stroke="#f4e4bc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <g transform="translate(60 28)"><circle r="15" fill="url(#exR2)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">4</text></g>
+            <g transform="translate(60 55)"><circle r="15" fill="url(#exG2)" stroke="#175020" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">5</text></g>
+            <g transform="translate(60 82)"><circle r="15" fill="url(#exR2)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">6</text></g>
+            <text x="138" y="58" text-anchor="middle" font-size="22" fill="#3a8a3a" font-family="Fredoka One,cursive">✓</text>
+          </svg>
+
+          <!-- example 3: too many turns (✗) -->
+          <svg class="example-svg" viewBox="0 0 170 110">
+            <defs>
+              <radialGradient id="exR3" cx="35%" cy="32%"><stop offset="0%" stop-color="#f08070"/><stop offset="100%" stop-color="#a02020"/></radialGradient>
+              <radialGradient id="exG3" cx="35%" cy="32%"><stop offset="0%" stop-color="#7cd078"/><stop offset="100%" stop-color="#175020"/></radialGradient>
+            </defs>
+            <path d="M 30 30 L 30 55 L 110 55 L 110 82 L 140 82"
+                  fill="none" stroke="#cc4040" stroke-width="3" stroke-dasharray="3,3" stroke-linecap="round"/>
+            <g transform="translate(30 30)"><circle r="15" fill="url(#exR3)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">4</text></g>
+            <g transform="translate(90 30)"><circle r="15" fill="url(#exG3)" stroke="#175020" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">7</text></g>
+            <g transform="translate(110 82)"><circle r="15" fill="url(#exG3)" stroke="#175020" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">5</text></g>
+            <g transform="translate(140 82)"><circle r="15" fill="url(#exR3)" stroke="#5a0e0e" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="14" fill="#fff" font-family="Fredoka One,cursive">6</text></g>
+            <text x="62" y="18" text-anchor="middle" font-size="26" fill="#cc2a2a" font-family="Fredoka One,cursive">✗</text>
+          </svg>
+        </div>
+        <button class="btn-green" onclick="goGame()">START</button>
+      </div>
+    </div>
+
+    <!-- ═══ GAME SCREEN ═══ -->
+    <div id="screen-game" class="screen">
+      <div class="game-layout">
+        <div class="left-panel">
+          <div class="timer-card">
+            <div class="timer-label">Time:</div>
+            <div class="timer-value" id="timerValue">0.000</div>
+          </div>
+          <div class="target-label" id="targetLabel">Add to 9</div>
+          <button class="menu-btn" onclick="goLevels()">Menu</button>
+          <div class="icon-row">
+            <button class="icon-btn" title="Help" onclick="goIntro()">?</button>
+            <button class="icon-btn" title="Shuffle" onclick="shuffleBoard()">⚙</button>
+          </div>
+        </div>
+        <div class="board-wrap">
+          <div class="board-frame" id="boardFrame">
+            <div class="board-grid" id="boardGrid"></div>
+            <canvas id="path-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ WIN SCREEN ═══ -->
+    <div id="screen-win" class="screen">
+      <div class="win-content">
+        <div class="win-title">You did it!</div>
+        <div class="win-time" id="winTime">0.000 seconds</div>
+        <div class="win-best" id="winBest"></div>
+        <div class="win-buttons">
+          <button class="btn-green" onclick="goGame()">Replay</button>
+          <button class="btn-green" onclick="goLevels()">Levels</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /game-wrap -->
+</div><!-- /fit-stage -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const COLS = 10;
+const ROWS = 10;
+const CELL = 46;           // pixel size of each cell on the board
+const BALL_PX = 42;        // ball diameter
+const FRAME_PAD = 8;       // frame inner padding in px
+
+const TARGET_SUMS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+
+// Number → radial-gradient colour stops (light, mid, dark).
+const BALL_PALETTE = {
+  1:  { light:'#f08070', mid:'#c8302a', dark:'#6e0e0a' },   // red
+  2:  { light:'#7cd078', mid:'#2f8f3a', dark:'#175020' },   // green
+  3:  { light:'#6aa8e0', mid:'#2c75c4', dark:'#173f7d' },   // blue
+  4:  { light:'#c878d0', mid:'#923aa0', dark:'#5a2068' },   // purple
+  5:  { light:'#f5b870', mid:'#e88840', dark:'#a85a1c' },   // orange
+  6:  { light:'#f5d860', mid:'#dfb01a', dark:'#9a780b' },   // yellow
+  7:  { light:'#70d0c8', mid:'#1ea8a0', dark:'#0c5e58' },   // teal
+  8:  { light:'#f088b0', mid:'#d44a90', dark:'#8a225e' },   // pink
+  9:  { light:'#b8c870', mid:'#7a8830', dark:'#4a5418' },   // olive
+ 10:  { light:'#8878d0', mid:'#5040a8', dark:'#2a1f68' },   // indigo
+ 11:  { light:'#e0a868', mid:'#b07030', dark:'#6e4818' },   // brown
+ 12:  { light:'#a8e0a8', mid:'#60b860', dark:'#388838' },   // mint
+ 13:  { light:'#e878b0', mid:'#b03080', dark:'#701c58' },   // magenta
+ 14:  { light:'#7aa8e0', mid:'#3070b0', dark:'#1c4878' },   // steel
+ 15:  { light:'#e8e090', mid:'#b0b040', dark:'#787818' }    // mustard
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const state = {
+  targetSum: 9,
+  board: [],            // board[r][c] = { value, el } or null
+  selected: null,       // { r, c } of first picked ball
+  cleared: 0,
+  timerStart: 0,
+  timerRaf: 0,
+  locked: false,        // true while a match animation is playing
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN ROUTING
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goTitle()  { stopTimer(); showScreen('screen-title'); }
+function goLevels() { stopTimer(); showScreen('screen-levels'); }
+function goIntro()  {
+  stopTimer();
+  document.getElementById('introSum').textContent = state.targetSum;
+  showScreen('screen-intro');
+}
+function goGame() {
+  showScreen('screen-game');
+  startLevel(state.targetSum);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVEL SELECT
+// ═══════════════════════════════════════════════════════════════
+function buildLevelGrid() {
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML = '';
+  TARGET_SUMS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'level-btn';
+    btn.textContent = 'Add to ' + t;
+    btn.onclick = () => { state.targetSum = t; goIntro(); };
+    grid.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOARD GENERATION
+// ═══════════════════════════════════════════════════════════════
+function pairTypesFor(target) {
+  const pairs = [];
+  for (let a = 1; a < target; a++) {
+    if (a < target - a)        pairs.push([a, target - a]);
+    else if (a === target - a) pairs.push([a, a]);
+  }
+  return pairs;
+}
+
+function shuffleArray(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+function generateBoard(target) {
+  const pairs = pairTypesFor(target);
+  const total = COLS * ROWS;
+  const numbers = [];
+  for (let i = 0; i < total / 2; i++) {
+    const p = pairs[Math.floor(Math.random() * pairs.length)];
+    numbers.push(p[0], p[1]);
+  }
+  shuffleArray(numbers);
+  const board = [];
+  let k = 0;
+  for (let r = 0; r < ROWS; r++) {
+    const row = [];
+    for (let c = 0; c < COLS; c++) {
+      row.push({ value: numbers[k++], el: null });
+    }
+    board.push(row);
+  }
+  return board;
+}
+
+function startLevel(target) {
+  state.targetSum = target;
+  state.selected = null;
+  state.cleared = 0;
+  state.locked = false;
+  document.getElementById('targetLabel').textContent = 'Add to ' + target;
+
+  let attempts = 0;
+  do {
+    state.board = generateBoard(target);
+    attempts++;
+  } while (!hasAnyMove() && attempts < 50);
+
+  renderBoard();
+  startTimer();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PATH-FINDING (≤ 2 turns through empty cells or just outside grid)
+// ═══════════════════════════════════════════════════════════════
+// Virtual grid: row 0 and row ROWS+1 are perimeter buffer; columns same.
+// Board (r, c) ↔ virtual (r+1, c+1).
+function isPassable(r, c) {
+  if (r <= 0 || r >= ROWS + 1) return true;
+  if (c <= 0 || c >= COLS + 1) return true;
+  return state.board[r - 1][c - 1] === null;
+}
+
+function segmentClear(r1, c1, r2, c2) {
+  // All cells STRICTLY between the two endpoints must be passable.
+  if (r1 === r2) {
+    if (c1 === c2) return true;
+    const step = c1 < c2 ? 1 : -1;
+    for (let c = c1 + step; c !== c2; c += step) {
+      if (!isPassable(r1, c)) return false;
+    }
+    return true;
+  }
+  if (c1 === c2) {
+    const step = r1 < r2 ? 1 : -1;
+    for (let r = r1 + step; r !== r2; r += step) {
+      if (!isPassable(r, c1)) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+function findPath(r1, c1, r2, c2) {
+  // 0 turns: straight line
+  if (r1 === r2 || c1 === c2) {
+    if (segmentClear(r1, c1, r2, c2)) {
+      return [{r:r1,c:c1}, {r:r2,c:c2}];
+    }
+  }
+  // 1 turn: L-shape via corner
+  if (r1 !== r2 && c1 !== c2) {
+    if (isPassable(r1, c2) &&
+        segmentClear(r1, c1, r1, c2) &&
+        segmentClear(r1, c2, r2, c2)) {
+      return [{r:r1,c:c1}, {r:r1,c:c2}, {r:r2,c:c2}];
+    }
+    if (isPassable(r2, c1) &&
+        segmentClear(r1, c1, r2, c1) &&
+        segmentClear(r2, c1, r2, c2)) {
+      return [{r:r1,c:c1}, {r:r2,c:c1}, {r:r2,c:c2}];
+    }
+  }
+  // 2 turns: intermediate row R (U / Z via horizontal middle leg)
+  for (let R = 0; R <= ROWS + 1; R++) {
+    if (R === r1 || R === r2) continue;
+    if (!isPassable(R, c1) || !isPassable(R, c2)) continue;
+    if (segmentClear(r1, c1, R, c1) &&
+        segmentClear(R, c1, R, c2) &&
+        segmentClear(R, c2, r2, c2)) {
+      return [{r:r1,c:c1}, {r:R,c:c1}, {r:R,c:c2}, {r:r2,c:c2}];
+    }
+  }
+  // 2 turns: intermediate column C (U / Z via vertical middle leg)
+  for (let C = 0; C <= COLS + 1; C++) {
+    if (C === c1 || C === c2) continue;
+    if (!isPassable(r1, C) || !isPassable(r2, C)) continue;
+    if (segmentClear(r1, c1, r1, C) &&
+        segmentClear(r1, C, r2, C) &&
+        segmentClear(r2, C, r2, c2)) {
+      return [{r:r1,c:c1}, {r:r1,c:C}, {r:r2,c:C}, {r:r2,c:c2}];
+    }
+  }
+  return null;
+}
+
+function hasAnyMove() {
+  const balls = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (state.board[r][c]) balls.push({ r, c, v: state.board[r][c].value });
+    }
+  }
+  const byVal = new Map();
+  for (const b of balls) {
+    if (!byVal.has(b.v)) byVal.set(b.v, []);
+    byVal.get(b.v).push(b);
+  }
+  for (const b of balls) {
+    const partners = byVal.get(state.targetSum - b.v);
+    if (!partners) continue;
+    for (const o of partners) {
+      if (o === b) continue;
+      if (findPath(b.r + 1, b.c + 1, o.r + 1, o.c + 1)) return true;
+    }
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderBoard() {
+  const grid = document.getElementById('boardGrid');
+  const frame = document.getElementById('boardFrame');
+  grid.innerHTML = '';
+  const w = COLS * CELL;
+  const h = ROWS * CELL;
+  grid.style.width = w + 'px';
+  grid.style.height = h + 'px';
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.style.left = (c * CELL) + 'px';
+      cell.style.top = (r * CELL) + 'px';
+      cell.style.width = CELL + 'px';
+      cell.style.height = CELL + 'px';
+      grid.appendChild(cell);
+    }
+  }
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const slot = state.board[r][c];
+      if (!slot) continue;
+      const el = createBallEl(slot.value, r, c);
+      slot.el = el;
+      grid.appendChild(el);
+    }
+  }
+
+  const canvas = document.getElementById('path-canvas');
+  const cw = w + FRAME_PAD * 2;
+  const ch = h + FRAME_PAD * 2;
+  canvas.width = cw;
+  canvas.height = ch;
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+}
+
+function createBallEl(value, r, c) {
+  const ball = document.createElement('div');
+  ball.className = 'ball';
+  const pal = BALL_PALETTE[value] || BALL_PALETTE[1];
+  const x = c * CELL + (CELL - BALL_PX) / 2;
+  const y = r * CELL + (CELL - BALL_PX) / 2;
+  ball.style.left = x + 'px';
+  ball.style.top = y + 'px';
+  applyBallStyle(ball, value);
+  ball.textContent = value;
+  ball.onclick = () => onBallClick(r, c);
+  return ball;
+}
+
+function applyBallStyle(el, value) {
+  const pal = BALL_PALETTE[value] || BALL_PALETTE[1];
+  el.style.background =
+    `radial-gradient(circle at 32% 28%, ${pal.light} 0%, ${pal.mid} 55%, ${pal.dark} 100%)`;
+  el.style.border = `1.5px solid ${pal.dark}`;
+  el.style.boxShadow =
+    `inset 4px 4px 6px rgba(255,255,255,.20), inset -4px -4px 8px rgba(0,0,0,.28)`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERACTION
+// ═══════════════════════════════════════════════════════════════
+function onBallClick(r, c) {
+  if (state.locked) return;
+  if (!state.board[r] || !state.board[r][c]) return;
+
+  if (!state.selected) {
+    state.selected = { r, c };
+    state.board[r][c].el.classList.add('selected');
+    return;
+  }
+  if (state.selected.r === r && state.selected.c === c) {
+    state.board[r][c].el.classList.remove('selected');
+    state.selected = null;
+    return;
+  }
+
+  const a = state.selected;
+  const b = { r, c };
+  const va = state.board[a.r][a.c].value;
+  const vb = state.board[b.r][b.c].value;
+
+  if (va + vb !== state.targetSum) {
+    rejectPair(a, b);
+    return;
+  }
+  const path = findPath(a.r + 1, a.c + 1, b.r + 1, b.c + 1);
+  if (!path) {
+    rejectPair(a, b);
+    return;
+  }
+  matchPair(a, b, path);
+}
+
+function rejectPair(a, b) {
+  const ea = state.board[a.r][a.c]?.el;
+  const eb = state.board[b.r][b.c]?.el;
+  if (ea) { ea.classList.remove('selected'); ea.classList.add('shake'); }
+  if (eb) { eb.classList.add('shake'); }
+  setTimeout(() => {
+    if (ea) ea.classList.remove('shake');
+    if (eb) eb.classList.remove('shake');
+  }, 380);
+  state.selected = null;
+}
+
+function matchPair(a, b, path) {
+  state.locked = true;
+  drawPath(path);
+  const ea = state.board[a.r][a.c].el;
+  const eb = state.board[b.r][b.c].el;
+  ea.classList.remove('selected');
+  ea.classList.add('removing');
+  eb.classList.add('removing');
+
+  setTimeout(() => {
+    if (ea.parentNode) ea.parentNode.removeChild(ea);
+    if (eb.parentNode) eb.parentNode.removeChild(eb);
+    state.board[a.r][a.c] = null;
+    state.board[b.r][b.c] = null;
+    state.cleared += 2;
+    clearPath();
+    state.selected = null;
+    state.locked = false;
+
+    if (state.cleared >= COLS * ROWS) {
+      onWin();
+    }
+  }, 350);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PATH DRAWING
+// ═══════════════════════════════════════════════════════════════
+function virtualToPixel(r, c) {
+  // r, c are virtual coords (0 = top/left perimeter, ROWS+1/COLS+1 = bottom/right).
+  // Pixels are relative to the canvas (which matches the frame size).
+  let x, y;
+  if (c <= 0)               x = FRAME_PAD / 2;
+  else if (c >= COLS + 1)   x = FRAME_PAD + COLS * CELL + FRAME_PAD / 2;
+  else                      x = FRAME_PAD + (c - 1) * CELL + CELL / 2;
+  if (r <= 0)               y = FRAME_PAD / 2;
+  else if (r >= ROWS + 1)   y = FRAME_PAD + ROWS * CELL + FRAME_PAD / 2;
+  else                      y = FRAME_PAD + (r - 1) * CELL + CELL / 2;
+  return { x, y };
+}
+
+function drawPath(path) {
+  const canvas = document.getElementById('path-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#f4e4bc';
+  ctx.lineWidth = 6;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,0.28)';
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 1;
+  ctx.shadowOffsetY = 2;
+  ctx.beginPath();
+  for (let i = 0; i < path.length; i++) {
+    const p = virtualToPixel(path[i].r, path[i].c);
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+}
+
+function clearPath() {
+  const canvas = document.getElementById('path-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════════
+function startTimer() {
+  state.timerStart = performance.now();
+  tickTimer();
+}
+function tickTimer() {
+  const elapsed = (performance.now() - state.timerStart) / 1000;
+  document.getElementById('timerValue').textContent = elapsed.toFixed(3);
+  state.timerRaf = requestAnimationFrame(tickTimer);
+}
+function stopTimer() {
+  if (state.timerRaf) {
+    cancelAnimationFrame(state.timerRaf);
+    state.timerRaf = 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHUFFLE (rescue)
+// ═══════════════════════════════════════════════════════════════
+function shuffleBoard() {
+  if (state.locked) return;
+  if (!document.getElementById('screen-game').classList.contains('active')) return;
+
+  const slots = [];      // references to { value, el }
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (state.board[r][c]) slots.push(state.board[r][c]);
+    }
+  }
+  if (slots.length === 0) return;
+
+  let attempts = 0;
+  let found = false;
+  while (!found && attempts < 30) {
+    const vals = slots.map(s => s.value);
+    shuffleArray(vals);
+    slots.forEach((s, i) => { s.value = vals[i]; });
+    found = hasAnyMove();
+    attempts++;
+  }
+
+  if (state.selected) {
+    const sel = state.board[state.selected.r][state.selected.c];
+    if (sel?.el) sel.el.classList.remove('selected');
+    state.selected = null;
+  }
+  for (const s of slots) {
+    if (s.el) {
+      applyBallStyle(s.el, s.value);
+      s.el.textContent = s.value;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WIN
+// ═══════════════════════════════════════════════════════════════
+function onWin() {
+  if (!document.getElementById('screen-game').classList.contains('active')) return;
+  stopTimer();
+  const elapsed = (performance.now() - state.timerStart) / 1000;
+  document.getElementById('winTime').textContent = elapsed.toFixed(3) + ' seconds';
+
+  const key = 'numberTwins.bestTime.' + state.targetSum;
+  const prev = parseFloat(localStorage.getItem(key) || '0');
+  if (!prev || elapsed < prev) {
+    localStorage.setItem(key, elapsed.toFixed(3));
+    document.getElementById('winBest').textContent = '⭐ NEW BEST TIME!';
+  } else {
+    document.getElementById('winBest').textContent = 'Best: ' + prev.toFixed(3) + 's';
+  }
+  setTimeout(() => showScreen('screen-win'), 380);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VIEWPORT SCALING
+// ═══════════════════════════════════════════════════════════════
+function rescale() {
+  const wrap = document.getElementById('gameWrap');
+  const s = Math.min(window.innerWidth / 960, window.innerHeight / 540);
+  wrap.style.transform = `scale(${s})`;
+  wrap.style.left = Math.max(0, (window.innerWidth  - 960 * s) / 2) + 'px';
+  wrap.style.top  = Math.max(0, (window.innerHeight - 540 * s) / 2) + 'px';
+}
+window.addEventListener('resize', rescale);
+window.addEventListener('orientationchange', () => setTimeout(rescale, 200));
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+buildLevelGrid();
+rescale();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

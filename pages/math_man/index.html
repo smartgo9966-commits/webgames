@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Man</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1b35">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #051a14;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 600px;
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: #0a3a26;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════════════════════════════════════
+   SMART GO BADGE (back to gallery)
+═══════════════════════════════════════ */
+.sg-badge {
+  position: fixed;
+  top: 12px; left: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgba(10, 30, 24, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 1 — MENU (LEVEL SELECT)
+═══════════════════════════════════════ */
+#screen-menu {
+  background: #0a3a26;
+}
+
+.menu-header {
+  width: 100%;
+  text-align: center;
+  padding: 14px 0 10px;
+  background: #082c1d;
+  border-bottom: 4px solid #04180f;
+}
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  color: #ffffff;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 0 rgba(0,0,0,.3);
+  line-height: 1;
+}
+.menu-subtitle {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #ffeb3b;
+  letter-spacing: 2px;
+  margin-top: 6px;
+}
+
+.menu-cols {
+  display: flex;
+  margin-top: 14px;
+  padding: 0 36px;
+  gap: 30px;
+  width: 100%;
+}
+.menu-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.menu-col-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #ffffff;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+
+.level-btn {
+  width: 280px;
+  padding: 14px 0;
+  margin-bottom: 14px;
+  background: #137a3f;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #0a4a25, inset 0 2px 0 rgba(255,255,255,.1);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.level-btn:hover { background: #169849; transform: translateY(-2px); box-shadow: 0 8px 0 #0a4a25; }
+.level-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #0a4a25; }
+
+.examples-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+.example-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #1a5840;
+  border-radius: 50px;
+  padding: 6px 16px;
+  width: 360px;
+}
+.ex-frac {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 28px;
+  color: #ffffff;
+  min-width: 44px;
+  text-align: center;
+}
+.ex-arrow {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px;
+  color: #ffffff;
+  letter-spacing: 1px;
+  flex: 1;
+  text-align: center;
+}
+.ex-ghost {
+  width: 50px; height: 50px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: bold;
+}
+.ex-ghost svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ex-ghost span { position: relative; z-index: 1; line-height: 1; }
+
+/* ═══════════════════════════════════════
+   SCREEN 2 — INSTRUCTIONS
+═══════════════════════════════════════ */
+#screen-instructions { background: #0a3a26; }
+
+.instr-header {
+  text-align: center;
+  padding-top: 18px;
+}
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 42px;
+  color: #ffffff;
+  letter-spacing: 3px;
+}
+.instr-body {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+  margin: 14px 60px 0;
+  letter-spacing: 1px;
+  line-height: 1.4;
+}
+
+.instr-example {
+  margin: 18px auto;
+  background: #1a5840;
+  border-radius: 80px;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 760px;
+}
+.instr-example .pac {
+  width: 56px; height: 56px;
+  flex-shrink: 0;
+}
+.instr-example .dots {
+  display: flex; gap: 8px;
+}
+.instr-example .dot {
+  width: 8px; height: 8px;
+  background: #ffeb3b;
+  border-radius: 50%;
+}
+.instr-example .ghost-pill {
+  width: 56px; height: 56px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 20px;
+  color: #ffffff;
+}
+.instr-example .ghost-pill svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.instr-example .ghost-pill span { position: relative; z-index: 1; }
+.instr-example .caption {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  color: #ffffff;
+  flex: 1;
+  letter-spacing: 1px;
+}
+
+.instr-tips-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  margin-top: 6px;
+}
+
+.instr-tip {
+  width: 220px;
+  background: #1a5840;
+  border-radius: 24px;
+  padding: 14px 18px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: #ffeb3b;
+  letter-spacing: 1px;
+  line-height: 1.4;
+}
+
+.instr-buttons {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  flex: 1;
+}
+.instr-btn {
+  background: #0a3a26;
+  border: 3px solid #ffeb3b;
+  border-radius: 18px;
+  color: #ffeb3b;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  letter-spacing: 3px;
+  padding: 8px 26px;
+  cursor: pointer;
+  transition: transform .12s, background .12s;
+}
+.instr-btn:hover { background: #ffeb3b; color: #0a3a26; transform: scale(1.05); }
+.instr-btn.big { font-size: 30px; padding: 10px 36px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 3 — GAME
+═══════════════════════════════════════ */
+#screen-game { background: #0a3a26; }
+#maze-canvas { touch-action: none; display: block; }
+
+.game-hud {
+  position: absolute;
+  top: 8px; left: 16px; right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+.hud-left, .hud-right {
+  display: flex; align-items: center; gap: 14px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  color: #ffeb3b;
+  letter-spacing: 1px;
+  background: rgba(0,0,0,0.35);
+  padding: 4px 12px;
+  border-radius: 14px;
+}
+.hud-lives { display: flex; gap: 4px; }
+.life-pac { width: 16px; height: 16px; }
+
+.game-statusbar {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  height: 90px;
+  background: #082c1d;
+  border-top: 3px solid #04180f;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 14px;
+  z-index: 4;
+}
+.scatter-info {
+  flex: 0 0 200px;
+  display: flex; flex-direction: column;
+  gap: 4px;
+}
+.scatter-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 11px;
+  color: #ffeb3b;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.scatter-pips { display: flex; gap: 4px; }
+.scatter-pip {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #2a5a44; border: 2px solid #1a3a2e;
+}
+.scatter-pip.on { background: #ffeb3b; border-color: #b89b00; }
+
+.question-text {
+  flex: 1;
+  text-align: center;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px;
+  color: #ffffff;
+}
+.question-text .frac {
+  display: inline-block;
+  margin: 0 6px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 1.1;
+}
+.question-text .frac .num,
+.question-text .frac .den {
+  display: block;
+  font-size: 28px;
+  padding: 0 6px;
+  min-width: 28px;
+}
+.question-text .frac .num { border-bottom: 2px solid #ffffff; }
+
+.math-review-pill {
+  flex: 0 0 auto;
+  background: #b9f078;
+  color: #0a3a26;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  letter-spacing: 2px;
+  padding: 8px 20px;
+  border-radius: 50px;
+  box-shadow: 0 4px 0 #6da840, inset 0 2px 0 rgba(255,255,255,.4);
+}
+
+/* ═══════════════════════════════════════
+   MODALS
+═══════════════════════════════════════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+
+.modal-card {
+  background: #0a3a26;
+  border: 4px solid #ffeb3b;
+  border-radius: 18px;
+  padding: 30px 50px;
+  text-align: center;
+  min-width: 380px;
+  max-width: 500px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.6);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px;
+  color: #ffeb3b;
+  letter-spacing: 3px;
+  margin-bottom: 14px;
+}
+.modal-body {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  line-height: 1.4;
+  letter-spacing: 1px;
+}
+.modal-stats {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px;
+  color: #b9f078;
+  margin: 10px 0 18px;
+}
+.modal-buttons {
+  display: flex; gap: 14px; justify-content: center;
+}
+
+/* Flash overlay for wrong-answer / correct feedback */
+.flash {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease-out;
+  z-index: 20;
+}
+.flash.show { opacity: 1; }
+.flash.red { background: rgba(220, 40, 40, 0.35); }
+.flash.green { background: rgba(80, 220, 100, 0.30); }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ SCREEN 1 — MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-header">
+      <div class="menu-title">MATH MAN</div>
+      <div class="menu-subtitle">REDUCE THE FRACTION TO THE LOWEST TERM</div>
+    </div>
+    <div class="menu-cols">
+      <div class="menu-col">
+        <div class="menu-col-title">SELECT A LEVEL:</div>
+        <button class="level-btn" data-level="1">LEVEL 1</button>
+        <button class="level-btn" data-level="2">LEVEL 2</button>
+        <button class="level-btn" data-level="3">LEVEL 3</button>
+        <button class="level-btn" data-level="4">LEVEL 4</button>
+      </div>
+      <div class="menu-col">
+        <div class="menu-col-title">EXAMPLES:</div>
+        <div class="examples-list">
+          <div class="example-row">
+            <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">2</span><span style="display:block;padding:0 4px">4</span></span></div>
+            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-ghost" data-color="#e63946"><span>1<br>2</span></div>
+          </div>
+          <div class="example-row">
+            <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">6</span><span style="display:block;padding:0 4px">9</span></span></div>
+            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-ghost" data-color="#f08820"><span>2<br>3</span></div>
+          </div>
+          <div class="example-row">
+            <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">12</span><span style="display:block;padding:0 4px">28</span></span></div>
+            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-ghost" data-color="#2a9d3a"><span>3<br>7</span></div>
+          </div>
+          <div class="example-row">
+            <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">48</span><span style="display:block;padding:0 4px">54</span></span></div>
+            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-ghost" data-color="#d92834"><span>8<br>9</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN 2 — INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-header">
+      <div class="instr-title">INSTRUCTIONS</div>
+    </div>
+    <div class="instr-body">
+      USE THE ARROW KEYS TO MOVE MATH MAN TO EAT ALL THE GHOSTS.<br>
+      YOU CAN ONLY EAT THE GHOST WITH A NUMBER THAT ANSWERS THE QUESTION.
+    </div>
+
+    <div class="instr-example">
+      <svg class="pac" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 50 50 L 95 30 A 50 50 0 1 1 95 70 Z" fill="#ffeb3b" stroke="#b89b00" stroke-width="2"/>
+        <circle cx="55" cy="30" r="5" fill="#0a3a26"/>
+      </svg>
+      <div class="dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="ghost-pill" data-color="#f08820">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 10 60 L 10 30 A 40 40 0 0 1 90 30 L 90 60 L 80 70 L 70 60 L 60 70 L 50 60 L 40 70 L 30 60 L 20 70 Z" fill="#f08820" stroke="#8a4a10" stroke-width="2"/>
+          <circle cx="35" cy="35" r="6" fill="#fff"/><circle cx="35" cy="35" r="3" fill="#000"/>
+          <circle cx="65" cy="35" r="6" fill="#fff"/><circle cx="65" cy="35" r="3" fill="#000"/>
+        </svg>
+        <span>1<br>2</span>
+      </div>
+      <div class="caption">EAT THE GHOST WITH THE FRACTION 2/4 IN SIMPLEST FORM</div>
+    </div>
+
+    <div class="instr-tips-row">
+      <div class="instr-tip">
+        TIP: THE SPACEBAR KEY WILL SCATTER THE GHOSTS, YOU HAVE LIMITED SCATTERS.
+      </div>
+      <div class="instr-buttons">
+        <button class="instr-btn" id="btn-instr-menu">MENU</button>
+        <button class="instr-btn" id="btn-instr-practice">PRACTICE GAME</button>
+        <button class="instr-btn big" id="btn-instr-start">START</button>
+      </div>
+      <div class="instr-tip">
+        TIP: IF YOU EAT A ★ THE GHOSTS WILL FREEZE FOR A FEW SECONDS.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN 3 — GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="game-hud">
+      <div class="hud-left">
+        <span id="hud-level">LEVEL 1</span>
+        <span>SCORE</span>
+        <span id="hud-score">0</span>
+      </div>
+      <div class="hud-right">
+        <span>LIVES</span>
+        <div class="hud-lives" id="hud-lives"></div>
+      </div>
+    </div>
+
+    <canvas id="maze-canvas" width="960" height="510"></canvas>
+
+    <div class="game-statusbar">
+      <div class="scatter-info">
+        <div class="scatter-label">PRESS THE SPACE BAR<br>TO SCATTER GHOSTS</div>
+        <div class="scatter-pips" id="scatter-pips"></div>
+      </div>
+      <div class="question-text" id="question-text">
+        Eat the ghost with the fraction
+        <span class="frac"><span class="num">4</span><span class="den">8</span></span>
+        in simplest form
+      </div>
+      <div class="math-review-pill">MATH REVIEW</div>
+    </div>
+
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <!-- ═══════════ MODAL — RESULTS ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="instr-btn" id="btn-results-menu">MENU</button>
+        <button class="instr-btn" id="btn-results-again">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL — PAUSE / NEXT LEVEL ═══════════ -->
+  <div class="modal" id="modal-pause">
+    <div class="modal-card">
+      <div class="modal-title">PAUSED</div>
+      <div class="modal-buttons">
+        <button class="instr-btn" id="btn-pause-menu">MENU</button>
+        <button class="instr-btn" id="btn-pause-resume">RESUME</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  MAZE LAYOUT — 25 cols x 17 rows
+//  Symbols: # wall, . dot, o star, ' ' empty, P pac spawn, G ghost spawn
+// ════════════════════════════════════════════════════════════
+const RAW_MAZE = [
+'#########################',
+'#o.....................o#',
+'#.###.#####...#####.###.#',
+'#.......................#',
+'#.###.#.#.#...#.#.#.###.#',
+'#.......................#',
+'#.###.#####...#####.###.#',
+'#.......................#',
+'######.#####.#####.######',
+'#...........G...........#',
+'######.#####.#####.######',
+'#.......................#',
+'#.###.#####...#####.###.#',
+'#.......................#',
+'#.###.#.#.#...#.#.#.###.#',
+'#o..........P..........o#',
+'#########################',
+];
+const COLS = 25;
+const ROWS = 17;
+const CELL = 28;
+
+// Normalize: pad each row to COLS chars; substitute any stray chars; mark spawns
+const MAZE = [];
+let PAC_SPAWN = { x: 13, y: 11 };
+let GHOST_SPAWNS = [];
+(function normalize(){
+  for (let r = 0; r < ROWS; r++) {
+    let row = (RAW_MAZE[r] || '').padEnd(COLS, ' ').slice(0, COLS);
+    const rowArr = [];
+    for (let c = 0; c < COLS; c++) {
+      let ch = row[c];
+      if (ch === 'P') { PAC_SPAWN = { x: c, y: r }; ch = ' '; }
+      if (ch === 'G') { GHOST_SPAWNS.push({ x: c, y: r }); ch = ' '; }
+      if (ch !== '#' && ch !== '.' && ch !== 'o' && ch !== ' ') ch = ' ';
+      rowArr.push(ch);
+    }
+    MAZE.push(rowArr);
+  }
+  // If no spawn markers, set defaults
+  if (GHOST_SPAWNS.length === 0) {
+    GHOST_SPAWNS = [
+      { x: 12, y: 8 }, { x: 13, y: 8 }, { x: 14, y: 8 }, { x: 13, y: 9 }
+    ];
+  }
+})();
+
+const MAZE_OFFSET_X = (960 - COLS * CELL) / 2;  // 96
+const MAZE_OFFSET_Y = 14;
+
+// ════════════════════════════════════════════════════════════
+//  DIRECTIONS
+// ════════════════════════════════════════════════════════════
+const DIRS = {
+  N: { dx: 0, dy: -1, name: 'N' },
+  E: { dx: 1, dy: 0, name: 'E' },
+  S: { dx: 0, dy: 1, name: 'S' },
+  W: { dx: -1, dy: 0, name: 'W' }
+};
+const DIR_LIST = [DIRS.N, DIRS.E, DIRS.S, DIRS.W];
+function oppositeDir(d) {
+  if (d === DIRS.N) return DIRS.S;
+  if (d === DIRS.S) return DIRS.N;
+  if (d === DIRS.E) return DIRS.W;
+  if (d === DIRS.W) return DIRS.E;
+  return null;
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════════════════════
+const GHOST_COLORS = [
+  { fill: '#e63946', stroke: '#7a1018' },  // red
+  { fill: '#f08820', stroke: '#7a3a08' },  // orange
+  { fill: '#3a78d6', stroke: '#12366e' },  // blue
+  { fill: '#2a9d3a', stroke: '#0f4a18' }   // green
+];
+
+const state = {
+  screen: 'menu',
+  level: 1,
+  practice: false,
+  score: 0,
+  lives: 3,
+  scattersLeft: 3,
+  roundsWon: 0,
+  pac: null,         // {x,y in cells (float), dir, nextDir, mouthT, alive}
+  ghosts: [],
+  dotsLeft: 0,
+  cells: null,       // copy of maze with dots being eaten
+  target: null,      // {num, den, reducedNum, reducedDen}
+  freezeUntil: 0,    // ms timestamp
+  scatterUntil: 0,
+  lastFrame: 0,
+  paused: false,
+  feedback: null     // {type:'good'|'bad', until: ms}
+};
+
+const ROUNDS_PER_LEVEL = 5;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function inBounds(cx, cy) { return cx >= 0 && cx < COLS && cy >= 0 && cy < ROWS; }
+function isWall(cx, cy) {
+  if (!inBounds(cx, cy)) return true;
+  return state.cells[cy][cx] === '#';
+}
+function isPassable(cx, cy) { return !isWall(cx, cy); }
+
+function cellCenterX(cx) { return MAZE_OFFSET_X + cx * CELL + CELL / 2; }
+function cellCenterY(cy) { return MAZE_OFFSET_Y + cy * CELL + CELL / 2; }
+
+function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ════════════════════════════════════════════════════════════
+//  ROUND / FRACTION GENERATION
+// ════════════════════════════════════════════════════════════
+function generateRound(level) {
+  const ranges = {
+    1: { aMax: 3, bMax: 4, kMin: 2, kMax: 4 },
+    2: { aMax: 5, bMax: 6, kMin: 2, kMax: 5 },
+    3: { aMax: 7, bMax: 9, kMin: 2, kMax: 6 },
+    4: { aMax: 9, bMax: 9, kMin: 5, kMax: 9 }
+  };
+  const cfg = ranges[level] || ranges[4];
+
+  // Pick reduced a/b with gcd=1, a<b, b>=2
+  let a, b;
+  for (let attempts = 0; attempts < 100; attempts++) {
+    a = rand(1, cfg.aMax);
+    b = rand(2, cfg.bMax);
+    if (a < b && gcd(a, b) === 1) break;
+  }
+  if (!(a < b) || gcd(a, b) !== 1) { a = 1; b = 2; }
+
+  const k = rand(cfg.kMin, cfg.kMax);
+  const target = { num: a * k, den: b * k, reducedNum: a, reducedDen: b };
+
+  // Generate 3 distractor reduced fractions
+  const distractors = [];
+  const seen = new Set([`${a}/${b}`]);
+  let safety = 0;
+  while (distractors.length < 3 && safety < 200) {
+    safety++;
+    let da = rand(1, Math.max(cfg.aMax, 5));
+    let db = rand(2, Math.max(cfg.bMax, 6));
+    if (da >= db) continue;
+    if (gcd(da, db) !== 1) continue;
+    const key = `${da}/${db}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    distractors.push({ num: da, den: db });
+  }
+  while (distractors.length < 3) {
+    distractors.push({ num: 1, den: distractors.length + 3 });
+  }
+
+  // Assemble 4 ghost fractions, shuffle so correct position is random
+  const ghostFractions = [{ num: a, den: b, correct: true }, ...distractors.map(d => ({ ...d, correct: false }))];
+  shuffle(ghostFractions);
+
+  return { target, ghostFractions };
+}
+
+// ════════════════════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-', '');
+}
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ════════════════════════════════════════════════════════════
+//  NEW GAME / NEW ROUND
+// ════════════════════════════════════════════════════════════
+function copyMaze() {
+  return MAZE.map(row => row.slice());
+}
+
+function startGame(level, practice) {
+  state.level = level;
+  state.practice = !!practice;
+  state.score = 0;
+  state.lives = practice ? 99 : 3;
+  state.scattersLeft = 3;
+  state.roundsWon = 0;
+  startNewRound(true);
+  showScreen('screen-game');
+  state.paused = false;
+}
+
+function startNewRound(refillDots) {
+  if (refillDots) {
+    state.cells = copyMaze();
+    state.dotsLeft = 0;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const ch = state.cells[r][c];
+        if (ch === '.' || ch === 'o') state.dotsLeft++;
+      }
+    }
+  }
+  // Pac-Man at spawn
+  state.pac = {
+    x: PAC_SPAWN.x,
+    y: PAC_SPAWN.y,
+    dir: DIRS.W,
+    nextDir: null,
+    mouthT: 0
+  };
+
+  // Generate round fractions
+  const round = generateRound(state.level);
+  state.target = round.target;
+
+  // Place 4 ghosts at ghost spawn cells
+  const spawns = GHOST_SPAWNS.slice();
+  while (spawns.length < 4) {
+    spawns.push({ x: PAC_SPAWN.x + spawns.length - 1, y: PAC_SPAWN.y - 4 });
+  }
+  state.ghosts = round.ghostFractions.map((frac, i) => {
+    const sp = spawns[i % spawns.length];
+    const colorIdx = i % GHOST_COLORS.length;
+    return {
+      x: sp.x,
+      y: sp.y,
+      dir: pick(DIR_LIST),
+      nextDir: null,
+      color: GHOST_COLORS[colorIdx],
+      num: frac.num,
+      den: frac.den,
+      correct: frac.correct,
+      lastDecisionCell: { x: -1, y: -1 },
+      exitDelay: i * 0.5
+    };
+  });
+  state.freezeUntil = 0;
+  state.scatterUntil = 0;
+  state.feedback = null;
+  updateHUD();
+  updateQuestionText();
+}
+
+// ════════════════════════════════════════════════════════════
+//  HUD / DOM UPDATES
+// ════════════════════════════════════════════════════════════
+function updateHUD() {
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-score').textContent = state.score;
+  const livesEl = document.getElementById('hud-lives');
+  livesEl.innerHTML = '';
+  const displayLives = state.practice ? 1 : state.lives;
+  for (let i = 0; i < displayLives; i++) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'life-pac');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.innerHTML = '<path d="M 50 50 L 95 30 A 50 50 0 1 1 95 70 Z" fill="#ffeb3b" stroke="#b89b00" stroke-width="3"/>';
+    livesEl.appendChild(svg);
+    if (state.practice) break;
+  }
+  if (state.practice) {
+    livesEl.innerHTML = '<span style="font-family:Fredoka One,cursive;color:#ffeb3b;font-size:18px;letter-spacing:1px">∞</span>';
+  }
+  const pipsEl = document.getElementById('scatter-pips');
+  pipsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'scatter-pip' + (i < state.scattersLeft ? ' on' : '');
+    pipsEl.appendChild(pip);
+  }
+}
+
+function updateQuestionText() {
+  const t = state.target;
+  if (!t) return;
+  const el = document.getElementById('question-text');
+  el.innerHTML = 'Eat the ghost with the fraction <span class="frac"><span class="num">' + t.num + '</span><span class="den">' + t.den + '</span></span> in simplest form';
+}
+
+// ════════════════════════════════════════════════════════════
+//  MOVEMENT
+// ════════════════════════════════════════════════════════════
+const CELL_EPSILON = 0.06;  // close enough to a cell-center to count as aligned
+
+function isCellAligned(entity) {
+  return Math.abs(entity.x - Math.round(entity.x)) < CELL_EPSILON &&
+         Math.abs(entity.y - Math.round(entity.y)) < CELL_EPSILON;
+}
+
+function tryMoveEntity(entity, dir, speed, dt) {
+  if (!dir) return false;
+  // Stop at cell boundary if the next cell is a wall (no snapping when corridor is clear)
+  if (isCellAligned(entity)) {
+    const cx = Math.round(entity.x);
+    const cy = Math.round(entity.y);
+    const nx = cx + dir.dx;
+    const ny = cy + dir.dy;
+    if (isWall(nx, ny)) {
+      entity.x = cx;
+      entity.y = cy;
+      return false;
+    }
+  }
+  entity.x += dir.dx * speed * dt;
+  entity.y += dir.dy * speed * dt;
+  return true;
+}
+
+function tryTurnEntity(entity) {
+  if (!entity.nextDir) return;
+  if (!isCellAligned(entity)) return;
+  const cx = Math.round(entity.x);
+  const cy = Math.round(entity.y);
+  const nx = cx + entity.nextDir.dx;
+  const ny = cy + entity.nextDir.dy;
+  if (!isWall(nx, ny)) {
+    // Snap to cell center so the turn lines up cleanly with the new axis
+    entity.x = cx;
+    entity.y = cy;
+    entity.dir = entity.nextDir;
+    entity.nextDir = null;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  GHOST AI
+// ════════════════════════════════════════════════════════════
+function chooseGhostDir(ghost) {
+  if (!isCellAligned(ghost)) return;
+  const cx = Math.round(ghost.x);
+  const cy = Math.round(ghost.y);
+  const opp = oppositeDir(ghost.dir);
+  const options = [];
+  for (const d of DIR_LIST) {
+    if (d === opp) continue;
+    if (!isWall(cx + d.dx, cy + d.dy)) options.push(d);
+  }
+  if (options.length === 0) {
+    if (opp && !isWall(cx + opp.dx, cy + opp.dy)) options.push(opp);
+  }
+  if (options.length === 0) return;
+
+  const originalDir = ghost.dir;
+
+  if (options.length === 1) {
+    ghost.dir = options[0];
+  } else {
+    // Determine target
+    let targetX, targetY;
+    const now = performance.now();
+    if (now < state.scatterUntil) {
+      const corners = [
+        { x: 1, y: 1 },
+        { x: COLS - 2, y: 1 },
+        { x: 1, y: ROWS - 2 },
+        { x: COLS - 2, y: ROWS - 2 }
+      ];
+      const c = corners[(ghost.num + ghost.den) % 4];
+      targetX = c.x; targetY = c.y;
+    } else {
+      targetX = state.pac.x;
+      targetY = state.pac.y;
+    }
+    // 70% greedy toward target, 30% random
+    if (Math.random() < 0.70) {
+      let bestDir = options[0];
+      let bestDist = Infinity;
+      for (const d of options) {
+        const tx = cx + d.dx;
+        const ty = cy + d.dy;
+        const dist = Math.abs(tx - targetX) + Math.abs(ty - targetY);
+        if (dist < bestDist) { bestDist = dist; bestDir = d; }
+      }
+      ghost.dir = bestDir;
+    } else {
+      ghost.dir = pick(options);
+    }
+  }
+
+  // Snap to cell center if we turned, so the new axis lines up cleanly
+  if (ghost.dir !== originalDir) {
+    ghost.x = cx;
+    ghost.y = cy;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  INPUT
+// ════════════════════════════════════════════════════════════
+function setPacNextDir(dir) {
+  if (!state.pac) return;
+  state.pac.nextDir = dir;
+  // Allow instant reversal even if not aligned
+  if (dir === oppositeDir(state.pac.dir)) {
+    state.pac.dir = dir;
+    state.pac.nextDir = null;
+  }
+}
+
+window.addEventListener('keydown', (e) => {
+  if (state.screen !== 'game') return;
+  if (document.querySelector('.modal.active')) {
+    if (e.key === 'Escape') {
+      closeModal('modal-pause');
+      state.paused = false;
+    }
+    return;
+  }
+  const k = e.key;
+  if (k === 'ArrowUp' || k === 'w' || k === 'W') { setPacNextDir(DIRS.N); e.preventDefault(); }
+  else if (k === 'ArrowDown' || k === 's' || k === 'S') { setPacNextDir(DIRS.S); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'a' || k === 'A') { setPacNextDir(DIRS.W); e.preventDefault(); }
+  else if (k === 'ArrowRight' || k === 'd' || k === 'D') { setPacNextDir(DIRS.E); e.preventDefault(); }
+  else if (k === ' ' || k === 'Spacebar') {
+    if (state.scattersLeft > 0) {
+      state.scattersLeft--;
+      state.scatterUntil = performance.now() + 2500;
+      updateHUD();
+    }
+    e.preventDefault();
+  }
+  else if (k === 'Escape' || k === 'p' || k === 'P') {
+    state.paused = true;
+    openModal('modal-pause');
+    e.preventDefault();
+  }
+});
+
+// Touch swipe input
+(function () {
+  const canvas = document.getElementById('maze-canvas');
+  const SWIPE_MIN = 25;
+  let startX = 0, startY = 0, active = false;
+  canvas.addEventListener('touchstart', (e) => {
+    if (state.screen !== 'game') return;
+    if (document.querySelector('.modal.active')) return;
+    const t = e.changedTouches[0];
+    startX = t.clientX; startY = t.clientY; active = true;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => { if (active) e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN) return;
+    let dir;
+    if (Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? DIRS.E : DIRS.W;
+    else                              dir = dy > 0 ? DIRS.S : DIRS.N;
+    setPacNextDir(dir);
+    e.preventDefault();
+  }, { passive: false });
+})();
+
+// ════════════════════════════════════════════════════════════
+//  COLLISION / DOT EATING
+// ════════════════════════════════════════════════════════════
+function eatDots() {
+  const cx = Math.round(state.pac.x);
+  const cy = Math.round(state.pac.y);
+  if (!inBounds(cx, cy)) return;
+  const ch = state.cells[cy][cx];
+  if (ch === '.') {
+    state.cells[cy][cx] = ' ';
+    state.score += 10;
+    state.dotsLeft--;
+    updateHUD();
+  } else if (ch === 'o') {
+    state.cells[cy][cx] = ' ';
+    state.score += 50;
+    state.dotsLeft--;
+    state.freezeUntil = performance.now() + 4000;
+    updateHUD();
+  }
+  if (state.dotsLeft <= 0) {
+    // Refill and continue with same round
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (MAZE[r][c] === '.' || MAZE[r][c] === 'o') {
+          state.cells[r][c] = MAZE[r][c];
+          state.dotsLeft++;
+        }
+      }
+    }
+  }
+}
+
+function checkGhostCollisions() {
+  if (state.feedback && performance.now() < state.feedback.until) return;
+  for (const g of state.ghosts) {
+    const dx = g.x - state.pac.x;
+    const dy = g.y - state.pac.y;
+    if (Math.abs(dx) < 0.55 && Math.abs(dy) < 0.55) {
+      handleGhostHit(g);
+      return;
+    }
+  }
+}
+
+function flashFeedback(type) {
+  const el = document.getElementById('flash');
+  el.className = 'flash ' + (type === 'good' ? 'green' : 'red') + ' show';
+  setTimeout(() => { el.className = 'flash ' + (type === 'good' ? 'green' : 'red'); }, 220);
+}
+
+function handleGhostHit(ghost) {
+  if (ghost.correct) {
+    state.score += 500;
+    state.roundsWon++;
+    flashFeedback('good');
+    state.feedback = { type: 'good', until: performance.now() + 600 };
+    updateHUD();
+    if (state.roundsWon >= ROUNDS_PER_LEVEL && !state.practice) {
+      setTimeout(() => endLevel(true), 700);
+    } else {
+      setTimeout(() => startNewRound(false), 700);
+    }
+  } else {
+    flashFeedback('bad');
+    state.feedback = { type: 'bad', until: performance.now() + 600 };
+    if (!state.practice) {
+      state.lives--;
+      updateHUD();
+      if (state.lives <= 0) {
+        setTimeout(() => endLevel(false), 700);
+        return;
+      }
+    }
+    setTimeout(() => {
+      // Reset positions but keep same round
+      state.pac.x = PAC_SPAWN.x;
+      state.pac.y = PAC_SPAWN.y;
+      state.pac.dir = DIRS.W;
+      state.pac.nextDir = null;
+      const spawns = GHOST_SPAWNS.slice();
+      state.ghosts.forEach((g, i) => {
+        const sp = spawns[i % spawns.length] || { x: PAC_SPAWN.x, y: PAC_SPAWN.y - 4 };
+        g.x = sp.x; g.y = sp.y;
+        g.dir = pick(DIR_LIST);
+        g.nextDir = null;
+        g.lastDecisionCell = { x: -1, y: -1 };
+      });
+      state.feedback = null;
+    }, 700);
+  }
+}
+
+function endLevel(won) {
+  const title = document.getElementById('results-title');
+  const body = document.getElementById('results-body');
+  const stats = document.getElementById('results-stats');
+  if (won) {
+    title.textContent = 'LEVEL COMPLETE!';
+    body.textContent = state.level < 4 ? 'You crushed it! Try the next level.' : 'You mastered all four levels!';
+  } else {
+    title.textContent = 'GAME OVER';
+    body.textContent = 'Out of lives — try again!';
+  }
+  stats.textContent = 'Score: ' + state.score + '   Rounds: ' + state.roundsWon + '/' + ROUNDS_PER_LEVEL;
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+const canvas = document.getElementById('maze-canvas');
+const ctx = canvas.getContext('2d');
+
+function drawMaze() {
+  // Background already set by CSS on game-wrap, but paint maze area
+  ctx.fillStyle = '#0a3a26';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Walls + dots
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const ch = state.cells[r][c];
+      const px = MAZE_OFFSET_X + c * CELL;
+      const py = MAZE_OFFSET_Y + r * CELL;
+      if (ch === '#') {
+        ctx.fillStyle = '#1bc04a';
+        ctx.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+        ctx.fillStyle = '#0e8030';
+        ctx.fillRect(px + 5, py + 5, CELL - 10, CELL - 10);
+      } else if (ch === '.') {
+        ctx.fillStyle = '#ffeb3b';
+        ctx.beginPath();
+        ctx.arc(px + CELL / 2, py + CELL / 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (ch === 'o') {
+        // Star
+        drawStar(px + CELL / 2, py + CELL / 2, 9, 4, '#ff3030', '#7a0c0c');
+      }
+    }
+  }
+}
+
+function drawStar(cx, cy, outerR, innerR, fill, stroke) {
+  const points = 5;
+  ctx.beginPath();
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 === 0 ? outerR : innerR;
+    const a = (i * Math.PI) / points - Math.PI / 2;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function drawPacMan() {
+  const px = cellCenterX(state.pac.x);
+  const py = cellCenterY(state.pac.y);
+  const r = CELL * 0.45;
+  const mouthAngle = (Math.sin(state.pac.mouthT * 10) + 1) * 0.35;  // 0 to ~0.7 rad
+  let baseAngle = 0;
+  if (state.pac.dir === DIRS.E) baseAngle = 0;
+  else if (state.pac.dir === DIRS.S) baseAngle = Math.PI / 2;
+  else if (state.pac.dir === DIRS.W) baseAngle = Math.PI;
+  else if (state.pac.dir === DIRS.N) baseAngle = -Math.PI / 2;
+
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.arc(px, py, r, baseAngle + mouthAngle, baseAngle - mouthAngle + Math.PI * 2);
+  ctx.closePath();
+  ctx.fillStyle = '#ffeb3b';
+  ctx.fill();
+  ctx.strokeStyle = '#b89b00';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Eye
+  let ex = px, ey = py;
+  if (state.pac.dir === DIRS.E) { ex = px + 2; ey = py - r * 0.45; }
+  else if (state.pac.dir === DIRS.W) { ex = px - 2; ey = py - r * 0.45; }
+  else if (state.pac.dir === DIRS.N) { ex = px + r * 0.35; ey = py - 4; }
+  else if (state.pac.dir === DIRS.S) { ex = px + r * 0.35; ey = py + 4; }
+  ctx.fillStyle = '#0a3a26';
+  ctx.beginPath();
+  ctx.arc(ex, ey, 2.4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawGhost(g) {
+  const px = cellCenterX(g.x);
+  const py = cellCenterY(g.y);
+  const r = CELL * 0.5;
+  const frozen = performance.now() < state.freezeUntil;
+  const fill = frozen ? '#5ad1ff' : g.color.fill;
+  const stroke = frozen ? '#1078b0' : g.color.stroke;
+
+  ctx.beginPath();
+  ctx.moveTo(px - r, py + r * 0.7);
+  ctx.lineTo(px - r, py);
+  ctx.arc(px, py, r, Math.PI, 0);
+  ctx.lineTo(px + r, py + r * 0.7);
+  const humps = 4;
+  const step = (r * 2) / humps;
+  for (let i = humps; i > 0; i--) {
+    const x1 = px + r - (humps - i + 0.5) * step;
+    const y1 = py + r * 0.7 + (i % 2 === 0 ? 0 : -CELL * 0.18);
+    ctx.lineTo(x1, y1);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Small eyes tucked near the top of the head so the fraction has room to breathe
+  const eyeR = r * 0.14;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(px - r * 0.40, py - r * 0.50, eyeR, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + r * 0.40, py - r * 0.50, eyeR, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#0a3a26';
+  ctx.beginPath(); ctx.arc(px - r * 0.40, py - r * 0.48, eyeR * 0.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + r * 0.40, py - r * 0.48, eyeR * 0.5, 0, Math.PI * 2); ctx.fill();
+
+  // Large outlined fraction centered on the ghost body
+  const num = String(g.num);
+  const den = String(g.den);
+  ctx.font = '900 13px "Arial Black", "Patrick Hand", Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+
+  const labelY = py + r * 0.18;
+  const barHalfW = Math.max(8, Math.max(num.length, den.length) * 4.5);
+
+  // numerator: thick black outline, then bright white fill
+  ctx.lineWidth = 3.5;
+  ctx.strokeStyle = '#000000';
+  ctx.strokeText(num, px, labelY - 8);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(num, px, labelY - 8);
+
+  // fraction bar with outline
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(px - barHalfW - 1, labelY - 1.5, (barHalfW + 1) * 2, 4);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(px - barHalfW, labelY - 0.5, barHalfW * 2, 2);
+
+  // denominator
+  ctx.lineWidth = 3.5;
+  ctx.strokeStyle = '#000000';
+  ctx.strokeText(den, px, labelY + 9);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(den, px, labelY + 9);
+}
+
+function render() {
+  drawMaze();
+  for (const g of state.ghosts) drawGhost(g);
+  if (state.pac) drawPacMan();
+}
+
+// ════════════════════════════════════════════════════════════
+//  UPDATE LOOP
+// ════════════════════════════════════════════════════════════
+const PAC_SPEED = 4.2;   // cells per second
+const GHOST_SPEED = 2.3;
+
+function update(dt) {
+  if (state.paused) return;
+  if (state.feedback && performance.now() < state.feedback.until) {
+    // Still render but don't move
+    return;
+  }
+
+  // Pac-Man
+  tryTurnEntity(state.pac);
+  const moved = tryMoveEntity(state.pac, state.pac.dir, PAC_SPEED, dt);
+  state.pac.mouthT += dt;
+  if (!moved) {
+    // Snap to nearest cell on stop
+    state.pac.x = Math.round(state.pac.x);
+    state.pac.y = Math.round(state.pac.y);
+  }
+  // Clamp Pac-Man inside maze
+  state.pac.x = Math.max(0, Math.min(COLS - 1, state.pac.x));
+  state.pac.y = Math.max(0, Math.min(ROWS - 1, state.pac.y));
+
+  eatDots();
+
+  // Ghosts
+  const frozen = performance.now() < state.freezeUntil;
+  if (!frozen) {
+    for (const g of state.ghosts) {
+      // Choose direction once per cell entry, not every frame
+      if (isCellAligned(g)) {
+        const cx = Math.round(g.x), cy = Math.round(g.y);
+        if (cx !== g.lastDecisionCell.x || cy !== g.lastDecisionCell.y) {
+          chooseGhostDir(g);
+          g.lastDecisionCell.x = cx;
+          g.lastDecisionCell.y = cy;
+        }
+      }
+      const ok = tryMoveEntity(g, g.dir, GHOST_SPEED, dt);
+      if (!ok) {
+        // Stuck — force a fresh direction choice next frame
+        const cx = Math.round(g.x), cy = Math.round(g.y);
+        const opts = DIR_LIST.filter(d => !isWall(cx + d.dx, cy + d.dy));
+        if (opts.length > 0) {
+          g.dir = pick(opts);
+          g.lastDecisionCell.x = cx;
+          g.lastDecisionCell.y = cy;
+        }
+      }
+    }
+  }
+
+  checkGhostCollisions();
+}
+
+function loop(now) {
+  if (!state.lastFrame) state.lastFrame = now;
+  const dt = Math.min(0.05, (now - state.lastFrame) / 1000);
+  state.lastFrame = now;
+  if (state.screen === 'game' && state.pac) {
+    update(dt);
+    render();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+let pendingLevel = 1;
+
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startGame(pendingLevel, false));
+document.getElementById('btn-instr-practice').addEventListener('click', () => startGame(pendingLevel, true));
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-again').addEventListener('click', () => {
+  closeModal('modal-results');
+  startGame(state.level, state.practice);
+});
+document.getElementById('btn-pause-menu').addEventListener('click', () => {
+  closeModal('modal-pause');
+  state.paused = false;
+  showScreen('screen-menu');
+});
+document.getElementById('btn-pause-resume').addEventListener('click', () => {
+  closeModal('modal-pause');
+  state.paused = false;
+});
+
+// Color the example ghosts on menu via SVG
+document.querySelectorAll('.ex-ghost').forEach(el => {
+  const c = el.getAttribute('data-color') || '#e63946';
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 10 60 L 10 35 A 40 40 0 0 1 90 35 L 90 60 L 80 70 L 70 60 L 60 70 L 50 60 L 40 70 L 30 60 L 20 70 Z" fill="${c}" stroke="rgba(0,0,0,0.4)" stroke-width="2"/>
+    <circle cx="38" cy="40" r="6" fill="#fff"/><circle cx="38" cy="40" r="3" fill="#000"/>
+    <circle cx="62" cy="40" r="6" fill="#fff"/><circle cx="62" cy="40" r="3" fill="#000"/>
+  </svg>`;
+  el.insertAdjacentHTML('afterbegin', svg);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 600;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+
+// ════════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════════
+requestAnimationFrame(loop);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
