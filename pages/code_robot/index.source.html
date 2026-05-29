@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Robot</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0a4a78">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #0a4a78;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(160deg, #cef0ff 0%, #84d4f8 55%, #4aa8d8 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(10, 30, 70, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(30, 228, 214, .6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 20px;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 78px; color: #0a3a6a;
+  letter-spacing: 5px;
+  text-shadow: 0 4px 0 #5ab8e8, 0 6px 14px rgba(0,0,0,0.18);
+  display: flex; align-items: center; gap: 16px;
+}
+.menu-title .robot-ico { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #064060;
+  margin-top: 4px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 20px; margin-top: 28px; }
+
+.level-btn {
+  width: 175px; height: 175px;
+  background: #fff;
+  border: 4px solid #0a3a6a;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #0a3a6a, 0 12px 22px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #0a3a6a, 0 16px 28px rgba(0,0,0,0.25); }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #0a3a6a; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #0a3a6a; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px; color: #0a3a6a; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px; color: #064060;
+}
+
+.practice-row {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #064060;
+  background: rgba(255,255,255,0.55);
+  padding: 8px 18px; border-radius: 40px;
+  border: 2px solid #0a3a6a;
+  cursor: pointer;
+}
+.practice-row .toggle {
+  width: 44px; height: 24px;
+  background: #b0c8d8;
+  border-radius: 12px;
+  position: relative;
+  transition: background .15s;
+}
+.practice-row.on .toggle { background: #2bb04a; }
+.practice-row .toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: left .15s;
+}
+.practice-row.on .toggle::after { left: 22px; }
+
+/* ═══════ INSTRUCTIONS ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px; color: #0a3a6a;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #5ab8e8;
+}
+.instr-step-row {
+  display: flex; gap: 28px; margin-top: 22px; align-items: center;
+}
+.instr-card {
+  background: #fff; border: 3px solid #0a3a6a;
+  border-radius: 18px; padding: 14px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 170px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px; color: #0a3a6a;
+  margin-top: 8px; text-align: center;
+}
+.instr-block {
+  width: 110px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; color: #fff; letter-spacing: 1px;
+  border: 3px solid #0a3a6a;
+}
+.instr-block.fwd { background: #2c8fd6; }
+.instr-block.run { background: #2bb04a; }
+.demo-grid {
+  width: 110px; height: 80px;
+  background: #d8f0ff;
+  border: 3px solid #0a3a6a;
+  border-radius: 8px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.demo-robot { font-size: 32px; }
+.demo-flag { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 24px; }
+.instr-arrow { font-size: 38px; color: #0a3a6a; }
+.instr-tip {
+  margin-top: 22px;
+  background: rgba(255,255,255,0.6);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #064060; text-align: center;
+  max-width: 760px; line-height: 1.4;
+  border: 2px dashed #0a3a6a;
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 22px; }
+
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #0a3a6a;
+  color: #0a3a6a;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #0a3a6a, 0 8px 16px rgba(0,0,0,0.15);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #0a3a6a, 0 12px 22px rgba(0,0,0,0.2); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #0a3a6a; }
+.btn.primary { background: #0a3a6a; color: #fff; }
+.btn.run { background: #2bb04a; color: #fff; border-color: #155a18; box-shadow: 0 5px 0 #155a18, 0 8px 16px rgba(0,0,0,0.15); }
+.btn.run:hover { box-shadow: 0 7px 0 #155a18, 0 12px 22px rgba(0,0,0,0.2); }
+.btn.run:active { box-shadow: 0 2px 0 #155a18; }
+.btn.warn { background: #f08820; color: #fff; border-color: #8a4a10; box-shadow: 0 5px 0 #8a4a10, 0 8px 16px rgba(0,0,0,0.15); }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: 0 2px 0 #0a3a6a; }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 10px 16px 16px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.6);
+  border: 2px solid #0a3a6a;
+  border-radius: 14px;
+  padding: 6px 14px;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #064060;
+}
+.hud .item .val { color: #0a3a6a; font-size: 22px; }
+.hud .stars-strip { display: flex; gap: 4px; font-size: 18px; }
+.hud .stars-strip .star { color: #b0c8d8; }
+.hud .stars-strip .star.lit { color: #ffc500; text-shadow: 0 0 4px rgba(255,197,0,.6); }
+.hud .spacer { flex: 1; }
+
+.play-area {
+  flex: 1; display: flex; gap: 14px; margin-top: 12px;
+  align-items: stretch;
+}
+
+.grid-pane {
+  width: 440px; flex-shrink: 0;
+  background: rgba(255,255,255,0.4);
+  border: 3px solid #0a3a6a;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px;
+}
+#grid-canvas { display: block; }
+
+.program-pane {
+  width: 250px; flex-shrink: 0;
+  background: rgba(255,255,255,0.6);
+  border: 3px solid #0a3a6a;
+  border-radius: 14px;
+  display: flex; flex-direction: column;
+  padding: 10px;
+}
+.program-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #0a3a6a;
+  letter-spacing: 2px; text-align: center;
+  margin-bottom: 8px;
+}
+.program-list {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 4px;
+}
+.program-list::-webkit-scrollbar { width: 8px; }
+.program-list::-webkit-scrollbar-thumb { background: #0a3a6a; border-radius: 4px; }
+.program-list .empty-hint {
+  color: #6a90a8;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 18px; text-align: center;
+  margin-top: 60px;
+  padding: 0 14px;
+}
+.prog-block {
+  width: 100%; border-radius: 10px;
+  padding: 8px 10px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; color: #fff;
+  letter-spacing: 1px;
+  border: 3px solid rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  transition: transform .12s;
+}
+.prog-block:hover { transform: scale(1.03); }
+.prog-block.active { box-shadow: 0 0 0 3px #ffc500; transform: scale(1.05); }
+.prog-block .ico { font-size: 22px; }
+
+.prog-block.forward { background: #2c8fd6; }
+.prog-block.left { background: #f08820; }
+.prog-block.right { background: #a44acc; }
+.prog-block.repeat { background: #d63a8a; flex-direction: column; align-items: stretch; padding: 6px; }
+.prog-block.repeat .rep-hdr {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px;
+}
+.prog-block.repeat .rep-child {
+  margin: 6px 0 2px;
+  padding: 6px;
+  background: rgba(255,255,255,0.15);
+  border: 2px dashed rgba(255,255,255,0.6);
+  border-radius: 8px;
+  min-height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 15px;
+  color: rgba(255,255,255,0.8);
+}
+.prog-block.repeat .rep-child .inner-block {
+  width: 100%; padding: 6px 8px; border-radius: 6px;
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; color: #fff;
+  border: 2px solid rgba(0,0,0,0.35);
+}
+.prog-block.repeat .rep-child .inner-block.forward { background: #2c8fd6; }
+.prog-block.repeat .rep-child .inner-block.left { background: #f08820; }
+.prog-block.repeat .rep-child .inner-block.right { background: #a44acc; }
+
+.palette-pane {
+  width: 220px; flex-shrink: 0;
+  background: rgba(255,255,255,0.6);
+  border: 3px solid #0a3a6a;
+  border-radius: 14px;
+  display: flex; flex-direction: column;
+  padding: 10px;
+  gap: 8px;
+}
+.palette-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #0a3a6a;
+  letter-spacing: 2px; text-align: center;
+}
+.pal-block {
+  width: 100%; border-radius: 12px;
+  padding: 10px 12px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #fff;
+  letter-spacing: 1px;
+  border: 3px solid rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.35);
+  transition: transform .12s, box-shadow .12s;
+}
+.pal-block:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.35); }
+.pal-block:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+.pal-block .ico { font-size: 24px; }
+.pal-block.forward { background: #2c8fd6; }
+.pal-block.left { background: #f08820; }
+.pal-block.right { background: #a44acc; }
+.pal-block.repeat { background: #d63a8a; }
+
+.controls-row {
+  display: flex; gap: 12px; margin-top: 10px;
+  justify-content: center;
+}
+
+/* ═══════ MODAL ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: #fff; border: 5px solid #0a3a6a;
+  border-radius: 24px; padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 520px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 40px; color: #0a3a6a;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #5ab8e8;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 44px; margin: 12px 0;
+}
+.modal-stars .star { color: #b0c8d8; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffc500; transform: scale(1.1); text-shadow: 0 0 12px rgba(255,197,0,.7); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #064060;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #0a3a6a;
+  margin: 4px 0 14px;
+}
+.modal-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* ═══════ CONFETTI ═══════ */
+#confetti {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 30;
+}
+
+/* ═══════ TOAST (status messages) ═══════ */
+.toast {
+  position: absolute;
+  bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: rgba(10,30,70,0.9); color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; letter-spacing: 1px;
+  padding: 10px 22px; border-radius: 20px;
+  opacity: 0; transition: opacity .25s;
+  pointer-events: none;
+  z-index: 40;
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="robot-ico">🤖</span><span>CODE ROBOT</span></div>
+    <div class="menu-subtitle">Program the robot to reach the flag!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Tutorial</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">Coins</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">Mazes</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Repeat!</span></button>
+    </div>
+    <div class="practice-row" id="practiceToggle">
+      <span class="toggle"></span>
+      <span>Practice mode (unlimited resets, no stars)</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="instr-block fwd"><span class="ico">⬆</span><span>FORWARD</span></div>
+        <div class="lbl">TAP A BLOCK</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="instr-block fwd"><span class="ico">⬆</span><span>FORWARD</span></div>
+        <div class="instr-block fwd" style="margin-top:4px"><span class="ico">⬆</span><span>FORWARD</span></div>
+        <div class="lbl">BUILD A PROGRAM</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-grid">
+          <span class="demo-robot">🤖</span>
+          <span class="demo-flag">🚩</span>
+        </div>
+        <div class="instr-block run" style="margin-top:6px"><span>▶ RUN</span></div>
+        <div class="lbl">PRESS RUN!</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      🪙 Collect every coin <i>before</i> stepping on the flag. Hit a wall and the robot stops — tap RESET to try again!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🏆 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">📋 <span class="val" id="hud-puzzle">1/3</span></div>
+      <div class="item">⭐ <span class="stars-strip" id="hud-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span></span></div>
+      <div class="item">🪙 <span class="val" id="hud-coins">0</span></div>
+      <div class="spacer"></div>
+      <div class="item" id="hud-blocks">📦 <span class="val" id="hud-blockcount">0</span></div>
+    </div>
+    <div class="play-area">
+      <div class="grid-pane">
+        <canvas id="grid-canvas" width="424" height="424"></canvas>
+      </div>
+      <div class="program-pane">
+        <div class="program-title">PROGRAM</div>
+        <div class="program-list" id="program-list">
+          <div class="empty-hint">Tap blocks on the right to build your program</div>
+        </div>
+        <div class="controls-row">
+          <button class="btn run" id="btn-run">▶ RUN</button>
+          <button class="btn warn" id="btn-reset">↺ RESET</button>
+        </div>
+      </div>
+      <div class="palette-pane">
+        <div class="palette-title">BLOCKS</div>
+        <div id="palette-blocks"></div>
+      </div>
+    </div>
+    <canvas id="confetti"></canvas>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars"></div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  PUZZLE DEFINITIONS
+//  walls: array of [x,y] tiles that are blocked
+//  start: {x,y,dir} dir: 0=N, 1=E, 2=S, 3=W
+//  coins: array of [x,y]
+//  goal: [x,y]
+//  par: optimal block count (for ★★★)
+//  allowRepeat: include Repeat blocks in palette
+// ════════════════════════════════════════════════════════════
+const PUZZLES = {
+  1: [
+    { cols:6, rows:5, walls:[], start:{x:1,y:2,dir:1}, coins:[], goal:[4,2], par:3 },
+    { cols:6, rows:5, walls:[], start:{x:1,y:1,dir:1}, coins:[], goal:[4,3], par:5 },
+    { cols:6, rows:5, walls:[[2,1]], start:{x:1,y:1,dir:1}, coins:[], goal:[3,1], par:7 }
+  ],
+  2: [
+    { cols:6, rows:6, walls:[], start:{x:1,y:1,dir:1}, coins:[[4,1]], goal:[4,3], par:6 },
+    { cols:6, rows:6, walls:[[2,2]], start:{x:1,y:1,dir:1}, coins:[[1,3]], goal:[4,3], par:7 },
+    { cols:6, rows:6, walls:[[3,1],[3,3]], start:{x:1,y:1,dir:1}, coins:[[4,4]], goal:[4,1], par:10 }
+  ],
+  3: [
+    { cols:7, rows:6, walls:[[2,1],[2,2],[4,3],[4,4]], start:{x:1,y:1,dir:1}, coins:[[1,4],[5,4]], goal:[5,1], par:14 },
+    { cols:7, rows:6, walls:[[2,0],[2,1],[2,2],[4,3],[4,4],[4,5]], start:{x:0,y:0,dir:2}, coins:[[3,4],[6,2]], goal:[6,5], par:16 },
+    { cols:7, rows:6, walls:[[1,2],[2,2],[3,2],[4,4],[5,2],[5,3]], start:{x:1,y:0,dir:2}, coins:[[6,0],[1,5]], goal:[5,5], par:18 }
+  ],
+  4: [
+    { cols:8, rows:7, walls:[], start:{x:0,y:3,dir:1}, coins:[[3,3]], goal:[7,3], par:3, allowRepeat:true },
+    { cols:8, rows:7, walls:[[3,3],[4,3]], start:{x:0,y:3,dir:1}, coins:[[3,0],[4,6]], goal:[7,3], par:11, allowRepeat:true },
+    { cols:8, rows:7, walls:[[2,1],[2,2],[5,4],[5,5]], start:{x:0,y:0,dir:1}, coins:[[7,0],[0,6],[7,6]], goal:[3,3], par:20, allowRepeat:true }
+  ]
+};
+
+const DIR_DX = [0, 1, 0, -1];
+const DIR_DY = [-1, 0, 1, 0];
+
+const PALETTE_ICONS = {
+  forward: '⬆',
+  left: '↺',
+  right: '↻',
+  repeat3: '↻×3',
+  repeat5: '↻×5'
+};
+const PALETTE_LABELS = {
+  forward: 'FORWARD',
+  left: 'TURN LEFT',
+  right: 'TURN RIGHT',
+  repeat3: 'REPEAT ×3',
+  repeat5: 'REPEAT ×5'
+};
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  puzzleIdx: 0,
+  practice: false,
+  puzzle: null,
+  robot: { x:0, y:0, dir:1 },
+  coinsLeft: [],
+  program: [],
+  running: false,
+  starsByPuzzle: [0,0,0],
+  resetsUsed: 0,
+  triesUsed: 0,
+  shake: 0
+};
+let practiceOn = false;
+let pendingLevel = 1;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>el.classList.remove('show'), 1600);
+}
+
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+function isWall(p, x, y){
+  if (x<0 || x>=p.cols || y<0 || y>=p.rows) return true;
+  return p.walls.some(w => w[0]===x && w[1]===y);
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level, practice){
+  state.level = level;
+  state.practice = !!practice;
+  state.puzzleIdx = 0;
+  state.starsByPuzzle = [0,0,0];
+  loadPuzzle(0);
+  showScreen('screen-game');
+}
+
+function loadPuzzle(idx){
+  state.puzzleIdx = idx;
+  state.puzzle = deepClone(PUZZLES[state.level][idx]);
+  state.robot = { ...state.puzzle.start };
+  state.coinsLeft = deepClone(state.puzzle.coins);
+  state.program = [];
+  state.running = false;
+  state.resetsUsed = 0;
+  state.triesUsed = 0;
+  state.shake = 0;
+  renderPalette();
+  renderProgram();
+  renderHUD();
+  drawGrid();
+}
+
+function resetPuzzle(){
+  state.robot = { ...state.puzzle.start };
+  state.coinsLeft = deepClone(state.puzzle.coins);
+  state.running = false;
+  state.shake = 0;
+  drawGrid();
+}
+
+// ════════════════════════════════════════════════════════════
+//  HUD / PROGRAM / PALETTE RENDERING
+// ════════════════════════════════════════════════════════════
+function renderHUD(){
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-puzzle').textContent = (state.puzzleIdx+1) + '/3';
+  document.getElementById('hud-coins').textContent = state.coinsLeft.length;
+  document.getElementById('hud-blockcount').textContent = countBlocks(state.program);
+
+  const starsEl = document.getElementById('hud-stars');
+  starsEl.innerHTML = '';
+  for (let i=0;i<3;i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < state.starsByPuzzle[state.puzzleIdx] ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+}
+
+function countBlocks(prog){
+  let n = 0;
+  for (const b of prog){
+    n++;
+    if (b.type === 'repeat' && b.child) n++;
+  }
+  return n;
+}
+
+function renderPalette(){
+  const pal = document.getElementById('palette-blocks');
+  pal.innerHTML = '';
+  const types = ['forward','left','right'];
+  if (state.puzzle.allowRepeat){
+    types.push('repeat3','repeat5');
+  }
+  for (const t of types){
+    const b = document.createElement('div');
+    const cssType = t.startsWith('repeat') ? 'repeat' : t;
+    b.className = 'pal-block ' + cssType;
+    b.innerHTML = `<span class="ico">${PALETTE_ICONS[t]}</span><span>${PALETTE_LABELS[t]}</span>`;
+    b.addEventListener('click', () => onPaletteClick(t));
+    pal.appendChild(b);
+  }
+}
+
+function renderProgram(){
+  const list = document.getElementById('program-list');
+  list.innerHTML = '';
+  if (state.program.length === 0){
+    const hint = document.createElement('div');
+    hint.className = 'empty-hint';
+    hint.textContent = 'Tap blocks on the right to build your program';
+    list.appendChild(hint);
+    return;
+  }
+  state.program.forEach((b, idx) => {
+    const el = document.createElement('div');
+    if (b.type === 'repeat'){
+      el.className = 'prog-block repeat';
+      const childInner = b.child
+        ? `<div class="inner-block ${b.child.type}"><span class="ico">${PALETTE_ICONS[b.child.type]}</span><span>${PALETTE_LABELS[b.child.type]}</span></div>`
+        : 'Tap a block to add inside';
+      el.innerHTML = `<div class="rep-hdr"><span class="ico">${PALETTE_ICONS['repeat'+b.count]}</span><span>REPEAT ×${b.count}</span></div><div class="rep-child">${childInner}</div>`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onProgramClick(idx);
+      });
+    } else {
+      el.className = 'prog-block ' + b.type;
+      el.innerHTML = `<span class="ico">${PALETTE_ICONS[b.type]}</span><span>${PALETTE_LABELS[b.type]}</span>`;
+      el.addEventListener('click', () => onProgramClick(idx));
+    }
+    list.appendChild(el);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  PALETTE / PROGRAM CLICKS
+// ════════════════════════════════════════════════════════════
+function onPaletteClick(type){
+  if (state.running) return;
+
+  // Repeat blocks
+  if (type === 'repeat3' || type === 'repeat5'){
+    const count = type === 'repeat3' ? 3 : 5;
+    state.program.push({ type:'repeat', count, child:null });
+    renderProgram();
+    renderHUD();
+    return;
+  }
+
+  // If the LAST program block is an open Repeat (no child), insert inside it
+  const last = state.program[state.program.length - 1];
+  if (last && last.type === 'repeat' && !last.child){
+    last.child = { type };
+  } else {
+    state.program.push({ type });
+  }
+  renderProgram();
+  renderHUD();
+}
+
+function onProgramClick(idx){
+  if (state.running) return;
+  state.program.splice(idx, 1);
+  renderProgram();
+  renderHUD();
+}
+
+// ════════════════════════════════════════════════════════════
+//  EXECUTION
+// ════════════════════════════════════════════════════════════
+function flattenProgram(prog){
+  const out = [];
+  for (const b of prog){
+    if (b.type === 'repeat'){
+      if (b.child){
+        for (let i=0;i<b.count;i++) out.push({ type:b.child.type });
+      }
+    } else {
+      out.push({ type:b.type });
+    }
+  }
+  return out;
+}
+
+function runProgram(){
+  if (state.running) return;
+  if (state.program.length === 0){
+    toast('Add some blocks first!');
+    return;
+  }
+  // Always reset state to puzzle start
+  state.robot = { ...state.puzzle.start };
+  state.coinsLeft = deepClone(state.puzzle.coins);
+  state.shake = 0;
+  renderHUD();
+  drawGrid();
+
+  state.running = true;
+  state.triesUsed++;
+
+  const instructions = flattenProgram(state.program);
+  let i = 0;
+
+  function step(){
+    if (!state.running) return;
+    if (i >= instructions.length){
+      // Done — check if won
+      state.running = false;
+      const r = state.robot;
+      const g = state.puzzle.goal;
+      if (r.x === g[0] && r.y === g[1] && state.coinsLeft.length === 0){
+        onPuzzleSolved();
+      } else if (r.x === g[0] && r.y === g[1] && state.coinsLeft.length > 0){
+        toast('You missed a coin! 🪙');
+      } else {
+        toast("You didn't reach the flag!");
+      }
+      return;
+    }
+    const inst = instructions[i++];
+    applyInstruction(inst);
+    drawGrid();
+    if (!state.running) return; // applyInstruction may halt on wall
+    setTimeout(step, 380);
+  }
+  setTimeout(step, 200);
+}
+
+function applyInstruction(inst){
+  const r = state.robot;
+  if (inst.type === 'forward'){
+    const nx = r.x + DIR_DX[r.dir];
+    const ny = r.y + DIR_DY[r.dir];
+    if (isWall(state.puzzle, nx, ny)){
+      // Crash!
+      state.shake = 12;
+      state.running = false;
+      toast('💥 Crash! Tap RESET');
+      return;
+    }
+    r.x = nx; r.y = ny;
+    // Collect coin if present
+    const ci = state.coinsLeft.findIndex(c => c[0]===nx && c[1]===ny);
+    if (ci >= 0){
+      state.coinsLeft.splice(ci, 1);
+      renderHUD();
+    }
+  } else if (inst.type === 'left'){
+    r.dir = (r.dir + 3) % 4;
+  } else if (inst.type === 'right'){
+    r.dir = (r.dir + 1) % 4;
+  }
+}
+
+function onPuzzleSolved(){
+  // Star calculation
+  let stars = 1;
+  if (state.triesUsed === 1 && state.resetsUsed === 0) stars = 2;
+  if ((state.triesUsed === 1 && state.resetsUsed === 0) && countBlocks(state.program) <= state.puzzle.par) stars = 3;
+  state.starsByPuzzle[state.puzzleIdx] = Math.max(state.starsByPuzzle[state.puzzleIdx], stars);
+  renderHUD();
+
+  triggerConfetti();
+  toast('🎉 Puzzle ' + (state.puzzleIdx+1) + ' solved!');
+
+  setTimeout(() => {
+    const next = state.puzzleIdx + 1;
+    if (next >= PUZZLES[state.level].length){
+      endLevel();
+    } else {
+      loadPuzzle(next);
+    }
+  }, 1400);
+}
+
+function endLevel(){
+  const totalStars = state.starsByPuzzle.reduce((a,b)=>a+b, 0);
+  const maxStars = 9;
+  document.getElementById('results-title').textContent = 'LEVEL ' + state.level + ' COMPLETE!';
+
+  const starsEl = document.getElementById('results-stars');
+  starsEl.innerHTML = '';
+  for (let i=0;i<maxStars;i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < totalStars ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+  document.getElementById('results-body').textContent =
+    totalStars === 9 ? "Perfect! You're a coding master! 🤖" :
+    totalStars >= 6 ? 'Great work, future programmer!' :
+    'Nice — try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Stars: <b>' + totalStars + ' / ' + maxStars + '</b>';
+
+  document.getElementById('btn-results-next').style.display =
+    state.level < 4 ? 'inline-block' : 'none';
+
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CANVAS RENDERING
+// ════════════════════════════════════════════════════════════
+const canvas = document.getElementById('grid-canvas');
+const ctx = canvas.getContext('2d');
+
+function drawGrid(){
+  const p = state.puzzle;
+  if (!p) return;
+  const W = canvas.width, H = canvas.height;
+  const cell = Math.min((W-20)/p.cols, (H-20)/p.rows);
+  const ox = (W - cell * p.cols) / 2;
+  const oy = (H - cell * p.rows) / 2;
+
+  ctx.fillStyle = '#cef0ff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Floor tiles
+  for (let y=0;y<p.rows;y++){
+    for (let x=0;x<p.cols;x++){
+      const px = ox + x*cell;
+      const py = oy + y*cell;
+      const isWallTile = p.walls.some(w => w[0]===x && w[1]===y);
+      if (isWallTile){
+        // Wall: metallic blue block
+        ctx.fillStyle = '#2a5a8a';
+        ctx.fillRect(px+2, py+2, cell-4, cell-4);
+        ctx.fillStyle = '#3a78b0';
+        ctx.fillRect(px+4, py+4, cell-8, cell-12);
+        ctx.fillStyle = '#1a3a5a';
+        ctx.fillRect(px+4, py+cell-12, cell-8, 4);
+      } else {
+        // Floor: light cyan with grid lines
+        ctx.fillStyle = (x+y) % 2 === 0 ? '#e6f7ff' : '#d8eef8';
+        ctx.fillRect(px, py, cell, cell);
+        ctx.strokeStyle = '#a0c8e0';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px+0.5, py+0.5, cell, cell);
+      }
+    }
+  }
+
+  // Goal flag
+  const g = p.goal;
+  const gx = ox + g[0]*cell + cell/2;
+  const gy = oy + g[1]*cell + cell/2;
+  drawFlag(gx, gy, cell);
+
+  // Coins
+  for (const c of state.coinsLeft){
+    const cx = ox + c[0]*cell + cell/2;
+    const cy = oy + c[1]*cell + cell/2;
+    drawCoin(cx, cy, cell * 0.28);
+  }
+
+  // Robot
+  const r = state.robot;
+  let rx = ox + r.x*cell + cell/2;
+  let ry = oy + r.y*cell + cell/2;
+  if (state.shake > 0){
+    rx += Math.sin(state.shake * 2) * 4;
+    state.shake--;
+  }
+  drawRobot(rx, ry, cell * 0.36, r.dir);
+}
+
+function drawFlag(cx, cy, cell){
+  const s = cell * 0.34;
+  // Pole
+  ctx.strokeStyle = '#8a5028';
+  ctx.lineWidth = Math.max(2, cell * 0.07);
+  ctx.beginPath();
+  ctx.moveTo(cx - s*0.4, cy + s);
+  ctx.lineTo(cx - s*0.4, cy - s);
+  ctx.stroke();
+  // Flag triangle
+  ctx.fillStyle = '#e84545';
+  ctx.strokeStyle = '#a01818';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - s*0.4, cy - s);
+  ctx.lineTo(cx + s*0.9, cy - s*0.55);
+  ctx.lineTo(cx - s*0.4, cy - s*0.1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawCoin(cx, cy, r){
+  ctx.fillStyle = '#ffd040';
+  ctx.strokeStyle = '#a08000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ffec80';
+  ctx.beginPath();
+  ctx.arc(cx - r*0.3, cy - r*0.3, r*0.35, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#a08000';
+  ctx.font = 'bold ' + Math.floor(r*1.1) + 'px Arial Black, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('$', cx, cy + 1);
+}
+
+function drawRobot(cx, cy, r, dir){
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(dir * Math.PI/2);
+  // Body
+  ctx.fillStyle = '#5ac8d0';
+  ctx.strokeStyle = '#1a6a78';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  roundRect(ctx, -r, -r*0.9, r*2, r*1.8, r*0.25);
+  ctx.fill(); ctx.stroke();
+  // Screen face
+  ctx.fillStyle = '#0a2a3a';
+  ctx.beginPath();
+  roundRect(ctx, -r*0.7, -r*0.6, r*1.4, r*1.1, r*0.15);
+  ctx.fill();
+  // Eyes (pointing "up" which becomes facing direction after rotation)
+  ctx.fillStyle = '#5af4e6';
+  ctx.beginPath();
+  ctx.arc(-r*0.32, -r*0.2, r*0.18, 0, Math.PI*2);
+  ctx.arc(r*0.32, -r*0.2, r*0.18, 0, Math.PI*2);
+  ctx.fill();
+  // Mouth
+  ctx.strokeStyle = '#5af4e6';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-r*0.25, r*0.2);
+  ctx.lineTo(r*0.25, r*0.2);
+  ctx.stroke();
+  // Antenna
+  ctx.strokeStyle = '#1a6a78';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, -r*0.9);
+  ctx.lineTo(0, -r*1.3);
+  ctx.stroke();
+  ctx.fillStyle = '#ff4a4a';
+  ctx.beginPath();
+  ctx.arc(0, -r*1.4, r*0.15, 0, Math.PI*2);
+  ctx.fill();
+  // Direction arrow on top (small triangle pointing forward = up in robot's frame)
+  ctx.fillStyle = '#ffeb3b';
+  ctx.beginPath();
+  ctx.moveTo(0, -r*0.75);
+  ctx.lineTo(-r*0.18, -r*0.55);
+  ctx.lineTo(r*0.18, -r*0.55);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x+r, y);
+  c.lineTo(x+w-r, y);
+  c.quadraticCurveTo(x+w, y, x+w, y+r);
+  c.lineTo(x+w, y+h-r);
+  c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  c.lineTo(x+r, y+h);
+  c.quadraticCurveTo(x, y+h, x, y+h-r);
+  c.lineTo(x, y+r);
+  c.quadraticCurveTo(x, y, x+r, y);
+  c.closePath();
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#ff5050','#ffae42','#ffd040','#4ab048','#3a8acc','#a44acc','#5af4e6'];
+  for (let i=0;i<80;i++){
+    confettiParticles.push({
+      x: w/2 + (Math.random()-0.5)*120,
+      y: h/2,
+      vx: (Math.random()-0.5)*8,
+      vy: -Math.random()*8 - 4,
+      g: 0.25,
+      color: pick(colors),
+      size: Math.random()*6 + 4,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      life: 60 + Math.random()*30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length-1; i>=0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i,1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'),10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+const practiceEl = document.getElementById('practiceToggle');
+practiceEl.addEventListener('click', () => {
+  practiceOn = !practiceOn;
+  practiceEl.classList.toggle('on', practiceOn);
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel, practiceOn));
+
+document.getElementById('btn-run').addEventListener('click', runProgram);
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (state.running) return;
+  state.resetsUsed++;
+  resetPuzzle();
+});
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level, state.practice);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1, state.practice);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw/baseW, vh/baseH);
+    const x = (vw - baseW*s)/2;
+    const y = (vh - baseH*s)/2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+
+// shake redraw loop (lightweight)
+function shakeTick(){
+  if (state.shake > 0) drawGrid();
+  requestAnimationFrame(shakeTick);
+}
+requestAnimationFrame(shakeTick);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
