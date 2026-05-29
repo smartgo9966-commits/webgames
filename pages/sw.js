@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v11';
+const CACHE = 'games-v12';
 
 const PRECACHE = [
   './',
@@ -60,6 +60,8 @@ const PRECACHE = [
   './smart_board/index.html',
   './ten_frame_math_game/',
   './ten_frame_math_game/index.html',
+  './word_wizard/',
+  './word_wizard/index.html',
 ];
 
 self.addEventListener('install', event => {

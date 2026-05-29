@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Wizard</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#fcd54a">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #fcd54a;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(160deg, #fff4c4 0%, #ffe080 55%, #ffc94a 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(20, 30, 70, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(30, 228, 214, .6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU SCREEN ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 30px 20px;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 76px; color: #b13a08;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 0 #ffae42, 0 6px 14px rgba(0,0,0,0.18);
+  margin-top: 4px;
+  display: flex; align-items: center; gap: 14px;
+}
+.menu-title .wand { font-size: 64px; transform: rotate(-15deg); display: inline-block; }
+
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 28px; color: #5c3300;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+
+.level-row {
+  display: flex; gap: 22px; margin-top: 30px;
+}
+
+.level-btn {
+  width: 170px; height: 170px;
+  background: #fff;
+  border: 4px solid #b13a08;
+  border-radius: 24px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+  box-shadow: 0 8px 0 #b13a08, 0 12px 22px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #b13a08, 0 16px 28px rgba(0,0,0,0.25); }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #b13a08; }
+
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px; color: #b13a08;
+  letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 68px; color: #b13a08; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 18px; color: #6a4500;
+}
+
+.practice-row {
+  margin-top: 22px; display: flex; align-items: center; gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #5c3300;
+  background: rgba(255,255,255,0.5);
+  padding: 8px 18px; border-radius: 40px;
+  border: 2px solid #b13a08;
+  cursor: pointer;
+}
+.practice-row .toggle {
+  width: 44px; height: 24px;
+  background: #d8c098;
+  border-radius: 12px;
+  position: relative;
+  transition: background .15s;
+}
+.practice-row.on .toggle { background: #2bb04a; }
+.practice-row .toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: left .15s;
+}
+.practice-row.on .toggle::after { left: 22px; }
+
+/* ═══════ INSTRUCTIONS SCREEN ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px; color: #b13a08;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #ffae42;
+}
+.instr-step-row {
+  display: flex; gap: 28px; margin-top: 22px; align-items: center;
+}
+.instr-card {
+  background: #fff; border: 3px solid #b13a08;
+  border-radius: 18px; padding: 14px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 160px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #b13a08;
+  margin-top: 8px;
+}
+.instr-card .demo-svg {
+  width: 100px; height: 80px;
+}
+.instr-mini-slots {
+  display: flex; gap: 5px; margin-top: 6px;
+}
+.instr-mini-slot {
+  width: 28px; height: 32px; background: #fff;
+  border: 2px solid #b13a08; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #b13a08;
+}
+.instr-mini-slot.filled { background: #c7f0c2; border-color: #2bb04a; color: #155a18; }
+.instr-arrow {
+  font-size: 38px; color: #b13a08;
+}
+.instr-tip {
+  margin-top: 22px;
+  background: rgba(255,255,255,0.6);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #5c3300; text-align: center;
+  max-width: 760px; line-height: 1.4;
+  border: 2px dashed #b13a08;
+}
+.instr-buttons {
+  display: flex; gap: 18px; margin-top: 22px;
+}
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #b13a08;
+  color: #b13a08;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #b13a08, 0 8px 16px rgba(0,0,0,0.15);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #b13a08, 0 12px 22px rgba(0,0,0,0.2); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b13a08; }
+.btn.primary { background: #b13a08; color: #fff; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: 0 2px 0 #b13a08; }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 12px 18px 18px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.62);
+  border: 2px solid #b13a08;
+  border-radius: 18px;
+  padding: 8px 14px;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #5c3300;
+  letter-spacing: 1px;
+}
+.hud .item .ico { font-size: 22px; }
+.hud .item .val { color: #b13a08; font-size: 22px; }
+.hud .progress {
+  flex: 1; height: 16px;
+  background: #f5e6c4; border: 2px solid #b13a08;
+  border-radius: 10px; overflow: hidden;
+}
+.hud .progress .fill {
+  height: 100%; background: #2bb04a;
+  width: 0%; transition: width .25s;
+}
+
+.play-area {
+  flex: 1; display: flex; align-items: center; gap: 28px;
+  margin-top: 14px;
+}
+
+.picture-card {
+  background: #fff; border: 5px solid #b13a08;
+  border-radius: 26px; padding: 14px;
+  width: 280px; height: 280px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18), inset 0 0 0 3px #ffe080;
+  flex-shrink: 0;
+}
+.picture-card svg { width: 100%; height: 100%; display: block; }
+.picture-card.wiggle { animation: wiggle 0.6s; }
+@keyframes wiggle {
+  0%,100% { transform: rotate(0); }
+  20% { transform: rotate(-4deg); }
+  40% { transform: rotate(4deg); }
+  60% { transform: rotate(-3deg); }
+  80% { transform: rotate(3deg); }
+}
+
+.spell-area {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 22px; align-items: center;
+}
+
+.slot-row {
+  display: flex; gap: 10px; justify-content: center;
+}
+.slot {
+  width: 56px; height: 64px;
+  background: #fff; border: 3px dashed #b13a08;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 36px; color: #b13a08;
+  cursor: pointer;
+  transition: transform .12s, background .15s, border-color .15s;
+}
+.slot.filled {
+  background: #c7f0c2; border-style: solid; border-color: #2bb04a; color: #155a18;
+  cursor: pointer;
+}
+.slot.bad { animation: shake-red 0.4s; }
+@keyframes shake-red {
+  0%,100% { transform: translateX(0); background: #fff; }
+  10% { background: #ffd8d8; }
+  20% { transform: translateX(-6px); background: #ffd8d8; }
+  40% { transform: translateX(6px); background: #ffd8d8; }
+  60% { transform: translateX(-4px); background: #ffd8d8; }
+  80% { transform: translateX(4px); background: #ffd8d8; }
+}
+
+.pool {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  max-width: 540px;
+}
+.tile {
+  width: 50px; height: 56px;
+  background: #ffae42; border: 3px solid #b13a08;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px; color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #8a2c06, 0 6px 12px rgba(0,0,0,0.15);
+  animation: tile-bob 2.6s ease-in-out infinite;
+  transition: transform .12s, box-shadow .12s;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+}
+.tile:nth-child(2n) { animation-delay: -0.6s; }
+.tile:nth-child(3n) { animation-delay: -1.2s; }
+.tile:nth-child(4n) { animation-delay: -1.8s; }
+@keyframes tile-bob {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.tile:hover { transform: translateY(-2px); }
+.tile:active { transform: translateY(2px); box-shadow: 0 2px 0 #8a2c06; }
+.tile.selected {
+  background: #2bb04a; border-color: #155a18;
+  box-shadow: 0 4px 0 #0c3a10, 0 0 0 4px #c7f0c2;
+  animation: none;
+  transform: translateY(-3px) scale(1.08);
+}
+.tile.gone { visibility: hidden; pointer-events: none; }
+
+.controls-row {
+  display: flex; gap: 12px;
+}
+.ctrl-btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #b13a08;
+  color: #b13a08;
+  border-radius: 14px;
+  padding: 6px 16px;
+  font-size: 18px; letter-spacing: 1px;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 0 #b13a08;
+}
+.ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b13a08; }
+.ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: 0 1px 0 #b13a08; }
+.ctrl-btn .count { background: #b13a08; color: #fff; border-radius: 8px; padding: 0 6px; font-size: 14px; }
+
+/* ═══════ MODALS ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: #fff; border: 5px solid #b13a08;
+  border-radius: 24px; padding: 26px 34px;
+  text-align: center; min-width: 380px; max-width: 500px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 40px; color: #b13a08;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #ffae42;
+}
+.modal-stars {
+  display: flex; gap: 8px; justify-content: center;
+  font-size: 50px; margin: 12px 0;
+}
+.modal-stars .star { color: #d8c098; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffc500; transform: scale(1.1); text-shadow: 0 0 12px rgba(255,197,0,.7); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #5c3300;
+  margin-bottom: 10px;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #b13a08;
+  margin: 6px 0 16px;
+}
+.modal-buttons { display: flex; gap: 14px; justify-content: center; }
+
+/* ═══════ CONFETTI CANVAS ═══════ */
+#confetti {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 30;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="wand">🪄</span><span>WORD WIZARD</span></div>
+    <div class="menu-subtitle">Look at the picture — spell the word!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">3 letters</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">4 letters</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">5 letters</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">6–7 letters</span></button>
+    </div>
+    <div class="practice-row" id="practiceToggle">
+      <span class="toggle"></span>
+      <span>Practice mode (unlimited hints &amp; skips)</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo-svg" id="demo-picture"></div>
+        <div class="lbl">SEE THE PICTURE</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="instr-mini-slots">
+          <div class="instr-mini-slot">C</div>
+          <div class="instr-mini-slot"></div>
+          <div class="instr-mini-slot"></div>
+        </div>
+        <div class="lbl">TAP A TILE,<br>THEN A SLOT</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="instr-mini-slots">
+          <div class="instr-mini-slot filled">C</div>
+          <div class="instr-mini-slot filled">A</div>
+          <div class="instr-mini-slot filled">T</div>
+        </div>
+        <div class="lbl">SPELL THE WORD!</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      💡 Stuck? Use a hint to fill the next letter — but you only get a few per level!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item"><span class="ico">🏆</span><span id="hud-level">LEVEL 1</span></div>
+      <div class="item"><span class="ico">⭐</span><span class="val" id="hud-score">0</span></div>
+      <div class="item"><span class="ico">💡</span><span class="val" id="hud-hints">3</span></div>
+      <div class="item"><span class="ico">⏭</span><span class="val" id="hud-skips">3</span></div>
+      <div class="progress"><div class="fill" id="progress-fill"></div></div>
+      <div class="item"><span id="hud-progress">0/5</span></div>
+    </div>
+    <div class="play-area">
+      <div class="picture-card" id="picture-card"></div>
+      <div class="spell-area">
+        <div class="slot-row" id="slot-row"></div>
+        <div class="pool" id="pool"></div>
+        <div class="controls-row">
+          <button class="ctrl-btn" id="btn-hint">💡 Hint <span class="count" id="hint-count">3</span></button>
+          <button class="ctrl-btn" id="btn-backspace">⌫ Erase</button>
+          <button class="ctrl-btn" id="btn-skip">⏭ Skip <span class="count" id="skip-count">3</span></button>
+        </div>
+      </div>
+    </div>
+    <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn primary" id="btn-results-again">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  PICTURE SVGS (cartoon clipart, one per word)
+//  Each SVG is sized 200x200 viewBox.
+// ════════════════════════════════════════════════════════════
+const PICS = {
+  CAT: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="40,80 60,30 80,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="120,80 140,30 160,80" fill="#ff9030" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="50,72 60,48 72,72" fill="#ffc8a0"/>
+    <polygon points="128,72 140,48 152,72" fill="#ffc8a0"/>
+    <circle cx="100" cy="115" r="60" fill="#ff9030" stroke="#7a3a08" stroke-width="4"/>
+    <circle cx="78" cy="105" r="9" fill="#fff"/><circle cx="78" cy="107" r="5" fill="#1a1a1a"/>
+    <circle cx="122" cy="105" r="9" fill="#fff"/><circle cx="122" cy="107" r="5" fill="#1a1a1a"/>
+    <polygon points="92,125 108,125 100,135" fill="#7a3a08"/>
+    <path d="M 100 135 Q 92 145 80 140" stroke="#7a3a08" stroke-width="3" fill="none"/>
+    <path d="M 100 135 Q 108 145 120 140" stroke="#7a3a08" stroke-width="3" fill="none"/>
+    <line x1="55" y1="120" x2="78" y2="120" stroke="#7a3a08" stroke-width="2"/>
+    <line x1="58" y1="130" x2="78" y2="125" stroke="#7a3a08" stroke-width="2"/>
+    <line x1="122" y1="120" x2="145" y2="120" stroke="#7a3a08" stroke-width="2"/>
+    <line x1="122" y1="125" x2="142" y2="130" stroke="#7a3a08" stroke-width="2"/>
+  </svg>`,
+  DOG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+    <ellipse cx="150" cy="90" rx="22" ry="35" fill="#a06030" stroke="#5a3010" stroke-width="3"/>
+    <circle cx="100" cy="115" r="58" fill="#d0a070" stroke="#5a3010" stroke-width="4"/>
+    <circle cx="78" cy="105" r="8" fill="#1a1a1a"/>
+    <circle cx="122" cy="105" r="8" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="132" rx="14" ry="10" fill="#1a1a1a"/>
+    <path d="M 100 142 Q 90 152 82 148" stroke="#5a3010" stroke-width="3" fill="none"/>
+    <path d="M 100 142 Q 110 152 118 148" stroke="#5a3010" stroke-width="3" fill="none"/>
+    <ellipse cx="100" cy="155" rx="8" ry="10" fill="#ff6a8a"/>
+  </svg>`,
+  SUN: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#d89000" stroke-width="6" stroke-linecap="round">
+      <line x1="100" y1="20" x2="100" y2="48"/>
+      <line x1="100" y1="152" x2="100" y2="180"/>
+      <line x1="20" y1="100" x2="48" y2="100"/>
+      <line x1="152" y1="100" x2="180" y2="100"/>
+      <line x1="38" y1="38" x2="58" y2="58"/>
+      <line x1="142" y1="142" x2="162" y2="162"/>
+      <line x1="38" y1="162" x2="58" y2="142"/>
+      <line x1="142" y1="58" x2="162" y2="38"/>
+    </g>
+    <circle cx="100" cy="100" r="52" fill="#ffd040" stroke="#d89000" stroke-width="4"/>
+    <circle cx="82" cy="92" r="6" fill="#1a1a1a"/>
+    <circle cx="118" cy="92" r="6" fill="#1a1a1a"/>
+    <path d="M 80 115 Q 100 132 120 115" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="74" cy="108" r="6" fill="#ff9090" opacity="0.7"/>
+    <circle cx="126" cy="108" r="6" fill="#ff9090" opacity="0.7"/>
+  </svg>`,
+  HAT: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="140" width="160" height="14" rx="3" fill="#1a1a1a"/>
+    <rect x="55" y="50" width="90" height="100" fill="#1a1a1a"/>
+    <rect x="55" y="115" width="90" height="14" fill="#aa1818"/>
+    <ellipse cx="100" cy="50" rx="45" ry="10" fill="#2a2a2a"/>
+    <circle cx="125" cy="122" r="7" fill="#ffd040" stroke="#aa8000" stroke-width="2"/>
+  </svg>`,
+  BEE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="55" cy="80" rx="30" ry="22" fill="#fff" stroke="#666" stroke-width="2" opacity="0.85"/>
+    <ellipse cx="145" cy="80" rx="30" ry="22" fill="#fff" stroke="#666" stroke-width="2" opacity="0.85"/>
+    <ellipse cx="100" cy="115" rx="55" ry="42" fill="#ffd040" stroke="#1a1a1a" stroke-width="4"/>
+    <rect x="62" y="90" width="76" height="14" fill="#1a1a1a"/>
+    <rect x="58" y="120" width="84" height="14" fill="#1a1a1a"/>
+    <circle cx="84" cy="105" r="6" fill="#1a1a1a"/>
+    <circle cx="116" cy="105" r="6" fill="#1a1a1a"/>
+    <circle cx="86" cy="103" r="2" fill="#fff"/>
+    <circle cx="118" cy="103" r="2" fill="#fff"/>
+    <path d="M 88 132 Q 100 140 112 132" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M 80 70 Q 80 55 90 50" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M 120 70 Q 120 55 110 50" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <circle cx="90" cy="48" r="4" fill="#1a1a1a"/>
+    <circle cx="110" cy="48" r="4" fill="#1a1a1a"/>
+  </svg>`,
+  COW: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="55" cy="100" rx="18" ry="26" fill="#ffc7d0" stroke="#1a1a1a" stroke-width="3"/>
+    <ellipse cx="145" cy="100" rx="18" ry="26" fill="#ffc7d0" stroke="#1a1a1a" stroke-width="3"/>
+    <ellipse cx="100" cy="115" rx="62" ry="55" fill="#ffffff" stroke="#1a1a1a" stroke-width="4"/>
+    <ellipse cx="70" cy="92" rx="14" ry="10" fill="#1a1a1a"/>
+    <ellipse cx="135" cy="100" rx="12" ry="9" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="145" rx="36" ry="22" fill="#ff9aa8" stroke="#1a1a1a" stroke-width="3"/>
+    <circle cx="86" cy="148" r="4" fill="#1a1a1a"/>
+    <circle cx="114" cy="148" r="4" fill="#1a1a1a"/>
+    <circle cx="82" cy="110" r="8" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="82" cy="112" r="4" fill="#1a1a1a"/>
+    <circle cx="118" cy="110" r="8" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="118" cy="112" r="4" fill="#1a1a1a"/>
+    <path d="M 45 65 Q 50 50 65 55" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M 155 65 Q 150 50 135 55" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+  </svg>`,
+  PIG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="55,72 50,40 78,58" fill="#ffb0c5" stroke="#a04060" stroke-width="3"/>
+    <polygon points="145,72 150,40 122,58" fill="#ffb0c5" stroke="#a04060" stroke-width="3"/>
+    <circle cx="100" cy="115" r="62" fill="#ffc0d0" stroke="#a04060" stroke-width="4"/>
+    <ellipse cx="100" cy="130" rx="32" ry="22" fill="#ffa0b8" stroke="#a04060" stroke-width="3"/>
+    <ellipse cx="92" cy="130" rx="5" ry="7" fill="#a04060"/>
+    <ellipse cx="108" cy="130" rx="5" ry="7" fill="#a04060"/>
+    <circle cx="80" cy="100" r="7" fill="#1a1a1a"/>
+    <circle cx="120" cy="100" r="7" fill="#1a1a1a"/>
+    <circle cx="82" cy="98" r="2" fill="#fff"/>
+    <circle cx="122" cy="98" r="2" fill="#fff"/>
+  </svg>`,
+  BUS: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="60" width="160" height="90" rx="14" fill="#ffd040" stroke="#1a1a1a" stroke-width="4"/>
+    <rect x="35" y="75" width="35" height="35" fill="#a0d8f0" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="80" y="75" width="35" height="35" fill="#a0d8f0" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="125" y="75" width="35" height="35" fill="#a0d8f0" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="35" y="120" width="125" height="14" fill="#aa3000"/>
+    <circle cx="55" cy="160" r="16" fill="#3a3a3a" stroke="#1a1a1a" stroke-width="3"/>
+    <circle cx="55" cy="160" r="6" fill="#aaa"/>
+    <circle cx="145" cy="160" r="16" fill="#3a3a3a" stroke="#1a1a1a" stroke-width="3"/>
+    <circle cx="145" cy="160" r="6" fill="#aaa"/>
+    <circle cx="170" cy="90" r="4" fill="#fff"/>
+  </svg>`,
+
+  FROG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="130" rx="78" ry="46" fill="#7ad06a" stroke="#2a5a18" stroke-width="4"/>
+    <circle cx="65" cy="72" r="26" fill="#9ae27a" stroke="#2a5a18" stroke-width="3"/>
+    <circle cx="135" cy="72" r="26" fill="#9ae27a" stroke="#2a5a18" stroke-width="3"/>
+    <circle cx="65" cy="72" r="14" fill="#fff"/>
+    <circle cx="135" cy="72" r="14" fill="#fff"/>
+    <circle cx="65" cy="74" r="8" fill="#1a1a1a"/>
+    <circle cx="135" cy="74" r="8" fill="#1a1a1a"/>
+    <path d="M 60 130 Q 100 160 140 130" stroke="#2a5a18" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="40" cy="160" rx="20" ry="10" fill="#7ad06a" stroke="#2a5a18" stroke-width="3"/>
+    <ellipse cx="160" cy="160" rx="20" ry="10" fill="#7ad06a" stroke="#2a5a18" stroke-width="3"/>
+  </svg>`,
+  FISH: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="95" cy="100" rx="70" ry="45" fill="#4aaadf" stroke="#0c4a78" stroke-width="4"/>
+    <polygon points="160,100 195,60 195,140" fill="#4aaadf" stroke="#0c4a78" stroke-width="3"/>
+    <path d="M 90 70 Q 110 75 120 100 Q 110 125 90 130" fill="#7accee" stroke="#0c4a78" stroke-width="2"/>
+    <circle cx="55" cy="92" r="10" fill="#fff" stroke="#0c4a78" stroke-width="2"/>
+    <circle cx="55" cy="92" r="5" fill="#1a1a1a"/>
+    <path d="M 30 110 Q 50 130 70 115" stroke="#0c4a78" stroke-width="3" fill="none"/>
+    <circle cx="125" cy="80" r="4" fill="#fff" opacity="0.8"/>
+    <circle cx="140" cy="115" r="3" fill="#fff" opacity="0.8"/>
+  </svg>`,
+  BIRD: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="115" rx="55" ry="50" fill="#ff8030" stroke="#7a3a08" stroke-width="4"/>
+    <ellipse cx="100" cy="80" rx="34" ry="32" fill="#ffaa60" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="120,82 145,75 120,90" fill="#ffd040" stroke="#7a3a08" stroke-width="2"/>
+    <circle cx="108" cy="74" r="6" fill="#fff"/>
+    <circle cx="109" cy="75" r="3" fill="#1a1a1a"/>
+    <path d="M 70 120 Q 50 130 55 150 Q 70 150 80 140" fill="#e06010" stroke="#7a3a08" stroke-width="2"/>
+    <line x1="95" y1="165" x2="92" y2="180" stroke="#ffaa00" stroke-width="3" stroke-linecap="round"/>
+    <line x1="105" y1="165" x2="108" y2="180" stroke="#ffaa00" stroke-width="3" stroke-linecap="round"/>
+  </svg>`,
+  STAR: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="100,18 122,76 184,76 134,113 152,172 100,136 48,172 66,113 16,76 78,76"
+             fill="#ffd040" stroke="#aa7000" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="86" cy="96" r="5" fill="#1a1a1a"/>
+    <circle cx="114" cy="96" r="5" fill="#1a1a1a"/>
+    <path d="M 85 115 Q 100 128 115 115" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="78" cy="106" r="5" fill="#ff9090" opacity="0.7"/>
+    <circle cx="122" cy="106" r="5" fill="#ff9090" opacity="0.7"/>
+  </svg>`,
+  MOON: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 130 30 A 80 80 0 1 0 130 170 A 60 60 0 1 1 130 30 Z"
+          fill="#fff0a0" stroke="#9a7800" stroke-width="4"/>
+    <circle cx="85" cy="85" r="6" fill="#1a1a1a"/>
+    <circle cx="85" cy="120" r="6" fill="#1a1a1a"/>
+    <path d="M 65 145 Q 80 158 95 148" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="60" cy="100" r="6" fill="#e8d080" opacity="0.7"/>
+    <circle cx="100" cy="70" r="4" fill="#e8d080" opacity="0.7"/>
+  </svg>`,
+  TREE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect x="85" y="120" width="30" height="60" fill="#8a5028" stroke="#4a2810" stroke-width="3"/>
+    <line x1="92" y1="135" x2="92" y2="170" stroke="#4a2810" stroke-width="2"/>
+    <circle cx="60" cy="90" r="38" fill="#4ab048" stroke="#1c5a18" stroke-width="3"/>
+    <circle cx="140" cy="90" r="38" fill="#4ab048" stroke="#1c5a18" stroke-width="3"/>
+    <circle cx="100" cy="60" r="42" fill="#5ac058" stroke="#1c5a18" stroke-width="3"/>
+    <circle cx="100" cy="100" r="40" fill="#5ac058" stroke="#1c5a18" stroke-width="3"/>
+    <circle cx="80" cy="80" r="4" fill="#ff5050"/>
+    <circle cx="125" cy="70" r="4" fill="#ff5050"/>
+    <circle cx="110" cy="110" r="4" fill="#ff5050"/>
+  </svg>`,
+  DUCK: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="105" cy="125" rx="65" ry="42" fill="#ffd040" stroke="#aa7000" stroke-width="4"/>
+    <circle cx="60" cy="80" r="32" fill="#ffd040" stroke="#aa7000" stroke-width="4"/>
+    <polygon points="32,82 60,72 32,92" fill="#ff8030" stroke="#aa3a00" stroke-width="2"/>
+    <circle cx="55" cy="74" r="6" fill="#fff"/>
+    <circle cx="56" cy="75" r="3" fill="#1a1a1a"/>
+    <path d="M 150 145 Q 175 130 175 150 Q 160 160 145 155" fill="#ffd040" stroke="#aa7000" stroke-width="2"/>
+    <line x1="80" y1="165" x2="80" y2="180" stroke="#ff8030" stroke-width="4" stroke-linecap="round"/>
+    <line x1="120" y1="165" x2="120" y2="180" stroke="#ff8030" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+  BALL: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="78" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+    <path d="M 22 100 Q 100 60 178 100" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M 22 100 Q 100 140 178 100" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <line x1="100" y1="22" x2="100" y2="178" stroke="#1a1a1a" stroke-width="3"/>
+    <ellipse cx="62" cy="68" rx="20" ry="14" fill="#ff5050" opacity="0.85"/>
+    <ellipse cx="140" cy="120" rx="20" ry="14" fill="#3a8acc" opacity="0.85"/>
+    <ellipse cx="82" cy="140" rx="14" ry="10" fill="#5acc4a" opacity="0.85"/>
+    <ellipse cx="65" cy="50" rx="14" ry="6" fill="#fff" opacity="0.5"/>
+  </svg>`,
+
+  APPLE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 100 50 Q 60 50 50 90 Q 40 140 70 165 Q 100 180 130 165 Q 160 140 150 90 Q 140 50 100 50"
+          fill="#e8302a" stroke="#7a1010" stroke-width="4"/>
+    <path d="M 95 30 Q 110 30 105 55 Q 100 70 95 55 Z" fill="#5a3010" stroke="#3a1808" stroke-width="2"/>
+    <path d="M 100 35 Q 130 25 140 50" fill="#5acc4a" stroke="#1c5a18" stroke-width="2"/>
+    <ellipse cx="75" cy="80" rx="14" ry="22" fill="#fff" opacity="0.4"/>
+    <circle cx="70" cy="75" r="5" fill="#fff" opacity="0.7"/>
+  </svg>`,
+  HOUSE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="30,90 100,30 170,90 170,170 30,170" fill="#fff4d0" stroke="#5a3010" stroke-width="4"/>
+    <polygon points="20,95 100,25 180,95" fill="#cc3a2a" stroke="#5a1808" stroke-width="4"/>
+    <rect x="85" y="115" width="30" height="55" fill="#7a5028" stroke="#3a1808" stroke-width="3"/>
+    <circle cx="108" cy="142" r="3" fill="#ffd040"/>
+    <rect x="45" y="115" width="26" height="26" fill="#a0d8f0" stroke="#1a3a5a" stroke-width="3"/>
+    <line x1="58" y1="115" x2="58" y2="141" stroke="#1a3a5a" stroke-width="2"/>
+    <line x1="45" y1="128" x2="71" y2="128" stroke="#1a3a5a" stroke-width="2"/>
+    <rect x="130" y="115" width="26" height="26" fill="#a0d8f0" stroke="#1a3a5a" stroke-width="3"/>
+    <line x1="143" y1="115" x2="143" y2="141" stroke="#1a3a5a" stroke-width="2"/>
+    <line x1="130" y1="128" x2="156" y2="128" stroke="#1a3a5a" stroke-width="2"/>
+    <rect x="130" y="50" width="14" height="30" fill="#7a5028" stroke="#3a1808" stroke-width="2"/>
+  </svg>`,
+  MOUSE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="55" cy="70" r="26" fill="#c0c0c8" stroke="#3a3a3a" stroke-width="3"/>
+    <circle cx="145" cy="70" r="26" fill="#c0c0c8" stroke="#3a3a3a" stroke-width="3"/>
+    <circle cx="55" cy="70" r="15" fill="#ffc0d0"/>
+    <circle cx="145" cy="70" r="15" fill="#ffc0d0"/>
+    <ellipse cx="100" cy="115" rx="55" ry="48" fill="#d0d0d8" stroke="#3a3a3a" stroke-width="4"/>
+    <circle cx="82" cy="110" r="6" fill="#1a1a1a"/>
+    <circle cx="118" cy="110" r="6" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="130" rx="8" ry="6" fill="#ff70a0" stroke="#3a1818" stroke-width="2"/>
+    <path d="M 100 135 Q 92 144 84 142" stroke="#3a3a3a" stroke-width="2" fill="none"/>
+    <path d="M 100 135 Q 108 144 116 142" stroke="#3a3a3a" stroke-width="2" fill="none"/>
+    <line x1="60" y1="120" x2="40" y2="118" stroke="#3a3a3a" stroke-width="2"/>
+    <line x1="60" y1="125" x2="40" y2="128" stroke="#3a3a3a" stroke-width="2"/>
+    <line x1="140" y1="120" x2="160" y2="118" stroke="#3a3a3a" stroke-width="2"/>
+    <line x1="140" y1="125" x2="160" y2="128" stroke="#3a3a3a" stroke-width="2"/>
+    <path d="M 155 145 Q 180 140 178 170" stroke="#3a3a3a" stroke-width="3" fill="none"/>
+  </svg>`,
+  SHEEP: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#fff" stroke="#5a5a5a" stroke-width="2.5">
+      <circle cx="60" cy="100" r="22"/>
+      <circle cx="80" cy="80" r="22"/>
+      <circle cx="100" cy="68" r="22"/>
+      <circle cx="120" cy="80" r="22"/>
+      <circle cx="140" cy="100" r="22"/>
+      <circle cx="75" cy="120" r="22"/>
+      <circle cx="100" cy="125" r="24"/>
+      <circle cx="125" cy="120" r="22"/>
+    </g>
+    <ellipse cx="100" cy="135" rx="26" ry="22" fill="#3a3a3a" stroke="#1a1a1a" stroke-width="3"/>
+    <circle cx="90" cy="128" r="5" fill="#fff"/>
+    <circle cx="110" cy="128" r="5" fill="#fff"/>
+    <circle cx="90" cy="129" r="2" fill="#1a1a1a"/>
+    <circle cx="110" cy="129" r="2" fill="#1a1a1a"/>
+    <ellipse cx="100" cy="148" rx="6" ry="4" fill="#1a1a1a"/>
+    <line x1="78" y1="158" x2="78" y2="175" stroke="#1a1a1a" stroke-width="4"/>
+    <line x1="122" y1="158" x2="122" y2="175" stroke="#1a1a1a" stroke-width="4"/>
+  </svg>`,
+  CLOUD: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#fff" stroke="#7a90b0" stroke-width="3">
+      <circle cx="60" cy="115" r="30"/>
+      <circle cx="100" cy="95" r="38"/>
+      <circle cx="150" cy="115" r="32"/>
+      <ellipse cx="100" cy="130" rx="65" ry="22"/>
+    </g>
+    <circle cx="80" cy="105" r="6" fill="#1a1a1a"/>
+    <circle cx="120" cy="105" r="6" fill="#1a1a1a"/>
+    <path d="M 78 125 Q 100 138 122 125" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="68" cy="118" r="6" fill="#ff9090" opacity="0.6"/>
+    <circle cx="132" cy="118" r="6" fill="#ff9090" opacity="0.6"/>
+    <line x1="60" y1="160" x2="55" y2="178" stroke="#5aa8e0" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="158" x2="100" y2="180" stroke="#5aa8e0" stroke-width="4" stroke-linecap="round"/>
+    <line x1="140" y1="160" x2="145" y2="178" stroke="#5aa8e0" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+  TIGER: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="40,65 30,30 60,55" fill="#ff8a30" stroke="#7a3a08" stroke-width="3"/>
+    <polygon points="160,65 170,30 140,55" fill="#ff8a30" stroke="#7a3a08" stroke-width="3"/>
+    <circle cx="100" cy="110" r="62" fill="#ff9c40" stroke="#7a3a08" stroke-width="4"/>
+    <g stroke="#3a1a08" stroke-width="4" stroke-linecap="round" fill="none">
+      <path d="M 50 70 Q 60 80 55 95"/>
+      <path d="M 75 55 Q 80 70 76 80"/>
+      <path d="M 124 55 Q 120 70 124 80"/>
+      <path d="M 150 70 Q 140 80 145 95"/>
+      <path d="M 50 140 Q 60 135 55 125"/>
+      <path d="M 150 140 Q 140 135 145 125"/>
+    </g>
+    <circle cx="78" cy="105" r="9" fill="#fff"/>
+    <circle cx="78" cy="107" r="5" fill="#1a1a1a"/>
+    <circle cx="122" cy="105" r="9" fill="#fff"/>
+    <circle cx="122" cy="107" r="5" fill="#1a1a1a"/>
+    <polygon points="92,128 108,128 100,138" fill="#1a1a1a"/>
+    <path d="M 100 138 Q 90 148 80 142" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M 100 138 Q 110 148 120 142" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+  </svg>`,
+  HORSE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 60 60 Q 70 30 95 35 L 100 50 L 130 50 Q 158 50 162 90 L 165 140 L 145 140 L 142 110 L 120 110 L 120 140 L 100 140 L 100 90 Q 80 90 75 75 L 65 80 Z"
+          fill="#a06030" stroke="#5a2a08" stroke-width="4"/>
+    <path d="M 60 55 Q 50 30 65 25 Q 75 50 80 55" fill="#3a1808" stroke="#1a0808" stroke-width="2"/>
+    <circle cx="80" cy="62" r="4" fill="#1a1a1a"/>
+    <circle cx="90" cy="76" r="3" fill="#1a1a1a"/>
+    <line x1="100" y1="140" x2="100" y2="170" stroke="#5a2a08" stroke-width="5"/>
+    <line x1="120" y1="140" x2="120" y2="170" stroke="#5a2a08" stroke-width="5"/>
+    <line x1="145" y1="140" x2="145" y2="170" stroke="#5a2a08" stroke-width="5"/>
+    <path d="M 162 90 Q 178 95 180 110 Q 172 105 168 115" fill="#3a1808"/>
+  </svg>`,
+
+  RAINBOW: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 20 140 A 80 80 0 0 1 180 140" stroke="#ff3030" stroke-width="14" fill="none"/>
+    <path d="M 34 140 A 66 66 0 0 1 166 140" stroke="#ff9030" stroke-width="14" fill="none"/>
+    <path d="M 48 140 A 52 52 0 0 1 152 140" stroke="#ffd040" stroke-width="14" fill="none"/>
+    <path d="M 62 140 A 38 38 0 0 1 138 140" stroke="#4ab048" stroke-width="14" fill="none"/>
+    <path d="M 76 140 A 24 24 0 0 1 124 140" stroke="#3a8acc" stroke-width="14" fill="none"/>
+    <g fill="#fff" stroke="#7a90b0" stroke-width="3">
+      <circle cx="35" cy="148" r="20"/>
+      <circle cx="20" cy="155" r="18"/>
+      <circle cx="50" cy="160" r="18"/>
+      <circle cx="165" cy="148" r="20"/>
+      <circle cx="180" cy="155" r="18"/>
+      <circle cx="150" cy="160" r="18"/>
+    </g>
+  </svg>`,
+  GIRAFFE: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect x="80" y="80" width="22" height="80" fill="#ffd060" stroke="#7a5008" stroke-width="3"/>
+    <ellipse cx="91" cy="58" rx="22" ry="18" fill="#ffd060" stroke="#7a5008" stroke-width="3"/>
+    <ellipse cx="100" cy="60" rx="6" ry="5" fill="#3a1808"/>
+    <circle cx="85" cy="52" r="3" fill="#1a1a1a"/>
+    <line x1="80" y1="40" x2="78" y2="32" stroke="#7a5008" stroke-width="3"/>
+    <circle cx="77" cy="30" r="3" fill="#5a3010"/>
+    <line x1="92" y1="38" x2="90" y2="30" stroke="#7a5008" stroke-width="3"/>
+    <circle cx="89" cy="28" r="3" fill="#5a3010"/>
+    <rect x="102" y="110" width="60" height="50" rx="8" fill="#ffd060" stroke="#7a5008" stroke-width="3"/>
+    <line x1="118" y1="160" x2="118" y2="180" stroke="#7a5008" stroke-width="5"/>
+    <line x1="148" y1="160" x2="148" y2="180" stroke="#7a5008" stroke-width="5"/>
+    <line x1="88" y1="160" x2="88" y2="180" stroke="#7a5008" stroke-width="5"/>
+    <g fill="#a06010">
+      <ellipse cx="90" cy="90" rx="6" ry="5"/>
+      <ellipse cx="92" cy="115" rx="5" ry="6"/>
+      <ellipse cx="89" cy="140" rx="6" ry="5"/>
+      <ellipse cx="120" cy="125" rx="7" ry="6"/>
+      <ellipse cx="145" cy="125" rx="6" ry="7"/>
+      <ellipse cx="130" cy="148" rx="5" ry="5"/>
+      <ellipse cx="155" cy="145" rx="6" ry="5"/>
+    </g>
+  </svg>`,
+  MONKEY: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="48" cy="80" r="22" fill="#8a5028" stroke="#3a1808" stroke-width="3"/>
+    <circle cx="152" cy="80" r="22" fill="#8a5028" stroke="#3a1808" stroke-width="3"/>
+    <circle cx="48" cy="80" r="12" fill="#d0a070"/>
+    <circle cx="152" cy="80" r="12" fill="#d0a070"/>
+    <circle cx="100" cy="105" r="62" fill="#8a5028" stroke="#3a1808" stroke-width="4"/>
+    <ellipse cx="100" cy="118" rx="42" ry="40" fill="#d0a070" stroke="#3a1808" stroke-width="2"/>
+    <circle cx="82" cy="105" r="7" fill="#1a1a1a"/>
+    <circle cx="118" cy="105" r="7" fill="#1a1a1a"/>
+    <circle cx="84" cy="103" r="2" fill="#fff"/>
+    <circle cx="120" cy="103" r="2" fill="#fff"/>
+    <ellipse cx="92" cy="128" rx="3" ry="2" fill="#3a1808"/>
+    <ellipse cx="108" cy="128" rx="3" ry="2" fill="#3a1808"/>
+    <path d="M 86 140 Q 100 152 114 140" stroke="#3a1808" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  DOLPHIN: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 20 130 Q 30 80 100 75 Q 150 70 175 100 Q 180 90 190 92 Q 185 105 175 110 Q 170 140 130 145 Q 120 165 100 150 Q 75 165 55 150 Q 30 145 20 130 Z"
+          fill="#7accee" stroke="#0c4a78" stroke-width="4"/>
+    <path d="M 100 78 Q 105 50 130 50 Q 125 70 115 80" fill="#5aaadd" stroke="#0c4a78" stroke-width="3"/>
+    <path d="M 175 100 Q 195 80 200 100" fill="#5aaadd" stroke="#0c4a78" stroke-width="3"/>
+    <path d="M 25 130 Q 35 110 50 130" fill="#5aaadd" stroke="#0c4a78" stroke-width="2"/>
+    <circle cx="48" cy="120" r="5" fill="#fff"/>
+    <circle cx="48" cy="121" r="2.5" fill="#1a1a1a"/>
+    <path d="M 28 132 Q 35 138 42 132" stroke="#0c4a78" stroke-width="2.5" fill="none"/>
+    <ellipse cx="60" cy="105" rx="14" ry="6" fill="#fff" opacity="0.5"/>
+  </svg>`,
+  OCTOPUS: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="80" rx="60" ry="50" fill="#cc6acc" stroke="#5a1c5a" stroke-width="4"/>
+    <g stroke="#5a1c5a" stroke-width="3" fill="#cc6acc">
+      <path d="M 50 105 Q 30 130 40 165 Q 50 150 55 130"/>
+      <path d="M 70 115 Q 60 145 70 180 Q 80 165 80 135"/>
+      <path d="M 90 120 Q 90 155 100 185 Q 110 155 110 120"/>
+      <path d="M 130 115 Q 140 145 130 180 Q 120 165 120 135"/>
+      <path d="M 150 105 Q 170 130 160 165 Q 150 150 145 130"/>
+    </g>
+    <g fill="#a04aa0">
+      <circle cx="50" cy="140" r="3"/>
+      <circle cx="50" cy="155" r="3"/>
+      <circle cx="73" cy="155" r="3"/>
+      <circle cx="100" cy="160" r="3"/>
+      <circle cx="127" cy="155" r="3"/>
+      <circle cx="150" cy="155" r="3"/>
+    </g>
+    <circle cx="80" cy="72" r="10" fill="#fff" stroke="#5a1c5a" stroke-width="2"/>
+    <circle cx="80" cy="74" r="5" fill="#1a1a1a"/>
+    <circle cx="120" cy="72" r="10" fill="#fff" stroke="#5a1c5a" stroke-width="2"/>
+    <circle cx="120" cy="74" r="5" fill="#1a1a1a"/>
+    <path d="M 88 95 Q 100 105 112 95" stroke="#5a1c5a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`
+};
+
+// ════════════════════════════════════════════════════════════
+//  WORD LISTS PER LEVEL
+// ════════════════════════════════════════════════════════════
+const WORD_LISTS = {
+  1: ['CAT', 'DOG', 'SUN', 'HAT', 'BEE', 'COW', 'PIG', 'BUS'],
+  2: ['FROG', 'FISH', 'BIRD', 'STAR', 'MOON', 'TREE', 'DUCK', 'BALL'],
+  3: ['APPLE', 'HOUSE', 'MOUSE', 'SHEEP', 'CLOUD', 'TIGER', 'HORSE'],
+  4: ['RAINBOW', 'GIRAFFE', 'MONKEY', 'DOLPHIN', 'OCTOPUS']
+};
+const DISTRACTORS = {
+  1: 0, 2: 1, 3: 2, 4: 3
+};
+const WORDS_PER_ROUND = 5;
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  practice: false,
+  wordsThisLevel: [],
+  wordIndex: 0,
+  currentWord: '',
+  slots: [],
+  pool: [],
+  selectedTileId: null,
+  score: 0,
+  hintsLeft: 3,
+  skipsLeft: 3,
+  perfectWords: 0,
+  wrongAttempts: 0,
+  wordHadWrong: false,
+  wordHadHint: false
+};
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-', '');
+}
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startGame(level, practice) {
+  state.level = level;
+  state.practice = !!practice;
+  state.score = 0;
+  state.hintsLeft = practice ? 99 : 3;
+  state.skipsLeft = practice ? 99 : 3;
+  state.perfectWords = 0;
+  state.wrongAttempts = 0;
+  state.wordIndex = 0;
+
+  // Pick WORDS_PER_ROUND random words (no duplicates) from level pool
+  const pool = WORD_LISTS[level].slice();
+  shuffle(pool);
+  state.wordsThisLevel = pool.slice(0, Math.min(WORDS_PER_ROUND, pool.length));
+
+  loadWord(0);
+  showScreen('screen-game');
+}
+
+function loadWord(idx) {
+  state.wordIndex = idx;
+  state.currentWord = state.wordsThisLevel[idx];
+  state.slots = new Array(state.currentWord.length).fill(null);
+  state.selectedTileId = null;
+  state.wordHadWrong = false;
+  state.wordHadHint = false;
+
+  // Build tile pool: word letters + distractors
+  const tiles = [];
+  let id = 0;
+  for (const ch of state.currentWord) {
+    tiles.push({ id: id++, letter: ch, placedAt: null });
+  }
+  const distractorCount = DISTRACTORS[state.level];
+  const wordLetterSet = new Set(state.currentWord.split(''));
+  const availableDistractors = ALPHABET.filter(c => !wordLetterSet.has(c));
+  shuffle(availableDistractors);
+  for (let i = 0; i < distractorCount; i++) {
+    if (availableDistractors[i]) {
+      tiles.push({ id: id++, letter: availableDistractors[i], placedAt: null });
+    }
+  }
+  shuffle(tiles);
+  state.pool = tiles;
+
+  renderGame();
+}
+
+function renderGame() {
+  // HUD
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-score').textContent = state.score;
+  document.getElementById('hud-hints').textContent = state.practice ? '∞' : state.hintsLeft;
+  document.getElementById('hud-skips').textContent = state.practice ? '∞' : state.skipsLeft;
+  document.getElementById('hud-progress').textContent = (state.wordIndex + 1) + '/' + state.wordsThisLevel.length;
+  document.getElementById('progress-fill').style.width = (state.wordIndex / state.wordsThisLevel.length * 100) + '%';
+  document.getElementById('hint-count').textContent = state.practice ? '∞' : state.hintsLeft;
+  document.getElementById('skip-count').textContent = state.practice ? '∞' : state.skipsLeft;
+  document.getElementById('btn-hint').disabled = !state.practice && state.hintsLeft <= 0;
+  document.getElementById('btn-skip').disabled = !state.practice && state.skipsLeft <= 0;
+
+  // Picture
+  const pic = document.getElementById('picture-card');
+  pic.innerHTML = PICS[state.currentWord] || '';
+  pic.classList.remove('wiggle');
+  // re-trigger wiggle on next word
+  void pic.offsetWidth;
+  pic.classList.add('wiggle');
+
+  // Slots
+  const slotRow = document.getElementById('slot-row');
+  slotRow.innerHTML = '';
+  state.slots.forEach((letter, i) => {
+    const el = document.createElement('div');
+    el.className = 'slot' + (letter ? ' filled' : '');
+    el.textContent = letter || '';
+    el.dataset.idx = i;
+    el.addEventListener('click', () => onSlotClick(i));
+    slotRow.appendChild(el);
+  });
+
+  // Pool
+  const pool = document.getElementById('pool');
+  pool.innerHTML = '';
+  state.pool.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tile' + (t.placedAt !== null ? ' gone' : '') + (state.selectedTileId === t.id ? ' selected' : '');
+    el.textContent = t.letter;
+    el.dataset.id = t.id;
+    el.addEventListener('click', () => onTileClick(t.id));
+    pool.appendChild(el);
+  });
+}
+
+function onTileClick(id) {
+  const tile = state.pool.find(t => t.id === id);
+  if (!tile || tile.placedAt !== null) return;
+  state.selectedTileId = state.selectedTileId === id ? null : id;
+  renderGame();
+}
+
+function onSlotClick(idx) {
+  // If slot is filled — pop it back to the pool
+  if (state.slots[idx] !== null) {
+    const tile = state.pool.find(t => t.placedAt === idx);
+    if (tile) {
+      tile.placedAt = null;
+      state.slots[idx] = null;
+      renderGame();
+    }
+    return;
+  }
+  // Empty slot — try to place selected tile
+  if (state.selectedTileId === null) return;
+  const tile = state.pool.find(t => t.id === state.selectedTileId);
+  if (!tile) return;
+
+  if (tile.letter === state.currentWord[idx]) {
+    // Correct placement
+    tile.placedAt = idx;
+    state.slots[idx] = tile.letter;
+    state.selectedTileId = null;
+    renderGame();
+    if (state.slots.every((l, i) => l === state.currentWord[i])) {
+      onWordComplete();
+    }
+  } else {
+    // Wrong placement — shake the slot
+    state.wordHadWrong = true;
+    state.wrongAttempts++;
+    const slotEl = document.querySelector(`.slot[data-idx="${idx}"]`);
+    if (slotEl) {
+      slotEl.classList.add('bad');
+      setTimeout(() => slotEl.classList.remove('bad'), 420);
+    }
+    state.selectedTileId = null;
+    renderGame();
+  }
+}
+
+function onWordComplete() {
+  // Score
+  state.score += 100;
+  if (!state.wordHadWrong && !state.wordHadHint) {
+    state.score += 50;
+    state.perfectWords++;
+  }
+  triggerConfetti();
+  setTimeout(() => {
+    const next = state.wordIndex + 1;
+    if (next >= state.wordsThisLevel.length) {
+      endLevel(true);
+    } else {
+      loadWord(next);
+    }
+  }, 1100);
+}
+
+function endLevel(won) {
+  // Hint-remaining bonus
+  if (won && !state.practice) {
+    state.score += state.hintsLeft * 20;
+  }
+
+  // Star calculation: based on perfect words / total
+  const totalWords = state.wordsThisLevel.length;
+  const ratio = state.perfectWords / totalWords;
+  let stars = 1;
+  if (ratio >= 0.6) stars = 2;
+  if (ratio >= 0.9) stars = 3;
+
+  // Populate modal
+  document.getElementById('results-title').textContent = won ? 'LEVEL COMPLETE!' : 'TRY AGAIN';
+  document.getElementById('results-body').textContent =
+    won
+      ? (state.perfectWords === totalWords ? 'Perfect run! 🪄' :
+         state.perfectWords >= totalWords * 0.6 ? 'Nice spelling!' : 'Good job — keep practicing!')
+      : 'You can do it next time!';
+  document.getElementById('results-stats').innerHTML =
+    'Score: <b>' + state.score + '</b><br>Perfect words: <b>' + state.perfectWords + ' / ' + totalWords + '</b>';
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => {
+    el.classList.toggle('lit', i < stars);
+  });
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  HINT / SKIP / BACKSPACE
+// ════════════════════════════════════════════════════════════
+function useHint() {
+  if (!state.practice && state.hintsLeft <= 0) return;
+  // Find first empty slot
+  const emptyIdx = state.slots.findIndex(s => s === null);
+  if (emptyIdx === -1) return;
+  const needed = state.currentWord[emptyIdx];
+  // Find a pool tile with that letter that's not placed
+  const tile = state.pool.find(t => t.letter === needed && t.placedAt === null);
+  if (!tile) return;
+  tile.placedAt = emptyIdx;
+  state.slots[emptyIdx] = needed;
+  state.selectedTileId = null;
+  if (!state.practice) state.hintsLeft--;
+  state.wordHadHint = true;
+  renderGame();
+  if (state.slots.every((l, i) => l === state.currentWord[i])) {
+    onWordComplete();
+  }
+}
+
+function useSkip() {
+  if (!state.practice && state.skipsLeft <= 0) return;
+  if (!state.practice) state.skipsLeft--;
+  const next = state.wordIndex + 1;
+  if (next >= state.wordsThisLevel.length) {
+    endLevel(true);
+  } else {
+    loadWord(next);
+  }
+}
+
+function useBackspace() {
+  // Pop the last filled slot
+  for (let i = state.slots.length - 1; i >= 0; i--) {
+    if (state.slots[i] !== null) {
+      const tile = state.pool.find(t => t.placedAt === i);
+      if (tile) tile.placedAt = null;
+      state.slots[i] = null;
+      renderGame();
+      return;
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+
+function sizeConfetti() {
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+
+function triggerConfetti() {
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#ff5050', '#ffae42', '#ffd040', '#4ab048', '#3a8acc', '#a44acc'];
+  for (let i = 0; i < 90; i++) {
+    confettiParticles.push({
+      x: w / 2 + (Math.random() - 0.5) * 120,
+      y: h / 2,
+      vx: (Math.random() - 0.5) * 8,
+      vy: -Math.random() * 8 - 4,
+      g: 0.25,
+      color: pick(colors),
+      size: Math.random() * 6 + 4,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.3,
+      life: 60 + Math.random() * 30
+    });
+  }
+  if (!confettiRunning) {
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+let confettiRunning = false;
+function confettiLoop() {
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20) {
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0) {
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+let pendingLevel = 1;
+let practiceOn = false;
+
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+const practiceEl = document.getElementById('practiceToggle');
+practiceEl.addEventListener('click', () => {
+  practiceOn = !practiceOn;
+  practiceEl.classList.toggle('on', practiceOn);
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startGame(pendingLevel, practiceOn));
+
+document.getElementById('btn-hint').addEventListener('click', useHint);
+document.getElementById('btn-skip').addEventListener('click', useSkip);
+document.getElementById('btn-backspace').addEventListener('click', useBackspace);
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-again').addEventListener('click', () => {
+  closeModal('modal-results');
+  startGame(state.level, state.practice);
+});
+
+// Demo picture on instructions screen
+document.getElementById('demo-picture').innerHTML = PICS.CAT;
+
+// Keyboard support: type letters to place, backspace to erase
+window.addEventListener('keydown', (e) => {
+  if (state.screen !== 'game') return;
+  if (document.querySelector('.modal.active')) return;
+  if (e.key === 'Backspace') {
+    useBackspace();
+    e.preventDefault();
+    return;
+  }
+  if (!/^[a-zA-Z]$/.test(e.key)) return;
+  const letter = e.key.toUpperCase();
+  // Find a pool tile with this letter that matches the next empty slot
+  const emptyIdx = state.slots.findIndex(s => s === null);
+  if (emptyIdx === -1) return;
+  if (state.currentWord[emptyIdx] === letter) {
+    const tile = state.pool.find(t => t.letter === letter && t.placedAt === null);
+    if (tile) {
+      tile.placedAt = emptyIdx;
+      state.slots[emptyIdx] = letter;
+      renderGame();
+      if (state.slots.every((l, i) => l === state.currentWord[i])) {
+        onWordComplete();
+      }
+    }
+  } else {
+    // Wrong letter — shake the slot
+    state.wordHadWrong = true;
+    state.wrongAttempts++;
+    const slotEl = document.querySelector(`.slot[data-idx="${emptyIdx}"]`);
+    if (slotEl) {
+      slotEl.classList.add('bad');
+      setTimeout(() => slotEl.classList.remove('bad'), 420);
+    }
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function () {
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
