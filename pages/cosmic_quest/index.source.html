@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmic Quest</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#2a2080">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #060624;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  color: #fff;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #1a0a4a 0%, #0a0628 70%, #04021c 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+
+/* ── STARFIELD ── */
+.starfield {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 20%, #fff, transparent),
+    radial-gradient(2px 2px at 40% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 50%, #cfe, transparent),
+    radial-gradient(1.5px 1.5px at 90% 80%, #fff, transparent),
+    radial-gradient(1px 1px at 15% 85%, #fff, transparent),
+    radial-gradient(2px 2px at 30% 15%, #fcf, transparent),
+    radial-gradient(1px 1px at 70% 35%, #fff, transparent),
+    radial-gradient(1px 1px at 50% 90%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 5% 50%, #fff, transparent),
+    radial-gradient(1px 1px at 95% 45%, #fff, transparent),
+    radial-gradient(2px 2px at 25% 60%, #ffe, transparent),
+    radial-gradient(1px 1px at 75% 75%, #fff, transparent),
+    radial-gradient(1px 1px at 45% 25%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 85% 10%, #fff, transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.starfield::after {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+    radial-gradient(1px 1px at 33% 47%, #fff, transparent),
+    radial-gradient(1px 1px at 57% 8%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 62%, #fff, transparent),
+    radial-gradient(1px 1px at 92% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 12% 73%, #cce, transparent),
+    radial-gradient(1px 1px at 42% 82%, #fff, transparent),
+    radial-gradient(1px 1px at 65% 95%, #fff, transparent);
+  opacity: 0.55;
+}
+@keyframes twinkle {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ── SMART GO BADGE ── */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(20,30,80,.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.55); border-color: rgba(255,216,64,.6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #ffd840, #ff8050);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ── MENU ── */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 30px 20px;
+}
+#screen-menu.active { display: flex; }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 70px; letter-spacing: 5px;
+  display: flex; align-items: center; gap: 16px;
+}
+.menu-title .name {
+  background: linear-gradient(180deg, #ffd840 0%, #ff8050 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 30px rgba(255,200,80,.35);
+}
+.menu-title .icon { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #c8d0ff;
+  margin-top: 4px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 18px; margin-top: 26px; }
+.level-btn {
+  width: 170px; height: 170px;
+  background: linear-gradient(180deg, #4830a0 0%, #1a1060 100%);
+  border: 4px solid #6840d8;
+  border-radius: 22px;
+  cursor: pointer; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #1a1060, 0 12px 24px rgba(0,0,0,.45);
+  transition: transform .12s, box-shadow .12s, border-color .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #1a1060, 0 16px 30px rgba(80,40,200,.5); border-color: #ffd840; }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #1a1060; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #ffd840; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 58px; color: #fff; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 17px; color: #c8d0ff; text-align: center; padding: 0 6px;
+}
+
+.practice-row {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #fff;
+  background: rgba(40,30,90,.65);
+  padding: 8px 18px; border-radius: 40px;
+  border: 2px solid #6840d8;
+  cursor: pointer;
+}
+.practice-row .toggle {
+  width: 44px; height: 24px;
+  background: #38306a;
+  border-radius: 12px;
+  position: relative;
+  transition: background .15s;
+}
+.practice-row.on .toggle { background: #2bb04a; }
+.practice-row .toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: left .15s;
+}
+.practice-row.on .toggle::after { left: 22px; }
+
+/* ── INSTRUCTIONS ── */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 46px;
+  background: linear-gradient(180deg, #ffd840 0%, #ff8050 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: 3px;
+}
+.instr-step-row { display: flex; gap: 22px; margin-top: 22px; align-items: center; }
+.instr-card {
+  background: rgba(40,30,90,.6);
+  border: 3px solid #6840d8;
+  border-radius: 18px;
+  padding: 14px 12px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 190px; gap: 10px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; color: #ffd840; text-align: center;
+}
+.instr-card .demo {
+  width: 90px; height: 90px;
+  display: flex; align-items: center; justify-content: center;
+}
+.instr-arrow { font-size: 36px; color: #ffd840; }
+.instr-tip {
+  margin-top: 20px;
+  background: rgba(40,30,90,.55);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #fff; text-align: center;
+  max-width: 760px; line-height: 1.4;
+  border: 2px dashed #6840d8;
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 18px; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: linear-gradient(180deg, #4830a0 0%, #2a2080 100%);
+  border: 3px solid #6840d8;
+  color: #ffd840;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #1a1060, 0 8px 16px rgba(0,0,0,.4);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #1a1060, 0 12px 22px rgba(0,0,0,.45); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1a1060; }
+.btn.primary { background: linear-gradient(180deg, #ff8050 0%, #ce4030 100%); color: #fff; border-color: #ffd840; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+
+/* ── GAME SCREEN ── */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 8px 14px 10px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(40,30,90,.65);
+  border: 2px solid #6840d8;
+  border-radius: 14px;
+  padding: 6px 18px;
+  flex-shrink: 0;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #fff;
+}
+.hud .item .val { font-size: 22px; color: #ffd840; }
+.hud .spacer { flex: 1; }
+.hud .lives { display: flex; gap: 4px; font-size: 22px; }
+.hud .lives .heart { color: #ff5070; transition: opacity .3s, transform .3s; }
+.hud .lives .heart.gone { color: rgba(255,80,112,.2); transform: scale(0.6); }
+
+/* ── PLAYFIELD ── */
+.playfield {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.solar-system {
+  position: absolute;
+  inset: 0;
+}
+
+.sun {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 64px; height: 64px;
+  margin-left: -32px; margin-top: -32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #fff8c8 0%, #ffd040 30%, #ffaa20 60%, #d06010 100%);
+  box-shadow: 0 0 28px 6px rgba(255,180,40,.55), 0 0 60px 8px rgba(255,120,30,.32);
+  animation: sun-pulse 2.6s ease-in-out infinite alternate;
+  z-index: 3;
+}
+@keyframes sun-pulse {
+  from { box-shadow: 0 0 28px 4px rgba(255,180,40,.55), 0 0 60px 6px rgba(255,120,30,.3); }
+  to   { box-shadow: 0 0 40px 8px rgba(255,200,80,.75), 0 0 80px 10px rgba(255,140,40,.45); }
+}
+
+.orbit-ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin-left: calc(var(--r) * -1);
+  margin-top: calc(var(--r) * -1);
+  border: 1px dashed rgba(150,200,255,.28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Empty slot indicator — does not rotate */
+.slot-anchor {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin-left: calc(var(--r) * -1);
+  margin-top: calc(var(--r) * -1);
+  transform: rotate(var(--a, 0deg));
+  pointer-events: none;
+  z-index: 2;
+}
+.slot-shaker {
+  position: absolute;
+  right: 0; top: 50%;
+  width: 42px; height: 42px;
+  transform: translate(50%, -50%) rotate(calc(-1 * var(--a, 0deg)));
+}
+.slot {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  border: 2px dashed rgba(180,220,255,.55);
+  background: rgba(120,150,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  color: rgba(220,230,255,.85);
+  font-size: 26px;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: slot-pulse 1.8s ease-in-out infinite;
+  transition: background .15s, transform .12s;
+}
+.slot:hover { background: rgba(180,200,255,.22); transform: scale(1.12); }
+.slot.shake { animation: shake-red .5s; }
+@keyframes slot-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(180,220,255,.3); }
+  50%     { box-shadow: 0 0 14px 4px rgba(180,220,255,.55); }
+}
+@keyframes shake-red {
+  0%,100% { transform: translateX(0); background: rgba(120,150,255,.1); border-color: rgba(180,220,255,.55); }
+  20% { transform: translateX(-7px); background: rgba(255,80,80,.5); border-color: rgba(255,120,120,.9); }
+  40% { transform: translateX(7px); background: rgba(255,80,80,.5); border-color: rgba(255,120,120,.9); }
+  60% { transform: translateX(-5px); background: rgba(255,80,80,.5); border-color: rgba(255,120,120,.9); }
+  80% { transform: translateX(5px); background: rgba(255,80,80,.5); border-color: rgba(255,120,120,.9); }
+}
+
+/* Orbit rotator — spins planet around the sun */
+.orbit-rot {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin-left: calc(var(--r) * -1);
+  margin-top: calc(var(--r) * -1);
+  animation: orbit var(--spin, 12s) linear infinite;
+  pointer-events: none;
+}
+.orbit-offset {
+  position: absolute; inset: 0;
+  transform: rotate(var(--a, 0deg));
+}
+.planet-wrap {
+  position: absolute;
+  right: 0; top: 50%;
+  width: calc(var(--ps) * 2);
+  height: calc(var(--ps) * 2);
+  transform: translate(50%, -50%);
+}
+.planet {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 28%, rgba(255,255,255,.55) 0%, var(--pc, #888) 38%, rgba(0,0,0,.4) 100%);
+  position: relative;
+  box-shadow: 0 0 10px rgba(255,255,255,.15);
+}
+.planet.fresh { animation: planet-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes planet-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.planet.has-rings::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 180%; height: 32%;
+  margin-left: -90%; margin-top: -16%;
+  border-radius: 50%;
+  border: 4px solid rgba(232,200,133,.85);
+  transform: rotate(-22deg);
+  box-shadow: inset 0 0 0 1px rgba(255,255,200,.4);
+  pointer-events: none;
+}
+.planet.has-spot::after {
+  content: '';
+  position: absolute;
+  left: 24%; top: 54%;
+  width: 22%; height: 14%;
+  border-radius: 50%;
+  background: #c83820;
+  opacity: 0.9;
+}
+
+@keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── TRAY ── */
+.tray-strip {
+  flex-shrink: 0;
+  display: flex; gap: 6px;
+  justify-content: center;
+  align-items: stretch;
+  padding: 6px 8px;
+  background: rgba(20,15,50,.55);
+  border-radius: 14px;
+  border: 2px solid #6840d8;
+  min-height: 96px;
+  margin-top: 6px;
+}
+.tray-tile {
+  width: 72px;
+  background: rgba(255,255,255,.06);
+  border: 2px solid rgba(120,150,255,.4);
+  border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer;
+  padding: 6px 4px;
+  transition: transform .15s, box-shadow .15s, border-color .15s, background .15s, opacity .3s;
+  position: relative;
+}
+.tray-tile:hover { transform: translateY(-3px); border-color: #ffd840; }
+.tray-tile.selected {
+  transform: translateY(-6px) scale(1.06);
+  border-color: #ffd840;
+  background: rgba(255,216,64,.18);
+  box-shadow: 0 0 20px rgba(255,216,64,.55);
+}
+.tray-tile.placed { opacity: 0.18; pointer-events: none; transform: scale(0.92); }
+.tray-tile .tile-planet {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 28%, rgba(255,255,255,.55) 0%, var(--pc, #888) 38%, rgba(0,0,0,.4) 100%);
+  position: relative;
+}
+.tray-tile .tile-planet.has-rings::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 170%; height: 26%;
+  margin-left: -85%; margin-top: -13%;
+  border-radius: 50%;
+  border: 3px solid rgba(232,200,133,.9);
+  transform: rotate(-22deg);
+  pointer-events: none;
+}
+.tray-tile .tile-planet.has-spot::after {
+  content: '';
+  position: absolute;
+  left: 24%; top: 54%;
+  width: 22%; height: 14%;
+  border-radius: 50%;
+  background: #c83820;
+  opacity: 0.9;
+}
+.tray-tile .tile-name {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+/* ── FACT CARD ── */
+.fact-card {
+  position: absolute;
+  left: 50%; top: 8px;
+  transform: translate(-50%, -16px);
+  background: rgba(255,216,64,.96);
+  color: #2a2080;
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 3px solid #ff8050;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+  box-shadow: 0 8px 26px rgba(0,0,0,.5);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  max-width: 560px;
+  text-align: center;
+  transition: opacity .3s, transform .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fact-card.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── MODAL ── */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.65);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: linear-gradient(180deg, #2a2080 0%, #1a1060 100%);
+  border: 4px solid #ffd840;
+  border-radius: 24px;
+  padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 540px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.7);
+  color: #fff;
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 36px;
+  background: linear-gradient(180deg, #ffd840, #ff8050);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: 3px;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 48px; margin: 12px 0;
+}
+.modal-stars .star { color: rgba(255,255,255,.18); transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffd840; transform: scale(1.1); text-shadow: 0 0 14px rgba(255,216,64,.8); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #c8d0ff;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #fff;
+  margin: 4px 0 14px;
+}
+.modal-stats b { color: #ffd840; }
+.modal-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+#confetti { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+<div class="starfield"></div>
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="icon">🪐</span><span class="name">COSMIC QUEST</span></div>
+    <div class="menu-subtitle">Build the Solar System!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Inner Planets</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">Outer Giants</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">All 8 Planets</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Cosmic Challenge!</span></button>
+    </div>
+    <div class="practice-row" id="practiceToggle">
+      <span class="toggle"></span>
+      <span>Practice mode (unlimited lives)</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <defs>
+              <radialGradient id="ig_sun" cx="0.35" cy="0.32"><stop offset="0%" stop-color="#fff8c8"/><stop offset="60%" stop-color="#ffaa20"/><stop offset="100%" stop-color="#d06010"/></radialGradient>
+            </defs>
+            <circle cx="45" cy="45" r="30" fill="none" stroke="rgba(180,220,255,.5)" stroke-dasharray="3,3"/>
+            <circle cx="45" cy="45" r="14" fill="url(#ig_sun)"/>
+            <circle cx="75" cy="45" r="5" fill="none" stroke="rgba(220,230,255,.85)" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="75" y="50" fill="rgba(220,230,255,.85)" font-size="11" font-family="'Fredoka One',Arial Black" text-anchor="middle">+</text>
+          </svg>
+        </div>
+        <div class="lbl">SEE THE EMPTY ORBITS</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <defs>
+              <radialGradient id="ig_earth" cx="0.33" cy="0.28"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#4a8fcd"/><stop offset="100%" stop-color="#1a3a6a"/></radialGradient>
+            </defs>
+            <rect x="14" y="14" width="62" height="62" rx="10" fill="rgba(255,216,64,.2)" stroke="#ffd840" stroke-width="2.5"/>
+            <circle cx="45" cy="45" r="16" fill="url(#ig_earth)"/>
+          </svg>
+        </div>
+        <div class="lbl">TAP A PLANET</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <defs>
+              <radialGradient id="ig_sun2" cx="0.35" cy="0.32"><stop offset="0%" stop-color="#fff8c8"/><stop offset="60%" stop-color="#ffaa20"/><stop offset="100%" stop-color="#d06010"/></radialGradient>
+              <radialGradient id="ig_earth2" cx="0.33" cy="0.28"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#4a8fcd"/><stop offset="100%" stop-color="#1a3a6a"/></radialGradient>
+            </defs>
+            <circle cx="45" cy="45" r="30" fill="none" stroke="rgba(180,220,255,.5)" stroke-dasharray="3,3"/>
+            <circle cx="45" cy="45" r="14" fill="url(#ig_sun2)"/>
+            <circle cx="75" cy="45" r="7" fill="url(#ig_earth2)"/>
+          </svg>
+        </div>
+        <div class="lbl">TAP ITS ORBIT</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      🚀 Place each planet in the right orbit — closest to the Sun first! Wrong taps cost a life. Earn 3 stars for a perfect mission!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🚀 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">⭐ <span class="val" id="hud-score">0</span></div>
+      <div class="item">🪐 <span class="val" id="hud-placed">0 / 0</span></div>
+      <div class="spacer"></div>
+      <div class="item">❤ <span class="lives" id="hud-lives"></span></div>
+    </div>
+
+    <div class="playfield">
+      <div class="solar-system" id="solar-system">
+        <div class="sun"></div>
+      </div>
+      <div class="fact-card" id="fact-card"></div>
+    </div>
+
+    <div class="tray-strip" id="tray-strip"></div>
+    <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">MISSION COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Great job, astronaut!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  PLANETS
+// ════════════════════════════════════════════════════════════
+const PLANETS = [
+  { id:'mercury', name:'Mercury', order:1, color:'#a8a29e', size:12, spinSec:6,  fact:'Mercury — smallest planet, closest to the Sun!' },
+  { id:'venus',   name:'Venus',   order:2, color:'#e8b87a', size:16, spinSec:9,  fact:'Venus — hottest planet, with clouds of acid!' },
+  { id:'earth',   name:'Earth',   order:3, color:'#4a8fcd', size:18, spinSec:12, fact:'Earth — our home, the only planet with life!' },
+  { id:'mars',    name:'Mars',    order:4, color:'#c8553c', size:14, spinSec:15, fact:'Mars — the Red Planet, has the biggest volcano!' },
+  { id:'jupiter', name:'Jupiter', order:5, color:'#e0a060', size:34, spinSec:20, redSpot:true, fact:'Jupiter — the biggest planet, with a giant red storm!' },
+  { id:'saturn',  name:'Saturn',  order:6, color:'#e8c885', size:30, spinSec:24, rings:true,   fact:'Saturn — famous for its beautiful rings!' },
+  { id:'uranus',  name:'Uranus',  order:7, color:'#9bd8d8', size:22, spinSec:28, fact:'Uranus — tilted on its side, rolls like a ball!' },
+  { id:'neptune', name:'Neptune', order:8, color:'#3a64c8', size:22, spinSec:32, fact:'Neptune — the windiest planet, with supersonic gales!' }
+];
+const DECOYS = [
+  { id:'pluto', name:'Pluto', color:'#a89884', size:10, decoy:true },
+  { id:'moon',  name:'Moon',  color:'#bdbdbd', size:12, decoy:true }
+];
+
+// ════════════════════════════════════════════════════════════
+//  LEVEL CONFIGS
+//  radii in px, angles in degrees (where the empty slot sits)
+// ════════════════════════════════════════════════════════════
+const LEVELS = [
+  null,
+  { name:'Inner Planets', planets:['mercury','venus','earth','mars'],
+    radii:[55,100,142,184], angles:[55,140,225,315], trayDecoys:[] },
+  { name:'Outer Giants',  planets:['jupiter','saturn','uranus','neptune'],
+    radii:[60,110,158,200], angles:[40,130,235,320], trayDecoys:[] },
+  { name:'Full Solar System', planets:['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune'],
+    radii:[44,68,92,116,140,162,182,200], angles:[28,68,108,148,200,240,280,330], trayDecoys:[] },
+  { name:'Cosmic Challenge', planets:['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune'],
+    radii:[44,68,92,116,140,162,182,200], angles:[28,68,108,148,200,240,280,330], trayDecoys:['pluto','moon'] }
+];
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  practice: false,
+  orbits: [],
+  tray: [],
+  selectedId: null,
+  lives: 3,
+  score: 0,
+  placedCount: 0,
+  totalNeeded: 0,
+  levelMisses: 0,
+  locked: false
+};
+let pendingLevel = 1;
+let practiceOn = false;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function planetById(id){
+  return PLANETS.find(p => p.id === id) || DECOYS.find(d => d.id === id);
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+function shuffle(arr){
+  for (let i = arr.length-1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level){
+  state.level = level;
+  state.practice = practiceOn;
+  state.lives = state.practice ? 99 : 3;
+  state.score = 0;
+  state.placedCount = 0;
+  state.levelMisses = 0;
+  state.selectedId = null;
+  state.locked = false;
+
+  const cfg = LEVELS[level];
+  state.orbits = cfg.planets.map((pid, i) => ({
+    index: i,
+    radius: cfg.radii[i],
+    angle: cfg.angles[i],
+    correctId: pid,
+    placedId: null
+  }));
+  state.totalNeeded = cfg.planets.length;
+
+  const trayIds = cfg.planets.slice();
+  cfg.trayDecoys.forEach(d => trayIds.push(d));
+  shuffle(trayIds);
+  state.tray = trayIds.map(id => ({ id, placed: false }));
+
+  hideFact();
+  closeModal('modal-results');
+  buildPlayfield();
+  renderTray();
+  renderHud();
+  showScreen('screen-game');
+}
+
+function buildPlayfield(){
+  const sys = document.getElementById('solar-system');
+  Array.from(sys.children).forEach(c => { if (!c.classList.contains('sun')) c.remove(); });
+
+  state.orbits.forEach(orbit => {
+    const ring = document.createElement('div');
+    ring.className = 'orbit-ring';
+    ring.style.setProperty('--r', orbit.radius + 'px');
+    sys.appendChild(ring);
+
+    sys.appendChild(makeSlot(orbit));
+  });
+}
+
+function makeSlot(orbit){
+  const anchor = document.createElement('div');
+  anchor.className = 'slot-anchor';
+  anchor.dataset.orbit = orbit.index;
+  anchor.style.setProperty('--r', orbit.radius + 'px');
+  anchor.style.setProperty('--a', orbit.angle + 'deg');
+  const shaker = document.createElement('div');
+  shaker.className = 'slot-shaker';
+  const slot = document.createElement('div');
+  slot.className = 'slot';
+  slot.textContent = '+';
+  slot.addEventListener('click', () => onOrbitClick(orbit.index));
+  shaker.appendChild(slot);
+  anchor.appendChild(shaker);
+  return anchor;
+}
+
+function makeOrbitingPlanet(orbit, planet, fresh){
+  const rot = document.createElement('div');
+  rot.className = 'orbit-rot';
+  rot.dataset.orbit = orbit.index;
+  rot.style.setProperty('--r', orbit.radius + 'px');
+  rot.style.setProperty('--spin', planet.spinSec + 's');
+  const offset = document.createElement('div');
+  offset.className = 'orbit-offset';
+  offset.style.setProperty('--a', orbit.angle + 'deg');
+  const wrap = document.createElement('div');
+  wrap.className = 'planet-wrap';
+  wrap.style.setProperty('--ps', planet.size + 'px');
+  const p = document.createElement('div');
+  p.className = 'planet'
+    + (planet.rings ? ' has-rings' : '')
+    + (planet.redSpot ? ' has-spot' : '')
+    + (fresh ? ' fresh' : '');
+  p.style.setProperty('--pc', planet.color);
+  wrap.appendChild(p);
+  offset.appendChild(wrap);
+  rot.appendChild(offset);
+  return rot;
+}
+
+function renderTray(){
+  const tray = document.getElementById('tray-strip');
+  tray.innerHTML = '';
+  state.tray.forEach(t => {
+    const p = planetById(t.id);
+    const tile = document.createElement('div');
+    tile.className = 'tray-tile';
+    if (t.placed) tile.classList.add('placed');
+    if (state.selectedId === t.id) tile.classList.add('selected');
+
+    const planet = document.createElement('div');
+    planet.className = 'tile-planet'
+      + (p.rings ? ' has-rings' : '')
+      + (p.redSpot ? ' has-spot' : '');
+    planet.style.setProperty('--pc', p.color);
+
+    const name = document.createElement('div');
+    name.className = 'tile-name';
+    name.textContent = p.name;
+
+    tile.appendChild(planet);
+    tile.appendChild(name);
+    tile.addEventListener('click', () => onTrayClick(t.id));
+    tray.appendChild(tile);
+  });
+}
+
+function renderHud(){
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-score').textContent = state.score;
+  document.getElementById('hud-placed').textContent = state.placedCount + ' / ' + state.totalNeeded;
+
+  const livesEl = document.getElementById('hud-lives');
+  livesEl.innerHTML = '';
+  if (state.practice){
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = '∞';
+    livesEl.appendChild(h);
+  } else {
+    for (let i = 0; i < 3; i++){
+      const h = document.createElement('span');
+      h.className = 'heart' + (i >= state.lives ? ' gone' : '');
+      h.textContent = '♥';
+      livesEl.appendChild(h);
+    }
+  }
+}
+
+function onTrayClick(id){
+  if (state.locked) return;
+  const tile = state.tray.find(t => t.id === id);
+  if (!tile || tile.placed) return;
+  state.selectedId = (state.selectedId === id) ? null : id;
+  renderTray();
+}
+
+function onOrbitClick(orbitIndex){
+  if (state.locked) return;
+  if (!state.selectedId) return;
+  const orbit = state.orbits[orbitIndex];
+  if (orbit.placedId !== null) return;
+
+  const selected = planetById(state.selectedId);
+  const isCorrect = !selected.decoy && selected.id === orbit.correctId;
+
+  if (isCorrect){
+    orbit.placedId = selected.id;
+    const trayItem = state.tray.find(t => t.id === state.selectedId);
+    if (trayItem) trayItem.placed = true;
+    state.score += 100;
+    state.placedCount++;
+
+    const slotAnchor = document.querySelector(`.slot-anchor[data-orbit="${orbitIndex}"]`);
+    if (slotAnchor) slotAnchor.remove();
+    const planetEl = makeOrbitingPlanet(orbit, selected, true);
+    document.getElementById('solar-system').appendChild(planetEl);
+
+    showFact(selected.fact);
+    triggerConfetti();
+    state.selectedId = null;
+    renderTray();
+    renderHud();
+
+    if (state.placedCount >= state.totalNeeded){
+      state.locked = true;
+      setTimeout(() => endLevel(true), 1200);
+    }
+  } else {
+    state.levelMisses++;
+    if (!state.practice) state.lives--;
+    const slot = document.querySelector(`.slot-anchor[data-orbit="${orbitIndex}"] .slot`);
+    if (slot){
+      slot.classList.add('shake');
+      setTimeout(() => slot.classList.remove('shake'), 520);
+    }
+    renderHud();
+    if (!state.practice && state.lives <= 0){
+      state.locked = true;
+      setTimeout(() => endLevel(false), 700);
+    }
+  }
+}
+
+function showFact(text){
+  const fc = document.getElementById('fact-card');
+  fc.textContent = text;
+  fc.classList.add('show');
+  clearTimeout(showFact._t);
+  showFact._t = setTimeout(() => fc.classList.remove('show'), 2200);
+}
+function hideFact(){
+  document.getElementById('fact-card').classList.remove('show');
+}
+
+function calcStars(){
+  if (state.practice) return 0;
+  if (state.levelMisses === 0) return 3;
+  if (state.levelMisses <= 2) return 2;
+  return 1;
+}
+function endLevel(won){
+  const stars = won ? calcStars() : 0;
+  if (won && !state.practice && state.levelMisses === 0) state.score += 200;
+  renderHud();
+
+  document.getElementById('results-title').textContent = won ? 'MISSION COMPLETE!' : 'MISSION FAILED!';
+  document.getElementById('results-body').textContent =
+    !won ? 'Out of lives — try again, astronaut!' :
+    stars === 3 ? 'Perfect orbit! 🚀' :
+    stars === 2 ? 'Great mission!' :
+    'Nice — try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Score: <b>' + state.score + '</b><br>Planets placed: <b>' + state.placedCount + ' / ' + state.totalNeeded +
+    '</b><br>Wrong taps: <b>' + state.levelMisses + '</b>';
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => el.classList.toggle('lit', i < stars));
+  document.getElementById('btn-results-next').style.display =
+    (won && state.level < 4) ? 'inline-block' : 'none';
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const cx = w/2, cy = h*0.42;
+  const colors = ['#ffd840','#ff8050','#5af4e6','#a44acc','#50b860','#ffffff','#ff5070'];
+  for (let i = 0; i < 60; i++){
+    confettiParticles.push({
+      x: cx + (Math.random()-0.5)*80,
+      y: cy + (Math.random()-0.5)*50,
+      vx: (Math.random()-0.5)*9,
+      vy: -Math.random()*8 - 3,
+      g: 0.26,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      size: Math.random()*5 + 3,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      life: 60 + Math.random()*30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length-1; i >= 0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+const practiceEl = document.getElementById('practiceToggle');
+practiceEl.addEventListener('click', () => {
+  practiceOn = !practiceOn;
+  practiceEl.classList.toggle('on', practiceOn);
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel));
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw/baseW, vh/baseH);
+    const x = (vw - baseW*s)/2;
+    const y = (vh - baseH*s)/2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

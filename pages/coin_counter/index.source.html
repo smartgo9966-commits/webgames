@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin Counter</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#8a5a18">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #fce8c0;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  color: #4a2d08;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(160deg, #fff2d0 0%, #fcd896 35%, #f8b870 75%, #f09850 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(70,40,12,0.85);
+  border: 2px solid rgba(255,240,200,.28);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(255,200,80,.7); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #ffd840, #f08820);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 28px 20px;
+}
+#screen-menu.active { display: flex; }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 70px; color: #8a5a18;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 0 #f0a830, 0 6px 18px rgba(74,45,8,.25);
+  display: flex; align-items: center; gap: 14px;
+}
+.menu-title .icon { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #6a3a18;
+  margin-top: 4px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 18px; margin-top: 26px; }
+.level-btn {
+  width: 170px; height: 170px;
+  background: linear-gradient(180deg, #fff8e0 0%, #fce0a8 100%);
+  border: 4px solid #8a5a18;
+  border-radius: 22px;
+  cursor: pointer;
+  color: #6a3a08;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #8a5a18, 0 12px 22px rgba(74,45,8,.25);
+  transition: transform .12s, box-shadow .12s, border-color .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #8a5a18, 0 16px 28px rgba(74,45,8,.3); border-color: #f0a830; }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #8a5a18; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #8a5a18; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 58px; color: #6a3a08; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px; color: #8a5a18; text-align: center; padding: 0 6px;
+}
+
+.practice-row {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #6a3a18;
+  background: rgba(255,248,220,0.65);
+  padding: 8px 18px; border-radius: 40px;
+  border: 2px solid #8a5a18;
+  cursor: pointer;
+}
+.practice-row .toggle {
+  width: 44px; height: 24px;
+  background: #d0b888;
+  border-radius: 12px;
+  position: relative;
+  transition: background .15s;
+}
+.practice-row.on .toggle { background: #2bb04a; }
+.practice-row .toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: left .15s;
+}
+.practice-row.on .toggle::after { left: 22px; }
+
+/* ═══════ INSTRUCTIONS ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 46px; color: #8a5a18;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #f0a830;
+}
+.instr-step-row { display: flex; gap: 22px; margin-top: 22px; align-items: center; }
+.instr-card {
+  background: #fff8e0; border: 3px solid #8a5a18;
+  border-radius: 18px; padding: 14px 12px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 195px; gap: 10px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px; color: #8a5a18; text-align: center;
+}
+.instr-card .demo {
+  width: 90px; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+.instr-arrow { font-size: 36px; color: #8a5a18; }
+.instr-tip {
+  margin-top: 20px;
+  background: rgba(255,248,220,0.7);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #6a3a18; text-align: center;
+  max-width: 760px; line-height: 1.4;
+  border: 2px dashed #8a5a18;
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 18px; }
+
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff8e0; border: 3px solid #8a5a18;
+  color: #8a5a18;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #8a5a18, 0 8px 16px rgba(74,45,8,.18);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #8a5a18, 0 12px 22px rgba(74,45,8,.25); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #8a5a18; }
+.btn.primary { background: linear-gradient(180deg, #f0a830, #c87810); color: #fff; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+.btn.danger { background: #fde0e0; border-color: #c83020; color: #c83020; box-shadow: 0 5px 0 #c83020, 0 8px 16px rgba(200,48,32,.18); }
+.btn.danger:hover { box-shadow: 0 7px 0 #c83020, 0 12px 22px rgba(200,48,32,.25); }
+.btn.danger:active { box-shadow: 0 2px 0 #c83020; }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 8px 14px 12px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(255,248,220,0.75);
+  border: 2px solid #8a5a18;
+  border-radius: 14px;
+  padding: 6px 18px;
+  flex-shrink: 0;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #6a3a18;
+}
+.hud .item .val { font-size: 22px; color: #8a5a18; }
+.hud .spacer { flex: 1; }
+.hud .lives { display: flex; gap: 4px; font-size: 22px; }
+.hud .lives .heart { color: #e83838; transition: opacity .3s, transform .3s; }
+.hud .lives .heart.gone { color: rgba(232,56,56,0.2); transform: scale(0.6); }
+
+/* ═══════ SHOP SCENE ═══════ */
+.shop {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  padding: 6px 0;
+}
+
+/* Price tag */
+.price-tag-wrap {
+  position: relative;
+  margin-top: 4px;
+}
+.price-tag-string {
+  position: absolute;
+  left: 50%; top: -10px;
+  width: 2px; height: 22px;
+  background: #6a3a18;
+  transform: translateX(-50%);
+}
+.price-tag {
+  position: relative;
+  background: #fff;
+  border: 4px dashed #c87810;
+  border-radius: 14px;
+  padding: 6px 28px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 42px; color: #8a5a18;
+  letter-spacing: 2px;
+  box-shadow: 0 6px 14px rgba(74,45,8,.3);
+  animation: tag-sway 3s ease-in-out infinite alternate;
+  transform-origin: top center;
+  min-width: 160px; text-align: center;
+}
+.price-tag::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: -6px;
+  width: 14px; height: 14px;
+  background: #c87810;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 0 rgba(0,0,0,.2);
+}
+@keyframes tag-sway {
+  from { transform: rotate(-1.2deg); }
+  to   { transform: rotate(1.2deg); }
+}
+
+/* Register */
+.register {
+  background: linear-gradient(180deg, #8a5a18 0%, #5a3a08 100%);
+  border: 4px solid #4a2a08;
+  border-radius: 16px;
+  padding: 10px 16px;
+  width: 360px;
+  min-height: 130px;
+  box-shadow: 0 8px 18px rgba(74,45,8,.4), inset 0 2px 8px rgba(255,200,100,.18);
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: transform .12s, box-shadow .15s, border-color .15s;
+}
+.register.flash-bad {
+  animation: reg-shake-red .5s;
+}
+.register.flash-good {
+  border-color: #4ace4a;
+  box-shadow: 0 8px 18px rgba(74,45,8,.4), 0 0 24px 4px rgba(80,220,80,.6), inset 0 2px 8px rgba(255,200,100,.18);
+}
+@keyframes reg-shake-red {
+  0%,100% { transform: translateX(0); border-color: #4a2a08; }
+  20% { transform: translateX(-8px); border-color: #c83020; }
+  40% { transform: translateX(8px); border-color: #c83020; }
+  60% { transform: translateX(-5px); border-color: #c83020; }
+  80% { transform: translateX(5px); border-color: #c83020; }
+}
+.reg-total {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  color: #fff8c8;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.4);
+}
+.reg-total .slash { color: #d0a050; margin: 0 4px; }
+.reg-total .target { color: #ffe080; }
+.reg-pile {
+  display: flex; flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 60px;
+  padding: 4px;
+  background: rgba(20,10,4,.4);
+  border-radius: 10px;
+  border: 2px solid rgba(255,200,100,.15);
+}
+.mini-coin {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  position: relative;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.8) 0%, var(--coin-color, #b87333) 45%, rgba(0,0,0,.35) 100%);
+  border: 1.5px solid rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 9px;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,.5);
+  flex-shrink: 0;
+  animation: coin-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes coin-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.mini-coin.fly-out {
+  animation: coin-fly-out 0.4s ease-in forwards;
+}
+@keyframes coin-fly-out {
+  to { transform: translateY(-40px) scale(0.5); opacity: 0; }
+}
+
+/* PAID stamp overlay */
+.paid-stamp {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg) scale(0);
+  font-family: 'Fredoka One', cursive;
+  font-size: 56px;
+  color: #2a8a18;
+  text-shadow: 0 0 0 #2a8a18;
+  border: 6px solid #2a8a18;
+  padding: 4px 24px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.85);
+  letter-spacing: 4px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 20;
+}
+.paid-stamp.show {
+  animation: paid-pop 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes paid-pop {
+  0%   { transform: translate(-50%, -50%) rotate(-12deg) scale(0); opacity: 0; }
+  40%  { transform: translate(-50%, -50%) rotate(-12deg) scale(1.4); opacity: 1; }
+  70%  { transform: translate(-50%, -50%) rotate(-12deg) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(-12deg) scale(1); opacity: 0; }
+}
+
+/* Over-pay message */
+.over-msg {
+  position: absolute;
+  left: 50%; bottom: 8px;
+  transform: translate(-50%, 0);
+  background: #c83020;
+  color: #fff;
+  padding: 5px 16px;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  letter-spacing: 1px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  transition: opacity .25s, transform .25s;
+}
+.over-msg.show { opacity: 1; transform: translate(-50%, -8px); }
+
+/* ═══════ COIN TRAY ═══════ */
+.tray-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: 18px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  padding: 8px 14px;
+  background: rgba(255,248,220,0.6);
+  border-radius: 14px;
+  border: 2px solid #8a5a18;
+}
+.coins-row { display: flex; gap: 12px; align-items: center; }
+.coin-btn {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  border: 4px solid rgba(0,0,0,.3);
+  cursor: pointer;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  color: #fff;
+  text-shadow: 0 2px 2px rgba(0,0,0,.5);
+  font-size: 18px;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.85) 0%, var(--coin-color, #b87333) 45%, rgba(0,0,0,.35) 100%);
+  box-shadow: 0 5px 0 rgba(0,0,0,.35), 0 8px 14px rgba(0,0,0,.25);
+  transition: transform .1s, box-shadow .1s;
+  flex-shrink: 0;
+}
+.coin-btn:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 8px 0 rgba(0,0,0,.35), 0 12px 18px rgba(0,0,0,.3); }
+.coin-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.coin-btn.tapped { animation: coin-tap .25s; }
+@keyframes coin-tap {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.coin-btn .value {
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════ MODAL ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(74,45,8,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: linear-gradient(180deg, #fff8e0 0%, #fce0a8 100%);
+  border: 5px solid #8a5a18;
+  border-radius: 24px;
+  padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 540px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.5);
+  color: #6a3a08;
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px; color: #8a5a18;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #f0a830;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 48px; margin: 12px 0;
+}
+.modal-stars .star { color: #d8c898; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #f0a830; transform: scale(1.1); text-shadow: 0 0 14px rgba(240,168,48,.8); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #6a3a18;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #8a5a18;
+  margin: 4px 0 14px;
+}
+.modal-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+#confetti { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="icon">💰</span><span>COIN COUNTER</span></div>
+    <div class="menu-subtitle">Make the exact price — tap the right coins!</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Pennies &amp; Nickels</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">+ Dimes</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">+ Quarters</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">+ $1 Coins</span></button>
+    </div>
+    <div class="practice-row" id="practiceToggle">
+      <span class="toggle"></span>
+      <span>Practice mode (unlimited lives)</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="100" height="70" viewBox="0 0 100 70">
+            <rect x="14" y="14" width="72" height="42" rx="8" fill="#fff" stroke="#c87810" stroke-width="3" stroke-dasharray="4,3"/>
+            <text x="50" y="44" fill="#8a5a18" font-family="'Fredoka One',Arial Black" font-size="22" font-weight="900" text-anchor="middle">47¢</text>
+          </svg>
+        </div>
+        <div class="lbl">SEE THE PRICE</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="100" height="80" viewBox="0 0 100 80">
+            <defs>
+              <radialGradient id="ic_p" cx="0.32" cy="0.28"><stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#b87333"/><stop offset="100%" stop-color="rgba(0,0,0,.35)"/></radialGradient>
+              <radialGradient id="ic_n" cx="0.32" cy="0.28"><stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="rgba(0,0,0,.35)"/></radialGradient>
+            </defs>
+            <circle cx="32" cy="40" r="20" fill="url(#ic_p)" stroke="rgba(0,0,0,.3)" stroke-width="2"/>
+            <text x="32" y="45" fill="#fff" font-family="'Fredoka One',Arial Black" font-size="11" text-anchor="middle">1¢</text>
+            <circle cx="72" cy="40" r="22" fill="url(#ic_n)" stroke="rgba(0,0,0,.3)" stroke-width="2"/>
+            <text x="72" y="45" fill="#fff" font-family="'Fredoka One',Arial Black" font-size="11" text-anchor="middle">5¢</text>
+          </svg>
+        </div>
+        <div class="lbl">TAP COINS TO ADD</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo">
+          <svg width="100" height="80" viewBox="0 0 100 80">
+            <rect x="10" y="20" width="80" height="44" rx="8" fill="#8a5a18" stroke="#4a2a08" stroke-width="3"/>
+            <text x="50" y="38" fill="#fff8c8" font-family="'Fredoka One',Arial Black" font-size="13" text-anchor="middle">47¢ / 47¢</text>
+            <text x="50" y="56" fill="#4ace4a" font-family="'Fredoka One',Arial Black" font-size="14" text-anchor="middle" font-weight="900">PAID!</text>
+          </svg>
+        </div>
+        <div class="lbl">MATCH EXACTLY!</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      💡 Tap coins until the total matches the price tag. Going over costs a life — use RESET to start the round fresh!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🏷 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">📋 <span class="val" id="hud-round">1/5</span></div>
+      <div class="item">⭐ <span class="val" id="hud-score">0</span></div>
+      <div class="spacer"></div>
+      <div class="item">❤ <span class="lives" id="hud-lives"></span></div>
+    </div>
+
+    <div class="shop">
+      <div class="price-tag-wrap">
+        <div class="price-tag-string"></div>
+        <div class="price-tag" id="price-tag">47¢</div>
+      </div>
+
+      <div class="register" id="register">
+        <div class="reg-total">
+          <span id="reg-current">0¢</span>
+          <span class="slash">/</span>
+          <span class="target" id="reg-target">47¢</span>
+        </div>
+        <div class="reg-pile" id="reg-pile"></div>
+        <div class="paid-stamp" id="paid-stamp">PAID!</div>
+        <div class="over-msg" id="over-msg">Too much! Try again.</div>
+      </div>
+    </div>
+
+    <div class="tray-bar">
+      <div class="coins-row" id="coins-row"></div>
+      <button class="btn danger" id="btn-reset" style="padding:8px 18px; font-size:18px;">RESET</button>
+    </div>
+
+    <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Nice shopping!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  COINS
+// ════════════════════════════════════════════════════════════
+const COINS = {
+  penny:   { id:'penny',   value:1,   label:'1¢',  color:'#b87333' },
+  nickel:  { id:'nickel',  value:5,   label:'5¢',  color:'#c0c0c0' },
+  dime:    { id:'dime',    value:10,  label:'10¢', color:'#d0d0d0' },
+  quarter: { id:'quarter', value:25,  label:'25¢', color:'#c8c8c8' },
+  dollar:  { id:'dollar',  value:100, label:'$1',  color:'#e0a830' }
+};
+
+const LEVELS = [
+  null,
+  { coins:['penny','nickel'],                              minPrice:1,  maxPrice:19 },
+  { coins:['penny','nickel','dime'],                       minPrice:5,  maxPrice:45 },
+  { coins:['penny','nickel','dime','quarter'],             minPrice:10, maxPrice:99 },
+  { coins:['penny','nickel','dime','quarter','dollar'],    minPrice:25, maxPrice:250 }
+];
+const ROUNDS_PER_LEVEL = 5;
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  round: 0,
+  practice: false,
+  price: 0,
+  total: 0,
+  coinsInRegister: [],   // { value, kind, id }
+  lives: 3,
+  score: 0,
+  totalMisses: 0,
+  roundHadMiss: false,
+  locked: false
+};
+let pendingLevel = 1;
+let practiceOn = false;
+let coinIdCounter = 0;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function formatPrice(cents){
+  if (cents < 100) return cents + '¢';
+  const d = Math.floor(cents / 100);
+  const r = cents % 100;
+  return '$' + d + (r === 0 ? '' : '.' + String(r).padStart(2, '0'));
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level){
+  state.level = level;
+  state.practice = practiceOn;
+  state.round = 0;
+  state.lives = state.practice ? 99 : 3;
+  state.score = 0;
+  state.totalMisses = 0;
+  closeModal('modal-results');
+  loadRound();
+  renderCoinTray();
+  showScreen('screen-game');
+}
+
+function loadRound(){
+  state.price = randomPrice(state.level);
+  state.total = 0;
+  state.coinsInRegister = [];
+  state.roundHadMiss = false;
+  state.locked = false;
+  hidePaid();
+  hideOverMsg();
+  renderRegister();
+  renderHud();
+}
+
+function randomPrice(level){
+  const cfg = LEVELS[level];
+  return cfg.minPrice + Math.floor(Math.random() * (cfg.maxPrice - cfg.minPrice + 1));
+}
+
+function renderCoinTray(){
+  const row = document.getElementById('coins-row');
+  row.innerHTML = '';
+  const cfg = LEVELS[state.level];
+  cfg.coins.forEach(coinId => {
+    const c = COINS[coinId];
+    const btn = document.createElement('button');
+    btn.className = 'coin-btn';
+    btn.style.setProperty('--coin-color', c.color);
+    btn.dataset.coin = coinId;
+    btn.innerHTML = '<span class="value">' + c.label + '</span>';
+    btn.addEventListener('click', () => onCoinClick(coinId));
+    row.appendChild(btn);
+  });
+}
+
+function renderRegister(){
+  document.getElementById('reg-current').textContent = formatPrice(state.total);
+  document.getElementById('reg-target').textContent = formatPrice(state.price);
+  document.getElementById('price-tag').textContent = formatPrice(state.price);
+
+  const pile = document.getElementById('reg-pile');
+  pile.innerHTML = '';
+  state.coinsInRegister.forEach(c => {
+    const mc = document.createElement('div');
+    mc.className = 'mini-coin';
+    const coin = COINS[c.kind];
+    mc.style.setProperty('--coin-color', coin.color);
+    mc.textContent = coin.label;
+    pile.appendChild(mc);
+  });
+}
+
+function renderHud(){
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-round').textContent = (state.round + 1) + '/' + ROUNDS_PER_LEVEL;
+  document.getElementById('hud-score').textContent = state.score;
+
+  const livesEl = document.getElementById('hud-lives');
+  livesEl.innerHTML = '';
+  if (state.practice){
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = '∞';
+    livesEl.appendChild(h);
+  } else {
+    for (let i = 0; i < 3; i++){
+      const h = document.createElement('span');
+      h.className = 'heart' + (i >= state.lives ? ' gone' : '');
+      h.textContent = '♥';
+      livesEl.appendChild(h);
+    }
+  }
+}
+
+function onCoinClick(coinId){
+  if (state.locked) return;
+  const c = COINS[coinId];
+  state.total += c.value;
+  state.coinsInRegister.push({ value: c.value, kind: coinId, id: ++coinIdCounter });
+
+  // Visual tap feedback
+  const btn = document.querySelector(`.coin-btn[data-coin="${coinId}"]`);
+  if (btn){
+    btn.classList.remove('tapped');
+    void btn.offsetWidth;
+    btn.classList.add('tapped');
+  }
+
+  renderRegister();
+
+  if (state.total === state.price){
+    // PAID
+    state.locked = true;
+    state.score += 50;
+    if (!state.roundHadMiss) state.score += 50;
+    renderHud();
+    showPaid();
+    flashRegisterGood();
+    triggerConfetti();
+    setTimeout(() => {
+      state.round++;
+      if (state.round >= ROUNDS_PER_LEVEL){
+        endLevel(true);
+      } else {
+        loadRound();
+      }
+    }, 1100);
+  } else if (state.total > state.price){
+    // OVER
+    state.locked = true;
+    state.roundHadMiss = true;
+    state.totalMisses++;
+    if (!state.practice) state.lives--;
+    flashRegisterBad();
+    showOverMsg();
+    renderHud();
+    setTimeout(() => {
+      flyOutCoins();
+    }, 350);
+    setTimeout(() => {
+      state.total = 0;
+      state.coinsInRegister = [];
+      state.locked = false;
+      hideOverMsg();
+      renderRegister();
+      if (!state.practice && state.lives <= 0){
+        state.locked = true;
+        setTimeout(() => endLevel(false), 300);
+      }
+    }, 900);
+  }
+}
+
+function onResetClick(){
+  if (state.locked) return;
+  if (state.coinsInRegister.length === 0) return;
+  flyOutCoins();
+  setTimeout(() => {
+    state.total = 0;
+    state.coinsInRegister = [];
+    renderRegister();
+  }, 380);
+}
+
+function flyOutCoins(){
+  document.querySelectorAll('#reg-pile .mini-coin').forEach(el => el.classList.add('fly-out'));
+}
+function flashRegisterGood(){
+  const reg = document.getElementById('register');
+  reg.classList.remove('flash-good');
+  void reg.offsetWidth;
+  reg.classList.add('flash-good');
+  setTimeout(() => reg.classList.remove('flash-good'), 900);
+}
+function flashRegisterBad(){
+  const reg = document.getElementById('register');
+  reg.classList.remove('flash-bad');
+  void reg.offsetWidth;
+  reg.classList.add('flash-bad');
+  setTimeout(() => reg.classList.remove('flash-bad'), 520);
+}
+function showPaid(){
+  const el = document.getElementById('paid-stamp');
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function hidePaid(){
+  document.getElementById('paid-stamp').classList.remove('show');
+}
+function showOverMsg(){
+  document.getElementById('over-msg').classList.add('show');
+}
+function hideOverMsg(){
+  document.getElementById('over-msg').classList.remove('show');
+}
+
+function calcStars(){
+  if (state.practice) return 0;
+  if (state.totalMisses === 0) return 3;
+  if (state.totalMisses <= 2) return 2;
+  return 1;
+}
+function endLevel(won){
+  const stars = won ? calcStars() : 0;
+  document.getElementById('results-title').textContent = won ? 'LEVEL ' + state.level + ' COMPLETE!' : 'GAME OVER!';
+  document.getElementById('results-body').textContent =
+    !won ? 'Out of lives — give it another go!' :
+    stars === 3 ? 'Perfect shopper! 💰' :
+    stars === 2 ? 'Nice counting!' :
+    'Try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Score: <b>' + state.score + '</b><br>Rounds: <b>' + state.round + ' / ' + ROUNDS_PER_LEVEL +
+    '</b><br>Over-pays: <b>' + state.totalMisses + '</b>';
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => el.classList.toggle('lit', i < stars));
+  document.getElementById('btn-results-next').style.display =
+    (won && state.level < 4) ? 'inline-block' : 'none';
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#f0a830','#b87333','#c0c0c0','#e0a830','#ffd840','#fff','#50b860'];
+  const cx = w/2, cy = h*0.5;
+  for (let i = 0; i < 60; i++){
+    confettiParticles.push({
+      x: cx + (Math.random()-0.5)*120,
+      y: cy + (Math.random()-0.5)*40,
+      vx: (Math.random()-0.5)*9,
+      vy: -Math.random()*8 - 3,
+      g: 0.26,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      size: Math.random()*6 + 3,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      life: 60 + Math.random()*30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length-1; i >= 0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.beginPath();
+    cctx.arc(0, 0, p.size/2, 0, Math.PI*2);
+    cctx.fill();
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+const practiceEl = document.getElementById('practiceToggle');
+practiceEl.addEventListener('click', () => {
+  practiceOn = !practiceOn;
+  practiceEl.classList.toggle('on', practiceOn);
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel));
+
+document.getElementById('btn-reset').addEventListener('click', onResetClick);
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw/baseW, vh/baseH);
+    const x = (vw - baseW*s)/2;
+    const y = (vh - baseH*s)/2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

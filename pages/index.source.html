@@ -302,6 +302,16 @@ body::before {
 .pp .tag        { background: #d8e8fc; color: #1a4080; }
 .pp .play-btn   { background: linear-gradient(135deg,#4a78d0,#1a4080); color: #ffd040; --btn-glow:rgba(26,64,128,.55); }
 
+/* ── COSMIC QUEST THEME ── */
+.cq .card-title { color: #2a2080; }
+.cq .tag        { background: #d8d8f8; color: #2a2080; }
+.cq .play-btn   { background: linear-gradient(135deg,#6840d8,#2a2080); color: #ffd840; --btn-glow:rgba(42,32,128,.60); }
+
+/* ── COIN COUNTER THEME ── */
+.cc .card-title { color: #8a5a18; }
+.cc .tag        { background: #fce8c0; color: #8a5a18; }
+.cc .play-btn   { background: linear-gradient(135deg,#f0a830,#8a5a18); color: #ffffff; --btn-glow:rgba(138,90,24,.55); }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -2296,6 +2306,196 @@ footer {
     </div>
     <div class="card-footer">
       <a class="play-btn" href="pattern_pop/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       COSMIC QUEST CARD
+  ══════════════════════════════ -->
+  <div class="game-card cq" onclick="location.href='cosmic_quest/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cqBg" cx="0.5" cy="0.5" r="0.7">
+            <stop offset="0%"  stop-color="#1a0a4a"/>
+            <stop offset="70%" stop-color="#0a0628"/>
+            <stop offset="100%" stop-color="#04021c"/>
+          </radialGradient>
+          <radialGradient id="cqSun" cx="0.35" cy="0.32">
+            <stop offset="0%" stop-color="#fff8c8"/>
+            <stop offset="40%" stop-color="#ffd040"/>
+            <stop offset="80%" stop-color="#ffaa20"/>
+            <stop offset="100%" stop-color="#d06010"/>
+          </radialGradient>
+          <radialGradient id="cqMercury" cx="0.33" cy="0.28">
+            <stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#a8a29e"/><stop offset="100%" stop-color="#3a3530"/>
+          </radialGradient>
+          <radialGradient id="cqVenus" cx="0.33" cy="0.28">
+            <stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#e8b87a"/><stop offset="100%" stop-color="#6a4818"/>
+          </radialGradient>
+          <radialGradient id="cqEarth" cx="0.33" cy="0.28">
+            <stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#4a8fcd"/><stop offset="100%" stop-color="#1a3a6a"/>
+          </radialGradient>
+          <radialGradient id="cqMars" cx="0.33" cy="0.28">
+            <stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#c8553c"/><stop offset="100%" stop-color="#502010"/>
+          </radialGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#cqBg)"/>
+
+        <!-- Starfield -->
+        <circle cx="30" cy="30" r="1.2" fill="#fff"/>
+        <circle cx="60" cy="180" r="1" fill="#fff"/>
+        <circle cx="350" cy="40" r="1.4" fill="#cfe"/>
+        <circle cx="320" cy="160" r="1" fill="#fff"/>
+        <circle cx="20" cy="120" r="1" fill="#fcf"/>
+        <circle cx="180" cy="20" r="1.2" fill="#fff"/>
+        <circle cx="265" cy="190" r="1" fill="#fff"/>
+        <circle cx="100" cy="60" r="0.9" fill="#fff"/>
+        <circle cx="240" cy="100" r="1.1" fill="#fff"/>
+        <circle cx="160" cy="195" r="0.9" fill="#fff"/>
+        <circle cx="48" cy="70" r="0.8" fill="#cce"/>
+        <circle cx="370" cy="100" r="0.9" fill="#fff"/>
+
+        <!-- Title -->
+        <text x="190" y="32" fill="#ffd840" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="26" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#2a2080" stroke-width="3" stroke-linejoin="round">Cosmic Quest</text>
+        <text x="80" y="34" font-size="26" text-anchor="middle">🪐</text>
+
+        <!-- Orbit rings around sun (center 190,118) -->
+        <circle cx="190" cy="118" r="34" fill="none" stroke="rgba(180,220,255,.32)" stroke-width="1" stroke-dasharray="3,3"/>
+        <circle cx="190" cy="118" r="56" fill="none" stroke="rgba(180,220,255,.28)" stroke-width="1" stroke-dasharray="3,3"/>
+        <circle cx="190" cy="118" r="78" fill="none" stroke="rgba(180,220,255,.24)" stroke-width="1" stroke-dasharray="3,3"/>
+        <circle cx="190" cy="118" r="100" fill="none" stroke="rgba(180,220,255,.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Sun with glow -->
+        <circle cx="190" cy="118" r="28" fill="rgba(255,180,40,.25)"/>
+        <circle cx="190" cy="118" r="20" fill="url(#cqSun)"/>
+
+        <!-- Planets on orbits -->
+        <!-- Mercury on r=34 at 50° -->
+        <circle cx="212" cy="92" r="5" fill="url(#cqMercury)"/>
+        <!-- Venus on r=56 at 150° -->
+        <circle cx="141" cy="146" r="7" fill="url(#cqVenus)"/>
+        <!-- Earth on r=78 at 220° -->
+        <circle cx="130" cy="68" r="8" fill="url(#cqEarth)"/>
+        <!-- Mars empty slot on r=100 at 330° (dashed) -->
+        <circle cx="277" cy="68" r="9" fill="rgba(120,150,255,.12)" stroke="rgba(220,230,255,.85)" stroke-width="1.6" stroke-dasharray="2.5,2"/>
+        <text x="277" y="72" fill="rgba(220,230,255,.95)" font-family="'Fredoka One',Arial Black" font-size="13" text-anchor="middle">+</text>
+
+        <!-- Selected Mars tile glowing on the right -->
+        <rect x="320" y="92" width="46" height="50" rx="9" fill="rgba(255,216,64,.18)" stroke="#ffd840" stroke-width="2.5"/>
+        <circle cx="343" cy="113" r="11" fill="url(#cqMars)"/>
+        <text x="343" y="138" fill="#fff" font-family="'Patrick Hand',cursive" font-size="9" text-anchor="middle">Mars</text>
+
+        <!-- Sparkle decorations -->
+        <text x="350" y="120" font-size="14" fill="#ffd840">✨</text>
+        <text x="22" y="155" font-size="12" fill="#5af4e6">✦</text>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(42,32,128,.92)"/>
+        <text x="190" y="200" fill="rgba(255,216,64,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Build the solar system — tap a planet, tap its orbit!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">🪐 Cosmic Quest</div>
+      <div class="card-desc">Build the solar system orbit by orbit! Place each planet in the right ring around the Sun and learn fun space facts. Four levels: inner planets, outer giants, all eight, then a cosmic challenge with sneaky decoys.</div>
+      <div class="card-tags">
+        <span class="tag">Tap to Play</span>
+        <span class="tag">4 Levels</span>
+        <span class="tag">Space</span>
+        <span class="tag">Science</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="cosmic_quest/">▶ Play Now!</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       COIN COUNTER CARD
+  ══════════════════════════════ -->
+  <div class="game-card cc" onclick="location.href='coin_counter/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ccBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#fff2d0"/>
+            <stop offset="50%" stop-color="#fcd896"/>
+            <stop offset="100%" stop-color="#f09850"/>
+          </linearGradient>
+          <radialGradient id="ccPenny" cx="0.32" cy="0.28">
+            <stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#b87333"/><stop offset="100%" stop-color="rgba(0,0,0,.4)"/>
+          </radialGradient>
+          <radialGradient id="ccNickel" cx="0.32" cy="0.28">
+            <stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="rgba(0,0,0,.4)"/>
+          </radialGradient>
+          <radialGradient id="ccDime" cx="0.32" cy="0.28">
+            <stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#d0d0d0"/><stop offset="100%" stop-color="rgba(0,0,0,.4)"/>
+          </radialGradient>
+          <radialGradient id="ccQuarter" cx="0.32" cy="0.28">
+            <stop offset="0%" stop-color="rgba(255,255,255,.85)"/><stop offset="45%" stop-color="#c8c8c8"/><stop offset="100%" stop-color="rgba(0,0,0,.4)"/>
+          </radialGradient>
+        </defs>
+        <rect width="380" height="210" fill="url(#ccBg)"/>
+
+        <!-- Title -->
+        <text x="190" y="32" fill="#8a5a18" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="26" font-weight="900" text-anchor="middle"
+              paint-order="stroke fill" stroke="#fff8e0" stroke-width="3" stroke-linejoin="round">Coin Counter</text>
+        <text x="76" y="34" font-size="26" text-anchor="middle">💰</text>
+
+        <!-- Price tag swinging -->
+        <line x1="190" y1="46" x2="190" y2="60" stroke="#6a3a18" stroke-width="2"/>
+        <circle cx="190" cy="60" r="4" fill="#c87810"/>
+        <g transform="rotate(-3 190 70)">
+          <rect x="148" y="60" width="84" height="38" rx="8" fill="#fff" stroke="#c87810" stroke-width="3" stroke-dasharray="4,3"/>
+          <text x="190" y="86" fill="#8a5a18" font-family="'Fredoka One',Arial Black,Arial"
+                font-size="22" font-weight="900" text-anchor="middle">47¢</text>
+        </g>
+
+        <!-- Register -->
+        <rect x="80" y="110" width="220" height="56" rx="10" fill="#8a5a18" stroke="#4a2a08" stroke-width="3"/>
+        <rect x="86" y="116" width="208" height="14" rx="3" fill="rgba(255,200,100,.18)"/>
+        <text x="190" y="128" fill="#fff8c8" font-family="'Fredoka One',Arial Black,Arial"
+              font-size="11" text-anchor="middle">25¢ / 47¢</text>
+        <!-- Mini coins in register -->
+        <circle cx="100" cy="148" r="7" fill="url(#ccPenny)" stroke="rgba(0,0,0,.3)" stroke-width="1"/>
+        <circle cx="118" cy="148" r="7" fill="url(#ccPenny)" stroke="rgba(0,0,0,.3)" stroke-width="1"/>
+        <circle cx="136" cy="148" r="8" fill="url(#ccNickel)" stroke="rgba(0,0,0,.3)" stroke-width="1"/>
+        <circle cx="156" cy="148" r="8" fill="url(#ccDime)" stroke="rgba(0,0,0,.3)" stroke-width="1"/>
+
+        <!-- Coin tray -->
+        <circle cx="38" cy="148" r="14" fill="url(#ccPenny)" stroke="rgba(0,0,0,.3)" stroke-width="2"/>
+        <text x="38" y="153" fill="#fff" font-family="'Fredoka One',Arial Black,Arial" font-size="9" text-anchor="middle">1¢</text>
+        <circle cx="342" cy="148" r="15" fill="url(#ccQuarter)" stroke="rgba(0,0,0,.3)" stroke-width="2"/>
+        <text x="342" y="153" fill="#fff" font-family="'Fredoka One',Arial Black,Arial" font-size="9" text-anchor="middle">25¢</text>
+
+        <!-- Sparkle -->
+        <text x="320" y="60" font-size="16" fill="#ffd840">✨</text>
+        <text x="60" y="100" font-size="14" fill="#ffd840">✨</text>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(138,90,24,.92)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle">Tap coins to make the exact price!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title">💰 Coin Counter</div>
+      <div class="card-desc">Make the exact price by tapping coins into the cash register. Four levels: pennies and nickels, then dimes, quarters, and dollar coins for bigger prices.</div>
+      <div class="card-tags">
+        <span class="tag">Tap to Play</span>
+        <span class="tag">4 Levels</span>
+        <span class="tag">Money</span>
+        <span class="tag">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="coin_counter/">▶ Play Now!</a>
     </div>
   </div>
 
