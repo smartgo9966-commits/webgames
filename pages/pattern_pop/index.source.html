@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern Pop</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#4a78d0">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100dvh;
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #b0e0f8;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+
+.game-wrap {
+  width: 960px; height: 540px;
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #b0e0f8 0%, #c8f0d0 30%, #fcd8c0 65%, #e8c8f8 100%);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+
+/* ═══════ SMART GO BADGE ═══════ */
+.sg-badge {
+  position: fixed; top: 12px; left: 12px;
+  display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 14px;
+  background: rgba(20, 40, 70, 0.85);
+  border: 2px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-decoration: none; z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,.5); border-color: rgba(30, 228, 214, .6); }
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ═══════ MENU ═══════ */
+#screen-menu {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 20px;
+}
+#screen-menu.active { display: flex; }
+
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 76px; color: #1a4080;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 0 #80c0f0, 0 6px 18px rgba(0,0,0,0.2);
+  display: flex; align-items: center; gap: 16px;
+}
+.menu-title .icon { font-size: 60px; }
+.menu-subtitle {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 26px; color: #2860a0;
+  margin-top: 4px; letter-spacing: 1px;
+}
+
+.level-row { display: flex; gap: 18px; margin-top: 28px; }
+.level-btn {
+  width: 175px; height: 175px;
+  background: #fff;
+  border: 4px solid #1a4080;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 8px 0 #1a4080, 0 12px 22px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.level-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #1a4080, 0 16px 28px rgba(0,0,0,0.25); }
+.level-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #1a4080; }
+.level-btn .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #1a4080; letter-spacing: 2px;
+}
+.level-btn .num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 64px; color: #1a4080; line-height: 1;
+}
+.level-btn .meta {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 17px; color: #2860a0; text-align: center;
+}
+
+.practice-row {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #1a4080;
+  background: rgba(255,255,255,0.55);
+  padding: 8px 18px; border-radius: 40px;
+  border: 2px solid #1a4080;
+  cursor: pointer;
+}
+.practice-row .toggle {
+  width: 44px; height: 24px;
+  background: #b0c8d8;
+  border-radius: 12px;
+  position: relative;
+  transition: background .15s;
+}
+.practice-row.on .toggle { background: #2bb04a; }
+.practice-row .toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: left .15s;
+}
+.practice-row.on .toggle::after { left: 22px; }
+
+/* ═══════ INSTRUCTIONS ═══════ */
+#screen-instructions {
+  display: none; flex-direction: column; align-items: center;
+  padding: 26px 30px;
+}
+#screen-instructions.active { display: flex; }
+.instr-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px; color: #1a4080;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #80c0f0;
+}
+.instr-step-row {
+  display: flex; gap: 28px; margin-top: 22px; align-items: center;
+}
+.instr-card {
+  background: #fff; border: 3px solid #1a4080;
+  border-radius: 18px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center;
+  width: 200px; gap: 10px;
+}
+.instr-card .lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px; color: #1a4080;
+  text-align: center;
+}
+.demo-row { display: flex; gap: 4px; align-items: center; }
+.demo-tile {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: 2px solid #1a4080;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+}
+.demo-tile.q {
+  background: rgba(26,64,128,0.08);
+  border-style: dashed;
+  color: #1a4080;
+}
+.instr-arrow { font-size: 38px; color: #1a4080; }
+.instr-tip {
+  margin-top: 22px;
+  background: rgba(255,255,255,0.6);
+  padding: 12px 22px; border-radius: 16px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 22px; color: #1a4080; text-align: center;
+  max-width: 740px; line-height: 1.4;
+  border: 2px dashed #1a4080;
+}
+.instr-buttons { display: flex; gap: 18px; margin-top: 20px; }
+
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  background: #fff; border: 3px solid #1a4080;
+  color: #1a4080;
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-size: 22px; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #1a4080, 0 8px 16px rgba(0,0,0,0.15);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #1a4080, 0 12px 22px rgba(0,0,0,0.2); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1a4080; }
+.btn.primary { background: #1a4080; color: #fff; }
+.btn.big { font-size: 28px; padding: 12px 38px; }
+
+/* ═══════ GAME SCREEN ═══════ */
+#screen-game {
+  display: none; flex-direction: column;
+  padding: 12px 20px 16px;
+}
+#screen-game.active { display: flex; }
+
+.hud {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(255,255,255,0.65);
+  border: 2px solid #1a4080;
+  border-radius: 14px;
+  padding: 8px 18px;
+}
+.hud .item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: #1a4080;
+}
+.hud .item .val { font-size: 22px; }
+.hud .spacer { flex: 1; }
+.hud .lives { display: flex; gap: 4px; font-size: 22px; }
+.hud .lives .heart { color: #e83838; transition: opacity .3s, transform .3s; }
+.hud .lives .heart.gone { color: rgba(232,56,56,0.2); transform: scale(0.6); }
+.hud .stars-strip { display: flex; gap: 4px; font-size: 20px; }
+.hud .stars-strip .star { color: rgba(26,64,128,0.3); }
+.hud .stars-strip .star.lit { color: #ffc500; text-shadow: 0 0 4px rgba(255,197,0,0.6); }
+
+.game-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 30px;
+  padding: 14px 20px;
+}
+
+.pattern-strip {
+  display: flex; gap: 10px;
+  align-items: center; justify-content: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.tile {
+  background: #fff;
+  border: 4px solid #1a4080;
+  border-radius: 16px;
+  width: 72px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  color: #1a4080;
+  flex-shrink: 0;
+  box-shadow: 0 4px 0 #1a4080, 0 8px 12px rgba(0,0,0,0.15);
+  position: relative;
+}
+.tile.gap {
+  border-style: dashed;
+  background: rgba(255,255,255,0.5);
+  font-size: 40px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); box-shadow: 0 4px 0 #1a4080, 0 8px 12px rgba(0,0,0,0.15); }
+  50% { transform: scale(1.05); box-shadow: 0 4px 0 #1a4080, 0 0 24px rgba(26,64,128,0.4); }
+}
+.tile.popped {
+  animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes pop-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.choices-row {
+  display: flex; gap: 20px;
+  align-items: center; justify-content: center;
+}
+.choice-tile {
+  background: #fff;
+  border: 4px solid #1a4080;
+  border-radius: 16px;
+  width: 90px; height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #1a4080, 0 10px 18px rgba(0,0,0,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.choice-tile:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #1a4080, 0 14px 22px rgba(0,0,0,0.25); }
+.choice-tile:active { transform: translateY(3px); box-shadow: 0 3px 0 #1a4080; }
+.choice-tile.bad { animation: shake-red 0.5s; }
+@keyframes shake-red {
+  0%,100% { transform: translateX(0); background: #fff; }
+  20% { transform: translateX(-10px); background: #ffd8d8; }
+  40% { transform: translateX(10px); background: #ffd8d8; }
+  60% { transform: translateX(-7px); background: #ffd8d8; }
+  80% { transform: translateX(7px); background: #ffd8d8; }
+}
+.choice-tile.locked { pointer-events: none; opacity: 0.4; }
+
+/* ═══════ ITEM INNER STYLES ═══════ */
+.item-circle {
+  width: 60%; height: 60%; border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.25);
+}
+.choice-tile .item-circle { width: 56%; height: 56%; }
+.item-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 36px; color: #1a4080;
+}
+.choice-tile .item-num { font-size: 44px; }
+.item-shape svg { width: 70%; height: 70%; }
+.item-group {
+  display: grid; gap: 4px;
+  width: 78%; height: 78%;
+  align-items: center; justify-items: center;
+}
+.item-group .dot {
+  width: 100%; aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.25);
+  max-width: 18px;
+}
+
+/* ═══════ MODAL ═══════ */
+.modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal.active { display: flex; }
+.modal-card {
+  background: #fff; border: 5px solid #1a4080;
+  border-radius: 24px; padding: 26px 34px;
+  text-align: center; min-width: 400px; max-width: 520px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 38px; color: #1a4080;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 0 #80c0f0;
+}
+.modal-stars {
+  display: flex; gap: 6px; justify-content: center;
+  font-size: 48px; margin: 12px 0;
+}
+.modal-stars .star { color: #d8d8e0; transition: color .3s, transform .3s; }
+.modal-stars .star.lit { color: #ffc500; transform: scale(1.1); text-shadow: 0 0 12px rgba(255,197,0,.7); }
+.modal-body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 24px; color: #1a4080;
+  margin: 8px 0;
+}
+.modal-stats {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px; color: #2860a0;
+  margin: 4px 0 14px;
+}
+.modal-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+#confetti { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+
+<div class="fit-stage">
+<div class="game-wrap" id="gameWrap">
+
+  <!-- ═══════════ MENU ═══════════ -->
+  <div class="screen active" id="screen-menu">
+    <div class="menu-title"><span class="icon">🧩</span><span>PATTERN POP</span></div>
+    <div class="menu-subtitle">Look at the pattern — what comes next?</div>
+    <div class="level-row">
+      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">AB colors</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">ABC &amp; shapes</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">Growing</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Tricky!</span></button>
+    </div>
+    <div class="practice-row" id="practiceToggle">
+      <span class="toggle"></span>
+      <span>Practice mode (unlimited lives)</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ INSTRUCTIONS ═══════════ -->
+  <div class="screen" id="screen-instructions">
+    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-step-row">
+      <div class="instr-card">
+        <div class="demo-row">
+          <div class="demo-tile" style="background:#dc4040"></div>
+          <div class="demo-tile" style="background:#f0d840"></div>
+          <div class="demo-tile" style="background:#dc4040"></div>
+          <div class="demo-tile q">?</div>
+        </div>
+        <div class="lbl">LOOK AT THE PATTERN</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-row">
+          <div class="demo-tile" style="background:#3c6ad0"></div>
+          <div class="demo-tile" style="background:#f0d840;box-shadow:0 0 8px 2px #ffd040"></div>
+          <div class="demo-tile" style="background:#50b860"></div>
+        </div>
+        <div class="lbl">TAP WHAT COMES NEXT</div>
+      </div>
+      <div class="instr-arrow">→</div>
+      <div class="instr-card">
+        <div class="demo-row">
+          <div class="demo-tile" style="background:#dc4040"></div>
+          <div class="demo-tile" style="background:#f0d840"></div>
+          <div class="demo-tile" style="background:#dc4040"></div>
+          <div class="demo-tile" style="background:#f0d840;border-color:#2a8a18"></div>
+        </div>
+        <div class="lbl">POP! NEXT ROUND</div>
+      </div>
+    </div>
+    <div class="instr-tip">
+      🧠 Find the rule that makes the pattern repeat or grow. You have 3 lives per level — wrong taps cost a heart!
+    </div>
+    <div class="instr-buttons">
+      <button class="btn" id="btn-instr-menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start">START</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GAME ═══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="hud">
+      <div class="item">🏆 <span id="hud-level">LEVEL 1</span></div>
+      <div class="item">📋 <span class="val" id="hud-round">1/5</span></div>
+      <div class="item">⭐ <span class="val" id="hud-score">0</span></div>
+      <div class="spacer"></div>
+      <div class="item">❤ <span class="lives" id="hud-lives"></span></div>
+      <div class="item">🌟 <span class="stars-strip" id="hud-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span></span></div>
+    </div>
+
+    <div class="game-body">
+      <div class="pattern-strip" id="pattern-strip"></div>
+      <div class="choices-row" id="choices-row"></div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- ═══════════ RESULTS MODAL ═══════════ -->
+  <div class="modal" id="modal-results">
+    <div class="modal-card">
+      <div class="modal-title" id="results-title">LEVEL COMPLETE!</div>
+      <div class="modal-stars" id="results-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="modal-body" id="results-body">Great job!</div>
+      <div class="modal-stats" id="results-stats"></div>
+      <div class="modal-buttons">
+        <button class="btn" id="btn-results-menu">MENU</button>
+        <button class="btn" id="btn-results-replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+//  ITEM CATALOGS
+// ════════════════════════════════════════════════════════════
+const COLORS = [
+  { code: 'r', hex: '#e83838' },
+  { code: 'o', hex: '#f08820' },
+  { code: 'y', hex: '#f0d840' },
+  { code: 'g', hex: '#50b860' },
+  { code: 'b', hex: '#3c6ad0' },
+  { code: 'p', hex: '#a44acc' }
+];
+const SHAPES = ['circle', 'square', 'triangle', 'star', 'heart'];
+
+const SHAPE_SVG = {
+  circle:   '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="{c}" stroke="rgba(0,0,0,0.3)" stroke-width="3"/></svg>',
+  square:   '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="8" fill="{c}" stroke="rgba(0,0,0,0.3)" stroke-width="3"/></svg>',
+  triangle: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,12 90,86 10,86" fill="{c}" stroke="rgba(0,0,0,0.3)" stroke-width="3" stroke-linejoin="round"/></svg>',
+  star:     '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,10 62,38 92,40 68,60 78,90 50,72 22,90 32,60 8,40 38,38" fill="{c}" stroke="rgba(0,0,0,0.3)" stroke-width="3" stroke-linejoin="round"/></svg>',
+  heart:    '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50 86 C 22 66 10 48 10 32 C 10 18 22 10 32 10 C 42 10 48 18 50 24 C 52 18 58 10 68 10 C 78 10 90 18 90 32 C 90 48 78 66 50 86 Z" fill="{c}" stroke="rgba(0,0,0,0.3)" stroke-width="3"/></svg>'
+};
+
+// ════════════════════════════════════════════════════════════
+//  ITEM CONSTRUCTORS + KEY
+// ════════════════════════════════════════════════════════════
+function colorItem(c){ return { kind:'color', color: c.hex, code: c.code }; }
+function shapeItem(shape, c){ return { kind:'shape', shape, color: c.hex, code: c.code }; }
+function numItem(n){ return { kind:'number', n }; }
+function groupItem(count, c){ return { kind:'group', count, color: c.hex, code: c.code }; }
+
+function itemKey(it){
+  if (!it) return 'null';
+  if (it.kind === 'color') return 'c:' + it.code;
+  if (it.kind === 'shape') return 's:' + it.shape + ':' + it.code;
+  if (it.kind === 'number') return 'n:' + it.n;
+  if (it.kind === 'group') return 'g:' + it.count + ':' + it.code;
+  return '?';
+}
+
+// ════════════════════════════════════════════════════════════
+//  ITEM RENDERER
+// ════════════════════════════════════════════════════════════
+function renderItem(it){
+  if (!it) return '';
+  if (it.kind === 'color'){
+    return `<div class="item-circle" style="background:${it.color}"></div>`;
+  }
+  if (it.kind === 'shape'){
+    return `<div class="item-shape">${SHAPE_SVG[it.shape].replace(/{c}/g, it.color)}</div>`;
+  }
+  if (it.kind === 'number'){
+    return `<div class="item-num">${it.n}</div>`;
+  }
+  if (it.kind === 'group'){
+    // Arrange dots in a grid
+    const cols = it.count <= 3 ? it.count : Math.ceil(Math.sqrt(it.count));
+    let html = `<div class="item-group" style="grid-template-columns:repeat(${cols},1fr)">`;
+    for (let i = 0; i < it.count; i++){
+      html += `<div class="dot" style="background:${it.color}"></div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+  return '';
+}
+
+// ════════════════════════════════════════════════════════════
+//  GENERATORS
+//  Each returns: { pattern: [items, with one null], gapIndex, correct, choices }
+// ════════════════════════════════════════════════════════════
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function pickN(arr, n){
+  const copy = arr.slice();
+  shuffle(copy);
+  return copy.slice(0, n);
+}
+
+// AB color: AB AB AB AB ? (last position is gap)
+function genAB(){
+  const [c1, c2] = pickN(COLORS, 2);
+  const A = colorItem(c1), B = colorItem(c2);
+  const seq = [A, B, A, B, A, B, null];
+  const correct = B;  // last pos is B in ABABAB?
+  // Distractors: any other 2 colors
+  const distractor1 = colorItem(pick(COLORS.filter(c => c.code !== c1.code && c.code !== c2.code)));
+  const distractor2 = colorItem(A);  // A would be wrong here since pattern wants B
+  // ensure distractor2 ≠ correct (it is, since A ≠ B)
+  return {
+    pattern: seq,
+    gapIndex: 6,
+    correct,
+    choices: shuffle([correct, distractor1, distractor2])
+  };
+}
+
+// ABC color: ABC ABC A?
+function genABC(){
+  const [c1, c2, c3] = pickN(COLORS, 3);
+  const A = colorItem(c1), B = colorItem(c2), C = colorItem(c3);
+  const seq = [A, B, C, A, B, C, A, null];
+  const correct = B;
+  const distractor1 = C;
+  const distractor2 = colorItem(pick(COLORS.filter(x => x.code !== c1.code && x.code !== c2.code && x.code !== c3.code)));
+  return {
+    pattern: seq, gapIndex: 7, correct,
+    choices: shuffle([correct, distractor1, distractor2])
+  };
+}
+
+// AB shapes: shapeA shapeB shapeA shapeB ?
+function genAB_shapes(){
+  const [s1, s2] = pickN(SHAPES, 2);
+  const c1 = pick(COLORS);
+  const A = shapeItem(s1, c1), B = shapeItem(s2, c1);
+  const seq = [A, B, A, B, A, B, null];
+  const correct = B;
+  const distractor1 = A;
+  const distractor2 = shapeItem(pick(SHAPES.filter(s => s !== s1 && s !== s2)), c1);
+  return {
+    pattern: seq, gapIndex: 6, correct,
+    choices: shuffle([correct, distractor1, distractor2])
+  };
+}
+
+// Counting: 1, 2, 3, 4, ?
+function genCount(){
+  const start = 1 + Math.floor(Math.random() * 4);  // 1..4
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(numItem(start + i));
+  seq.push(null);
+  const correct = numItem(start + 4);
+  const d1 = numItem(start + 5);
+  const d2 = numItem(start + 3);
+  return {
+    pattern: seq, gapIndex: 4, correct,
+    choices: shuffle([correct, d1, d2])
+  };
+}
+
+// Skip even: 2, 4, 6, 8, ?
+function genSkipEven(){
+  const base = 2 * (1 + Math.floor(Math.random() * 3));  // 2, 4, 6
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(numItem(base + i * 2));
+  seq.push(null);
+  const ansN = base + 8;
+  return {
+    pattern: seq, gapIndex: 4, correct: numItem(ansN),
+    choices: shuffle([numItem(ansN), numItem(ansN - 1), numItem(ansN + 1)])
+  };
+}
+
+// Skip odd: 1, 3, 5, 7, ?
+function genSkipOdd(){
+  const base = 1 + 2 * Math.floor(Math.random() * 3);  // 1, 3, 5
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(numItem(base + i * 2));
+  seq.push(null);
+  const ansN = base + 8;
+  return {
+    pattern: seq, gapIndex: 4, correct: numItem(ansN),
+    choices: shuffle([numItem(ansN), numItem(ansN - 1), numItem(ansN + 1)])
+  };
+}
+
+// Growing dots: 1 dot, 2 dots, 3 dots, ?
+function genGrowDots(){
+  const c = pick(COLORS);
+  const start = 1 + Math.floor(Math.random() * 2);  // 1..2
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(groupItem(start + i, c));
+  seq.push(null);
+  const ansN = start + 4;
+  return {
+    pattern: seq, gapIndex: 4, correct: groupItem(ansN, c),
+    choices: shuffle([groupItem(ansN, c), groupItem(ansN + 1, c), groupItem(ansN - 1, c)])
+  };
+}
+
+// AABB pattern: AABB AABB ?
+function genAABB(){
+  const [c1, c2] = pickN(COLORS, 2);
+  const A = colorItem(c1), B = colorItem(c2);
+  const seq = [A, A, B, B, A, A, B, null];
+  const correct = B;
+  return {
+    pattern: seq, gapIndex: 7, correct,
+    choices: shuffle([correct, A, colorItem(pick(COLORS.filter(c => c.code !== c1.code && c.code !== c2.code)))])
+  };
+}
+
+// ABBA pattern: ABBA ABBA ?
+function genABBA(){
+  const [c1, c2] = pickN(COLORS, 2);
+  const A = colorItem(c1), B = colorItem(c2);
+  const seq = [A, B, B, A, A, B, B, null];
+  const correct = A;
+  return {
+    pattern: seq, gapIndex: 7, correct,
+    choices: shuffle([correct, B, colorItem(pick(COLORS.filter(c => c.code !== c1.code && c.code !== c2.code)))])
+  };
+}
+
+// Skip 2: random start, step 2
+function genSkip2(){
+  const base = 1 + Math.floor(Math.random() * 6);
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(numItem(base + i * 2));
+  seq.push(null);
+  const ansN = base + 8;
+  return {
+    pattern: seq, gapIndex: 4, correct: numItem(ansN),
+    choices: shuffle([numItem(ansN), numItem(ansN - 2), numItem(ansN + 1), numItem(ansN - 1)])
+  };
+}
+
+// Skip 5: 5, 10, 15, 20, ?
+function genSkip5(){
+  const base = 5;
+  const seq = [];
+  for (let i = 0; i < 4; i++) seq.push(numItem(base + i * 5));
+  seq.push(null);
+  const ansN = base + 20;
+  return {
+    pattern: seq, gapIndex: 4, correct: numItem(ansN),
+    choices: shuffle([numItem(ansN), numItem(ansN - 5), numItem(ansN + 5), numItem(ansN - 1)])
+  };
+}
+
+// Double: 1, 2, 4, 8, ? = 16
+function genDouble(){
+  const start = pick([1, 2, 3]);
+  const seq = [];
+  let v = start;
+  for (let i = 0; i < 4; i++){
+    seq.push(numItem(v));
+    v *= 2;
+  }
+  seq.push(null);
+  const ansN = v;
+  return {
+    pattern: seq, gapIndex: 4, correct: numItem(ansN),
+    choices: shuffle([numItem(ansN), numItem(ansN - start * 8), numItem(ansN + start * 8), numItem(start * 8 + start * 2)])
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+//  PATTERN POOLS PER LEVEL
+// ════════════════════════════════════════════════════════════
+const PATTERN_GENERATORS = {
+  1: [genAB],
+  2: [genABC, genAB_shapes],
+  3: [genCount, genSkipEven, genSkipOdd, genGrowDots],
+  4: [genAABB, genABBA, genSkip2, genSkip5, genDouble]
+};
+const ROUNDS_PER_LEVEL = 5;
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  screen: 'menu',
+  level: 1,
+  practice: false,
+  round: 0,
+  pattern: [],
+  gapIndex: -1,
+  correct: null,
+  choices: [],
+  lives: 3,
+  score: 0,
+  perfectRounds: 0,
+  totalMisses: 0,
+  roundHadMiss: false,
+  locked: false
+};
+let pendingLevel = 1;
+let practiceOn = false;
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  state.screen = id.replace('screen-','');
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+// ════════════════════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════════════════════
+function startLevel(level){
+  state.level = level;
+  state.practice = practiceOn;
+  state.round = 0;
+  state.lives = state.practice ? 99 : 3;
+  state.score = 0;
+  state.perfectRounds = 0;
+  state.totalMisses = 0;
+  loadRound();
+  showScreen('screen-game');
+}
+
+function loadRound(){
+  state.roundHadMiss = false;
+  state.locked = false;
+  const gens = PATTERN_GENERATORS[state.level];
+  const gen = pick(gens);
+  const r = gen();
+  state.pattern = r.pattern;
+  state.gapIndex = r.gapIndex;
+  state.correct = r.correct;
+  state.choices = r.choices;
+  renderGame();
+}
+
+function renderGame(){
+  // HUD
+  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-round').textContent = (state.round + 1) + '/' + ROUNDS_PER_LEVEL;
+  document.getElementById('hud-score').textContent = state.score;
+
+  // Lives
+  const livesEl = document.getElementById('hud-lives');
+  livesEl.innerHTML = '';
+  if (state.practice){
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = '∞';
+    livesEl.appendChild(h);
+  } else {
+    for (let i = 0; i < 3; i++){
+      const h = document.createElement('span');
+      h.className = 'heart' + (i >= state.lives ? ' gone' : '');
+      h.textContent = '♥';
+      livesEl.appendChild(h);
+    }
+  }
+
+  // Stars
+  const stars = calcStars();
+  const starsEl = document.getElementById('hud-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < stars ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+
+  // Pattern strip
+  const strip = document.getElementById('pattern-strip');
+  strip.innerHTML = '';
+  state.pattern.forEach((it, i) => {
+    const el = document.createElement('div');
+    if (i === state.gapIndex){
+      el.className = 'tile gap';
+      el.textContent = '?';
+      el.id = 'gap-tile';
+    } else {
+      el.className = 'tile';
+      el.innerHTML = renderItem(it);
+    }
+    strip.appendChild(el);
+  });
+
+  // Choices
+  const choices = document.getElementById('choices-row');
+  choices.innerHTML = '';
+  state.choices.forEach((it, i) => {
+    const el = document.createElement('div');
+    el.className = 'choice-tile';
+    el.innerHTML = renderItem(it);
+    el.dataset.idx = i;
+    el.addEventListener('click', () => onChoiceClick(i));
+    choices.appendChild(el);
+  });
+}
+
+function calcStars(){
+  if (state.practice) return 0;
+  if (state.totalMisses === 0 && state.perfectRounds >= 4) return 3;
+  if (state.totalMisses <= 2) return 2;
+  return 1;
+}
+
+function onChoiceClick(idx){
+  if (state.locked) return;
+  const chosen = state.choices[idx];
+  const tileEl = document.querySelector(`.choice-tile[data-idx="${idx}"]`);
+  if (itemKey(chosen) === itemKey(state.correct)){
+    // CORRECT
+    state.locked = true;
+    state.score += 100;
+    if (!state.roundHadMiss){
+      state.score += 50;
+      state.perfectRounds++;
+    }
+    // Pop the item into the gap
+    const gapTile = document.getElementById('gap-tile');
+    if (gapTile){
+      gapTile.classList.remove('gap');
+      gapTile.classList.add('popped');
+      gapTile.style.animation = '';
+      gapTile.textContent = '';
+      gapTile.innerHTML = renderItem(state.correct);
+    }
+    // Disable choices
+    document.querySelectorAll('.choice-tile').forEach(c => c.classList.add('locked'));
+    triggerConfetti();
+    setTimeout(() => {
+      state.round++;
+      if (state.round >= ROUNDS_PER_LEVEL){
+        endLevel(true);
+      } else {
+        loadRound();
+      }
+    }, 900);
+  } else {
+    // WRONG
+    state.roundHadMiss = true;
+    state.totalMisses++;
+    if (!state.practice) state.lives--;
+    tileEl.classList.add('bad');
+    setTimeout(() => tileEl.classList.remove('bad'), 520);
+    renderGame();
+    if (!state.practice && state.lives <= 0){
+      state.locked = true;
+      setTimeout(() => endLevel(false), 700);
+    }
+  }
+}
+
+function endLevel(won){
+  const stars = won ? calcStars() : 0;
+  document.getElementById('results-title').textContent = won ? 'LEVEL ' + state.level + ' COMPLETE!' : 'TRY AGAIN!';
+  document.getElementById('results-body').textContent =
+    !won ? 'Out of lives — give it another go!' :
+    stars === 3 ? "Pattern master! 🧩" :
+    stars === 2 ? 'Great pattern-spotting!' :
+    'Nice — try again for more stars!';
+  document.getElementById('results-stats').innerHTML =
+    'Score: <b>' + state.score + '</b><br>Perfect rounds: <b>' + state.perfectRounds + ' / ' + ROUNDS_PER_LEVEL +
+    '</b><br>Wrong taps: <b>' + state.totalMisses + '</b>';
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => el.classList.toggle('lit', i < stars));
+  document.getElementById('btn-results-next').style.display =
+    (won && state.level < 4) ? 'inline-block' : 'none';
+  openModal('modal-results');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI
+// ════════════════════════════════════════════════════════════
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function sizeConfetti(){
+  const rect = document.getElementById('screen-game').getBoundingClientRect();
+  confettiCanvas.width = rect.width || 960;
+  confettiCanvas.height = rect.height || 540;
+}
+function triggerConfetti(){
+  sizeConfetti();
+  const w = confettiCanvas.width, h = confettiCanvas.height;
+  const colors = ['#e83838','#f08820','#f0d840','#50b860','#3c6ad0','#a44acc','#5af4e6'];
+  for (let i = 0; i < 70; i++){
+    confettiParticles.push({
+      x: w/2 + (Math.random()-0.5)*140,
+      y: h*0.45,
+      vx: (Math.random()-0.5)*8,
+      vy: -Math.random()*8 - 4,
+      g: 0.26,
+      color: pick(colors),
+      size: Math.random()*6 + 4,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.3,
+      life: 60 + Math.random()*30
+    });
+  }
+  if (!confettiRunning){
+    confettiRunning = true;
+    requestAnimationFrame(confettiLoop);
+  }
+}
+function confettiLoop(){
+  cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = confettiParticles.length-1; i>=0; i--){
+    const p = confettiParticles[i];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.rot += p.vr;
+    p.life--;
+    if (p.life <= 0 || p.y > confettiCanvas.height + 20){
+      confettiParticles.splice(i,1);
+      continue;
+    }
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    cctx.restore();
+  }
+  if (confettiParticles.length > 0){
+    requestAnimationFrame(confettiLoop);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  WIRE UP UI
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pendingLevel = parseInt(btn.getAttribute('data-level'), 10) || 1;
+    showScreen('screen-instructions');
+  });
+});
+
+const practiceEl = document.getElementById('practiceToggle');
+practiceEl.addEventListener('click', () => {
+  practiceOn = !practiceOn;
+  practiceEl.classList.toggle('on', practiceOn);
+});
+
+document.getElementById('btn-instr-menu').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-instr-start').addEventListener('click', () => startLevel(pendingLevel));
+
+document.getElementById('btn-results-menu').addEventListener('click', () => {
+  closeModal('modal-results');
+  showScreen('screen-menu');
+});
+document.getElementById('btn-results-replay').addEventListener('click', () => {
+  closeModal('modal-results');
+  startLevel(state.level);
+});
+document.getElementById('btn-results-next').addEventListener('click', () => {
+  closeModal('modal-results');
+  if (state.level < 4) startLevel(state.level + 1);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SCALE-TO-FIT
+// ════════════════════════════════════════════════════════════
+(function(){
+  const wrap = document.getElementById('gameWrap');
+  const baseW = 960, baseH = 540;
+  function fitStage(){
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw/baseW, vh/baseH);
+    const x = (vw - baseW*s)/2;
+    const y = (vh - baseH*s)/2;
+    wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
