@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>10 Frame Math Game</title>
 <link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
 <link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
@@ -403,8 +403,8 @@ html, body {
 
 .sg-badge {
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
   display: inline-flex;
   align-items: center;
   padding: 8px 18px;
@@ -435,7 +435,7 @@ html, body {
 
 /* ════════ LANGUAGE TOGGLE ════════ */
 .lang-toggle {
-  position: fixed; top: 12px; right: 12px; z-index: 9999;
+  position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 9999;
   display: inline-flex; gap: 2px;
   background: rgba(10, 26, 56, .85);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
@@ -443,8 +443,8 @@ html, body {
   border-radius: 999px; padding: 4px;
   box-shadow: 0 6px 20px rgba(0,0,0,.35);
 }
-[dir="rtl"] .lang-toggle { right: auto; left: 12px; }
-[dir="rtl"] .sg-badge   { left: auto; right: 12px; }
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
 .lang-toggle button {
   font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
   min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;

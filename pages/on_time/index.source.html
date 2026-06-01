@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>On Time!</title>
   <link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
   <link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
@@ -315,8 +315,8 @@
     .btn-large:active { transform: translateY(2px);  box-shadow: 0 1px 0 #9a7800; }
   .sg-badge {
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
   display: inline-flex;
   align-items: center;
   padding: 8px 18px;
@@ -348,8 +348,8 @@
 /* ════════ LANGUAGE TOGGLE ════════ */
 .lang-toggle {
   position: fixed;
-  top: 12px;
-  right: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
   display: inline-flex;
   gap: 3px;
   padding: 4px;
@@ -361,8 +361,8 @@
   box-shadow: 0 6px 20px rgba(0,0,0,.35);
   z-index: 9999;
 }
-[dir="rtl"] .lang-toggle { right: auto; left: 12px; }
-[dir="rtl"] .sg-badge   { left: auto; right: 12px; }
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
 .lang-toggle button {
   font-family: 'Nunito', 'Arial', sans-serif;
   font-weight: 800;

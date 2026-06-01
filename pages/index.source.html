@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Games Gallery</title>
 <link rel="icon" type="image/jpeg" href="../assets/images/logo-blue.jpeg">
 <link rel="apple-touch-icon" href="../assets/images/icon-192.png">
@@ -314,7 +314,7 @@ body::before {
 
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
-  position: fixed; top: 16px; right: 16px; z-index: 200;
+  position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
   display: inline-flex; gap: 2px;
   background: rgba(255,255,255,.12);
   border: 1px solid rgba(255,255,255,.22);
@@ -322,7 +322,7 @@ body::before {
   backdrop-filter: blur(6px);
   box-shadow: 0 6px 18px rgba(0,0,0,.3);
 }
-[dir="rtl"] .lang-toggle { right: auto; left: 16px; }
+[dir="rtl"] .lang-toggle { right: auto; left: max(16px, env(safe-area-inset-left)); }
 .lang-toggle button {
   font-family: 'Nunito', sans-serif;
   font-weight: 800; font-size: 14px;
