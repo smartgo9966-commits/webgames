@@ -432,31 +432,56 @@ html, body {
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed; top: 12px; right: 12px; z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: 12px; }
+[dir="rtl"] .sg-badge   { left: auto; right: 12px; }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage"><div class="game-wrap">
 
 <!-- ══════════════════ START SCREEN ══════════════════ -->
 <div id="scr-start" class="screen active">
   <div class="game-card">
     <div class="card-header">
-      <h1>10 Frame Math Game</h1>
+      <h1 data-i18n="title">10 Frame Math Game</h1>
     </div>
     <div class="start-body">
 
       <div class="info-box">
-        <p class="info-text">A TEN FRAME is a rectangular frame divided into two rows of five to show numbers less than or equal to 10.</p>
+        <p class="info-text" data-i18n="info1">A TEN FRAME is a rectangular frame divided into two rows of five to show numbers less than or equal to 10.</p>
         <div class="examples-row" id="ex-row-1"></div>
       </div>
 
       <div class="info-box">
-        <p class="info-text">They can be filled in different ways to represent different numbers.</p>
+        <p class="info-text" data-i18n="info2">They can be filled in different ways to represent different numbers.</p>
         <div class="examples-row" id="ex-row-2"></div>
         <div class="start-btn-row">
-          <button class="oval-btn" onclick="startPlayGame()">Play<br>Game</button>
-          <button class="oval-btn" onclick="showSpeedSelect()">Speed<br>Game</button>
+          <button class="oval-btn" onclick="startPlayGame()" data-i18n-html="btn.playGame">Play<br>Game</button>
+          <button class="oval-btn" onclick="showSpeedSelect()" data-i18n-html="btn.speedGame">Speed<br>Game</button>
         </div>
       </div>
 
@@ -469,25 +494,25 @@ html, body {
   <div class="game-card">
     <div class="card-header speed-header">
       <div class="speed-star-l">⭐<br>⭐⭐<br>⭐</div>
-      <h1>Speed Game</h1>
+      <h1 data-i18n="speed.title">Speed Game</h1>
       <div class="speed-star-r">⭐<br>⭐⭐<br>⭐</div>
     </div>
     <div class="speed-body">
-      <p class="speed-desc">Answer as fast as you can! See how many questions you can correctly answer before time is up.</p>
+      <p class="speed-desc" data-i18n="speed.desc">Answer as fast as you can! See how many questions you can correctly answer before time is up.</p>
 
       <div class="speed-option" onclick="startSpeedGame(1)">
-        <span class="speed-badge">Speed<br>Game 1</span>
-        <span class="speed-opt-text">Match the 10 frame with the correct number</span>
+        <span class="speed-badge" data-i18n-html="speed.badge1">Speed<br>Game 1</span>
+        <span class="speed-opt-text" data-i18n-html="speed.opt1">Match the 10 frame with the correct number</span>
       </div>
 
       <div class="speed-option" onclick="startSpeedGame(2)">
-        <span class="speed-badge">Speed<br>Game 2</span>
-        <span class="speed-opt-text">Match the 10 frame with the correct number<br>Match the 10 frame with the empty units</span>
+        <span class="speed-badge" data-i18n-html="speed.badge2">Speed<br>Game 2</span>
+        <span class="speed-opt-text" data-i18n-html="speed.opt2">Match the 10 frame with the correct number<br>Match the 10 frame with the empty units</span>
       </div>
 
       <div class="speed-option" onclick="startSpeedGame(3)">
-        <span class="speed-badge">Speed<br>Game 3</span>
-        <span class="speed-opt-text">All 3 kinds of 10 frame fun!</span>
+        <span class="speed-badge" data-i18n-html="speed.badge3">Speed<br>Game 3</span>
+        <span class="speed-opt-text" data-i18n-html="speed.opt3">All 3 kinds of 10 frame fun!</span>
         <div class="speed-icon"><div class="speed-icon-dot"></div></div>
       </div>
     </div>
@@ -498,7 +523,7 @@ html, body {
 <div id="scr-game" class="screen">
   <div class="game-card">
     <div class="game-top">
-      <button class="menu-btn" onclick="goMenu()">Menu</button>
+      <button class="menu-btn" onclick="goMenu()" data-i18n="btn.menu">Menu</button>
       <div id="timer-circle" class="timer-circle hidden">
         <span id="timer-val">60</span>
       </div>
@@ -524,8 +549,8 @@ html, body {
       <div id="result-score" class="result-score"></div>
       <div id="result-label" class="result-label"></div>
       <div class="result-btns">
-        <button class="oval-btn" onclick="replayGame()">Play Again</button>
-        <button class="oval-btn teal" onclick="goMenu()">Menu</button>
+        <button class="oval-btn" onclick="replayGame()" data-i18n="btn.playAgain">Play Again</button>
+        <button class="oval-btn teal" onclick="goMenu()" data-i18n="btn.menu2">Menu</button>
       </div>
     </div>
   </div>
@@ -533,6 +558,143 @@ html, body {
 
 </div></div><!-- /.game-wrap /.fit-stage -->
 
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': '10 Frame Math Game',
+      'info1': 'A TEN FRAME is a rectangular frame divided into two rows of five to show numbers less than or equal to 10.',
+      'info2': 'They can be filled in different ways to represent different numbers.',
+      'btn.playGame': 'Play<br>Game',
+      'btn.speedGame': 'Speed<br>Game',
+      'btn.menu': 'Menu',
+      'btn.menu2': 'Menu',
+      'btn.playAgain': 'Play Again',
+      'speed.title': 'Speed Game',
+      'speed.desc': 'Answer as fast as you can! See how many questions you can correctly answer before time is up.',
+      'speed.badge1': 'Speed<br>Game 1',
+      'speed.opt1': 'Match the 10 frame with the correct number',
+      'speed.badge2': 'Speed<br>Game 2',
+      'speed.opt2': 'Match the 10 frame with the correct number<br>Match the 10 frame with the empty units',
+      'speed.badge3': 'Speed<br>Game 3',
+      'speed.opt3': 'All 3 kinds of 10 frame fun!',
+      'q.type1': 'Match the 10 frame<br>with the correct number',
+      'q.type2': 'Match the 10 frame<br>with the empty units',
+      'q.type3': 'How many more dots<br>to fill the frame?',
+      'res.perfect': 'Perfect!',
+      'res.great': 'Great Job!',
+      'res.welldone': 'Well Done!',
+      'res.timesUp': "Time's Up!",
+      'res.completed': 'You completed all 10 questions!',
+      'res.noMistakes': 'No mistakes — amazing!',
+      'res.mistake': '{n} mistake made',
+      'res.mistakes': '{n} mistakes made',
+      'res.answered1': '{n} correct answer',
+      'res.answered': '{n} correct answers',
+      'rate.fast': 'Lightning fast! 🔥',
+      'rate.nice': 'Nice speed! Keep going!',
+      'rate.keep': 'Keep practising!',
+    },
+    ar: {
+      'title': 'لعبة الإطار العشري',
+      'info1': 'الإطار العشري هو إطار مستطيل مقسوم إلى صفّين من خمسة لعرض الأعداد الأقل من أو تساوي ١٠.',
+      'info2': 'يمكن ملؤه بطرق مختلفة لتمثيل أعداد مختلفة.',
+      'btn.playGame': 'لعبة<br>عادية',
+      'btn.speedGame': 'لعبة<br>سريعة',
+      'btn.menu': 'القائمة',
+      'btn.menu2': 'القائمة',
+      'btn.playAgain': 'العب مرة أخرى',
+      'speed.title': 'اللعبة السريعة',
+      'speed.desc': 'أجب بأسرع ما يمكنك! شاهد كم سؤالًا تستطيع الإجابة عنه بشكل صحيح قبل انتهاء الوقت.',
+      'speed.badge1': 'لعبة<br>سريعة ١',
+      'speed.opt1': 'طابِق الإطار العشري مع الرقم الصحيح',
+      'speed.badge2': 'لعبة<br>سريعة ٢',
+      'speed.opt2': 'طابِق الإطار العشري مع الرقم الصحيح<br>طابِق الإطار العشري مع الوحدات الفارغة',
+      'speed.badge3': 'لعبة<br>سريعة ٣',
+      'speed.opt3': 'كل أنواع المرح الثلاثة للإطار العشري!',
+      'q.type1': 'طابِق الإطار العشري<br>مع الرقم الصحيح',
+      'q.type2': 'طابِق الإطار العشري<br>مع الوحدات الفارغة',
+      'q.type3': 'كم نقطة إضافية<br>لملء الإطار؟',
+      'res.perfect': 'مثالي!',
+      'res.great': 'عمل رائع!',
+      'res.welldone': 'أحسنت!',
+      'res.timesUp': 'انتهى الوقت!',
+      'res.completed': 'أكملت جميع الأسئلة العشرة!',
+      'res.noMistakes': 'بلا أخطاء — رائع!',
+      'res.mistake': 'خطأ واحد',
+      'res.mistakes': '{n} أخطاء',
+      'res.answered1': 'إجابة صحيحة واحدة',
+      'res.answered': '{n} إجابات صحيحة',
+      'rate.fast': 'سريع كالبرق! 🔥',
+      'rate.nice': 'سرعة جيدة! واصل!',
+      'rate.keep': 'واصل التدريب!',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-render the dynamic (JS-generated) text on the current screen.
+  function refreshDynamic() {
+    if (typeof G === 'undefined') return;
+    // Live question prompt
+    const qt = document.getElementById('question-text');
+    if (qt && document.getElementById('scr-game').classList.contains('active') && G.qType) {
+      qt.innerHTML = G.qType === 1 ? window.t('q.type1')
+                   : G.qType === 2 ? window.t('q.type2')
+                   : window.t('q.type3');
+    }
+    // Result screen — re-run showResult to rebuild all its text in the new language.
+    if (G._resultShown &&
+        document.getElementById('scr-result').classList.contains('active') &&
+        typeof showResult === 'function') {
+      showResult();
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 <script>
 // ── UTILS ─────────────────────────────────────────────────────
 
@@ -740,11 +902,11 @@ function renderQ() {
   // Question text
   const qt = document.getElementById('question-text');
   if (G.qType === 1) {
-    qt.innerHTML = 'Match the 10 frame<br>with the correct number';
+    qt.innerHTML = t('q.type1');
   } else if (G.qType === 2) {
-    qt.innerHTML = 'Match the 10 frame<br>with the empty units';
+    qt.innerHTML = t('q.type2');
   } else {
-    qt.innerHTML = 'How many more dots<br>to fill the frame?';
+    qt.innerHTML = t('q.type3');
   }
 
   // Choices: 2 top, 3 bottom
@@ -802,26 +964,28 @@ function handleChoice(btn, val) {
 
 function showResult() {
   show('scr-result');
+  // Remember the inputs so the language toggle can re-render this screen.
+  G._resultShown = true;
 
   if (G.mode === 'play') {
     const m = G.mistakes;
     document.getElementById('result-header').textContent =
-      m === 0 ? 'Perfect!' : m <= 3 ? 'Great Job!' : 'Well Done!';
+      m === 0 ? t('res.perfect') : m <= 3 ? t('res.great') : t('res.welldone');
     document.getElementById('result-stars').textContent =
       m === 0 ? '⭐⭐⭐' : m <= 4 ? '⭐⭐' : '⭐';
-    document.getElementById('result-score').textContent =
-      'You completed all 10 questions!';
+    document.getElementById('result-score').textContent = t('res.completed');
     document.getElementById('result-label').textContent =
-      m === 0 ? 'No mistakes — amazing!' : `${m} mistake${m !== 1 ? 's' : ''} made`;
+      m === 0 ? t('res.noMistakes')
+              : t(m === 1 ? 'res.mistake' : 'res.mistakes', { n: m });
   } else {
     const s = G.score;
-    document.getElementById('result-header').textContent = "Time's Up!";
+    document.getElementById('result-header').textContent = t('res.timesUp');
     document.getElementById('result-stars').textContent =
       s >= 18 ? '⭐⭐⭐' : s >= 10 ? '⭐⭐' : '⭐';
     document.getElementById('result-score').textContent =
-      `${s} correct answer${s !== 1 ? 's' : ''}`;
+      t(s === 1 ? 'res.answered1' : 'res.answered', { n: s });
     document.getElementById('result-label').textContent =
-      s >= 18 ? 'Lightning fast! 🔥' : s >= 10 ? 'Nice speed! Keep going!' : 'Keep practising!';
+      s >= 18 ? t('rate.fast') : s >= 10 ? t('rate.nice') : t('rate.keep');
   }
 }
 

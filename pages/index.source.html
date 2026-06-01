@@ -312,6 +312,36 @@ body::before {
 .cc .tag        { background: #fce8c0; color: #8a5a18; }
 .cc .play-btn   { background: linear-gradient(135deg,#f0a830,#8a5a18); color: #ffffff; --btn-glow:rgba(138,90,24,.55); }
 
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed; top: 16px; right: 16px; z-index: 200;
+  display: inline-flex; gap: 2px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 22px; padding: 3px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.3);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: 16px; }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 14px;
+  min-width: 38px; padding: 6px 12px;
+  border: none; border-radius: 18px;
+  background: transparent; color: rgba(255,255,255,.65);
+  cursor: pointer; transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #1ee4d6, #18d0a8);
+  color: #0d1b35;
+  box-shadow: 0 2px 8px rgba(30,228,214,.35);
+}
+
+/* ── RTL TWEAKS ── */
+[dir="rtl"] body { direction: rtl; }
+[dir="rtl"] .card-desc,
+[dir="rtl"] .card-title { text-align: right; }
+
 /* ── FOOTER ── */
 footer {
   margin-top: 52px;
@@ -324,11 +354,15 @@ footer {
 </head>
 <body>
 
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
+
 <header class="brand-header">
   <div class="brand-wordmark" aria-label="Smart Go">
     <div class="brand-name">SMART <span class="accent">GO</span></div>
   </div>
-  <p class="page-sub">Educational games for curious minds</p>
+  <p class="page-sub" data-i18n="brand.sub">Educational games for curious minds</p>
 </header>
 
 <div class="games-grid">
@@ -405,21 +439,21 @@ footer {
 
         <!-- Label -->
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.25)"/>
-        <text x="190" y="192" fill="rgba(255,255,255,.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Drag animals to build the food chain</text>
+        <text data-i18n="fc.svg" x="190" y="192" fill="rgba(255,255,255,.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Drag animals to build the food chain</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🌿 Food Chain Game</div>
-      <div class="card-desc">Place the animals in the correct order — from producer to top predator! Build 5 different food chains across forest, ocean, grassland ecosystems and more.</div>
+      <div class="card-title" data-i18n="fc.title">🌿 Food Chain Game</div>
+      <div class="card-desc" data-i18n="fc.desc">Place the animals in the correct order — from producer to top predator! Build 5 different food chains across forest, ocean, grassland ecosystems and more.</div>
       <div class="card-tags">
-        <span class="tag">Drag &amp; Drop</span>
-        <span class="tag">5 Levels</span>
-        <span class="tag">Ecosystems</span>
-        <span class="tag">Science</span>
+        <span class="tag" data-i18n="tag.dragdrop">Drag &amp; Drop</span>
+        <span class="tag" data-i18n="fc.tag.levels">5 Levels</span>
+        <span class="tag" data-i18n="fc.tag.eco">Ecosystems</span>
+        <span class="tag" data-i18n="tag.science">Science</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="food_chain_game/">▶ Play Now!</a>
+      <a class="play-btn" href="food_chain_game/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -498,26 +532,26 @@ footer {
 
         <!-- Question bubble -->
         <rect x="238" y="115" width="108" height="42" rx="10" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
-        <text x="292" y="131" fill="rgba(255,255,255,.9)" font-size="12" text-anchor="middle" font-family="Arial">What time does</text>
-        <text x="292" y="148" fill="rgba(255,255,255,.9)" font-size="12" text-anchor="middle" font-family="Arial">the clock show?</text>
+        <text data-i18n="ot.svg.q1" x="292" y="131" fill="rgba(255,255,255,.9)" font-size="12" text-anchor="middle" font-family="Arial">What time does</text>
+        <text data-i18n="ot.svg.q2" x="292" y="148" fill="rgba(255,255,255,.9)" font-size="12" text-anchor="middle" font-family="Arial">the clock show?</text>
 
         <!-- Bottom bar -->
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.28)"/>
-        <text x="190" y="192" fill="rgba(255,255,255,.9)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Drag the clock hands to the right time</text>
+        <text data-i18n="ot.svg" x="190" y="192" fill="rgba(255,255,255,.9)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Drag the clock hands to the right time</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">⏰ On Time!</div>
-      <div class="card-desc">Read the clock and drag the hands to match the right time! Progress through 4 difficulty levels from whole hours to precise minute challenges.</div>
+      <div class="card-title" data-i18n="ot.title">⏰ On Time!</div>
+      <div class="card-desc" data-i18n="ot.desc">Read the clock and drag the hands to match the right time! Progress through 4 difficulty levels from whole hours to precise minute challenges.</div>
       <div class="card-tags">
-        <span class="tag">Drag &amp; Drop</span>
-        <span class="tag">4 Levels</span>
-        <span class="tag">Clock Reading</span>
-        <span class="tag">Math</span>
+        <span class="tag" data-i18n="tag.dragdrop">Drag &amp; Drop</span>
+        <span class="tag" data-i18n="ot.tag.levels">4 Levels</span>
+        <span class="tag" data-i18n="ot.tag.clock">Clock Reading</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="on_time/">▶ Play Now!</a>
+      <a class="play-btn" href="on_time/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -601,21 +635,21 @@ footer {
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.25)"/>
         <text x="190" y="192" fill="rgba(255,255,255,.92)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
-              text-anchor="middle">Click the correct number for the 10 frame</text>
+              text-anchor="middle" data-i18n="tfm.svg">Click the correct number for the 10 frame</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🔢 10 Frame Math Game</div>
-      <div class="card-desc">Count the dots in the ten frame and pick the right number! Play at your own pace or race the clock across 3 speed game modes — perfect for building number sense.</div>
+      <div class="card-title" data-i18n="tfm.title">🔢 10 Frame Math Game</div>
+      <div class="card-desc" data-i18n="tfm.desc">Count the dots in the ten frame and pick the right number! Play at your own pace or race the clock across 3 speed game modes — perfect for building number sense.</div>
       <div class="card-tags">
-        <span class="tag">Click to Answer</span>
-        <span class="tag">3 Speed Modes</span>
-        <span class="tag">Counting</span>
-        <span class="tag">Math</span>
+        <span class="tag" data-i18n="tfm.tag.click">Click to Answer</span>
+        <span class="tag" data-i18n="tfm.tag.speed">3 Speed Modes</span>
+        <span class="tag" data-i18n="tfm.tag.count">Counting</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="ten_frame_math_game/">▶ Play Now!</a>
+      <a class="play-btn" href="ten_frame_math_game/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -2502,10 +2536,112 @@ footer {
 </div>
 
 <footer>
-  <p>Educational Games Collection</p>
+  <p data-i18n="footer">Educational Games Collection</p>
 </footer>
 
 <script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'brand.sub': 'Educational games for curious minds',
+      'footer': 'Educational Games Collection',
+      'btn.play': '▶ Play Now!',
+      'tag.dragdrop': 'Drag & Drop',
+      'tag.math': 'Math',
+      'tag.science': 'Science',
+      // Food Chain card
+      'fc.title': '🌿 Food Chain Game',
+      'fc.desc': 'Place the animals in the correct order — from producer to top predator! Build 5 different food chains across forest, ocean, grassland ecosystems and more.',
+      'fc.tag.levels': '5 Levels',
+      'fc.tag.eco': 'Ecosystems',
+      'fc.svg': 'Drag animals to build the food chain',
+      // On Time card
+      'ot.title': '⏰ On Time!',
+      'ot.desc': 'Read the clock and drag the hands to match the right time! Progress through 4 difficulty levels from whole hours to precise minute challenges.',
+      'ot.tag.levels': '4 Levels',
+      'ot.tag.clock': 'Clock Reading',
+      'ot.svg.q1': 'What time does',
+      'ot.svg.q2': 'the clock show?',
+      'ot.svg': 'Drag the clock hands to the right time',
+      // 10 Frame card
+      'tfm.title': '🔢 10 Frame Math Game',
+      'tfm.desc': 'Count the dots in the ten frame and pick the right number! Play at your own pace or race the clock across 3 speed game modes — perfect for building number sense.',
+      'tfm.tag.click': 'Click to Answer',
+      'tfm.tag.speed': '3 Speed Modes',
+      'tfm.tag.count': 'Counting',
+      'tfm.svg.q1': 'Match the 10 frame',
+      'tfm.svg.q2': 'with the correct number',
+      'tfm.svg': 'Click the correct number for the 10 frame',
+    },
+    ar: {
+      'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
+      'footer': 'مجموعة الألعاب التعليمية',
+      'btn.play': 'العب الآن! ◀',
+      'tag.dragdrop': 'سحب وإفلات',
+      'tag.math': 'رياضيات',
+      'tag.science': 'علوم',
+      // Food Chain card
+      'fc.title': '🌿 لعبة السلسلة الغذائية',
+      'fc.desc': 'رتّب الحيوانات بالترتيب الصحيح — من المُنتِج إلى المفترس الأعلى! ابنِ ٥ سلاسل غذائية مختلفة عبر بيئات الغابة والمحيط والمراعي وأكثر.',
+      'fc.tag.levels': '٥ مستويات',
+      'fc.tag.eco': 'النظم البيئية',
+      'fc.svg': 'اسحب الحيوانات لبناء السلسلة الغذائية',
+      // On Time card
+      'ot.title': '⏰ في الوقت المحدد!',
+      'ot.desc': 'اقرأ الساعة واسحب عقاربها لتطابق الوقت الصحيح! تقدّم عبر ٤ مستويات صعوبة من الساعات الكاملة إلى تحديات الدقائق الدقيقة.',
+      'ot.tag.levels': '٤ مستويات',
+      'ot.tag.clock': 'قراءة الساعة',
+      'ot.svg.q1': 'ما الوقت الذي',
+      'ot.svg.q2': 'تعرضه الساعة؟',
+      'ot.svg': 'اسحب عقارب الساعة إلى الوقت الصحيح',
+      // 10 Frame card
+      'tfm.title': '🔢 لعبة الإطار العشري',
+      'tfm.desc': 'عُدّ النقاط في الإطار العشري واختر الرقم الصحيح! العب على مهلك أو سابق الوقت عبر ٣ أنماط سريعة — مثالية لبناء الحسّ العددي.',
+      'tfm.tag.click': 'انقر للإجابة',
+      'tfm.tag.speed': '٣ أنماط سريعة',
+      'tfm.tag.count': 'العدّ',
+      'tfm.svg.q1': 'طابِق الإطار العشري',
+      'tfm.svg.q2': 'مع الرقم الصحيح',
+      'tfm.svg': 'انقر الرقم الصحيح للإطار العشري',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+
+  function t(key) {
+    return (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+         : (I18N.en[key] != null ? I18N.en[key] : key);
+  }
+
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  function setLang(l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyI18n();
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-lang]');
+    if (btn) setLang(btn.getAttribute('data-lang'));
+  });
+
+  applyI18n();
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')

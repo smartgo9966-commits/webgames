@@ -348,43 +348,46 @@
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage">
 <div class="game-wrap">
 
   <!-- ════════════════ MAIN MENU ════════════════ -->
   <div id="screen-menu" class="screen active">
-    <div class="game-title">ON TIME!</div>
+    <div class="game-title" data-i18n="title">ON TIME!</div>
     <div class="menu-body">
 
       <div class="levels-panel">
         <div class="level-row" onclick="startLevel(1)">
-          <div class="level-badge">LEVEL 1</div>
-          <div class="level-desc">Set the hour hand on a clock!</div>
+          <div class="level-badge" data-i18n="level1.badge">LEVEL 1</div>
+          <div class="level-desc" data-i18n="level1.desc">Set the hour hand on a clock!</div>
         </div>
         <div class="level-row" onclick="startLevel(2)">
-          <div class="level-badge">LEVEL 2</div>
-          <div class="level-desc">Set the clock's hour + minute hands (easy)</div>
+          <div class="level-badge" data-i18n="level2.badge">LEVEL 2</div>
+          <div class="level-desc" data-i18n="level2.desc">Set the clock's hour + minute hands (easy)</div>
         </div>
         <div class="level-row" onclick="startLevel(3)">
-          <div class="level-badge">LEVEL 3</div>
-          <div class="level-desc">Set the clock's hour + minute hands (medium)</div>
+          <div class="level-badge" data-i18n="level3.badge">LEVEL 3</div>
+          <div class="level-desc" data-i18n="level3.desc">Set the clock's hour + minute hands (medium)</div>
         </div>
         <div class="level-row" onclick="startLevel(4)">
-          <div class="level-badge">LEVEL 4</div>
-          <div class="level-desc">Set the clock's hour + minute hands (advanced)</div>
+          <div class="level-badge" data-i18n="level4.badge">LEVEL 4</div>
+          <div class="level-desc" data-i18n="level4.desc">Set the clock's hour + minute hands (advanced)</div>
         </div>
       </div>
 
       <div class="instr-panel">
-        <div class="instr-heading">Instructions</div>
-        <div class="instr-text">
+        <div class="instr-heading" data-i18n="instr.heading">Instructions</div>
+        <div class="instr-text" data-i18n="instr.text">
           CLICK + DRAG THE HANDS ON THE CLOCK TO SET THE CLOCK TO THE CORRECT TIME TO ANSWER THE QUESTIONS.
         </div>
         <div class="instr-bottom">
           <canvas id="demo-clock" width="155" height="155"></canvas>
           <div class="hint-bubble">
-            <div class="hint-label">HINT:</div>
-            <div class="hint-text">THE CLOCK ON THE LEFT SHOWS 1:30. NOTICE THE HOUR HAND IS HALFWAY BETWEEN THE ONE AND THE TWO.</div>
+            <div class="hint-label" data-i18n="hint.label">HINT:</div>
+            <div class="hint-text" data-i18n="hint.text">THE CLOCK ON THE LEFT SHOWS 1:30. NOTICE THE HOUR HAND IS HALFWAY BETWEEN THE ONE AND THE TWO.</div>
           </div>
         </div>
       </div>
@@ -394,7 +397,7 @@
 
   <!-- ════════════════ GAME SCREEN ════════════════ -->
   <div id="screen-game" class="screen">
-    <button class="btn-menu" onclick="goToMenu()">MENU</button>
+    <button class="btn-menu" onclick="goToMenu()" data-i18n="btn.menu">MENU</button>
 
     <div class="progress-box">
       <div id="progress-text">1 OF 10</div>
@@ -405,14 +408,14 @@
 
     <div class="instr-banner" id="instr-banner">SET THE CLOCK'S HANDS TO 7:00.</div>
 
-    <button class="btn-check" onclick="checkAnswer()">CHECK</button>
+    <button class="btn-check" onclick="checkAnswer()" data-i18n="btn.check">CHECK</button>
 
     <div class="feedback-overlay" id="feedback-overlay">
       <div class="feedback-card" id="feedback-card">
         <div class="feedback-emoji" id="feedback-emoji">⭐</div>
         <div class="feedback-title" id="feedback-title">Correct!</div>
         <div class="feedback-detail" id="feedback-detail"></div>
-        <button class="btn-next" onclick="nextQuestion()">NEXT →</button>
+        <button class="btn-next" onclick="nextQuestion()" data-i18n="btn.next">NEXT →</button>
       </div>
     </div>
   </div>
@@ -420,16 +423,135 @@
   <!-- ════════════════ END SCREEN ════════════════ -->
   <div id="screen-end" class="screen">
     <div class="game-title end-title" id="end-title">WELL DONE!</div>
-    <div class="end-score">Score: <span id="final-score">0</span> / 10</div>
+    <div class="end-score"><span data-i18n="score.label">Score:</span> <span id="final-score">0</span> / <span id="final-total">10</span></div>
     <div class="end-stars" id="end-stars">⭐⭐⭐</div>
     <div class="end-btns">
-      <button class="btn-large" onclick="replayLevel()">PLAY AGAIN</button>
-      <button class="btn-large" onclick="goToMenu()">MAIN MENU</button>
+      <button class="btn-large" onclick="replayLevel()" data-i18n="btn.playagain">PLAY AGAIN</button>
+      <button class="btn-large" onclick="goToMenu()" data-i18n="btn.mainmenu">MAIN MENU</button>
     </div>
   </div>
 
 </div>
 </div>
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'ON TIME!',
+      'level1.badge': 'LEVEL 1', 'level1.desc': 'Set the hour hand on a clock!',
+      'level2.badge': 'LEVEL 2', 'level2.desc': "Set the clock's hour + minute hands (easy)",
+      'level3.badge': 'LEVEL 3', 'level3.desc': "Set the clock's hour + minute hands (medium)",
+      'level4.badge': 'LEVEL 4', 'level4.desc': "Set the clock's hour + minute hands (advanced)",
+      'instr.heading': 'Instructions',
+      'instr.text': 'CLICK + DRAG THE HANDS ON THE CLOCK TO SET THE CLOCK TO THE CORRECT TIME TO ANSWER THE QUESTIONS.',
+      'hint.label': 'HINT:',
+      'hint.text': 'THE CLOCK ON THE LEFT SHOWS 1:30. NOTICE THE HOUR HAND IS HALFWAY BETWEEN THE ONE AND THE TWO.',
+      'btn.menu': 'MENU', 'btn.check': 'CHECK', 'btn.next': 'NEXT →',
+      'btn.playagain': 'PLAY AGAIN', 'btn.mainmenu': 'MAIN MENU',
+      'score.label': 'Score:',
+      'progress': '{n} OF {total}',
+      'banner.hour': 'SET THE HOUR HAND TO {time}.',
+      'banner.both': "SET THE CLOCK'S HANDS TO {time}.",
+      'fb.correct': 'Correct!',
+      'fb.wrong': 'Not quite!',
+      'fb.detail': 'The correct time was {time}',
+      'res.perfect': 'PERFECT!', 'res.excellent': 'EXCELLENT!', 'res.welldone': 'WELL DONE!',
+      'res.goodtry': 'GOOD TRY!', 'res.practice': 'KEEP PRACTICING!',
+    },
+    ar: {
+      'title': 'في الوقت المحدد!',
+      'level1.badge': 'المستوى ١', 'level1.desc': 'اضبط عقرب الساعات على الساعة!',
+      'level2.badge': 'المستوى ٢', 'level2.desc': 'اضبط عقربي الساعات والدقائق (سهل)',
+      'level3.badge': 'المستوى ٣', 'level3.desc': 'اضبط عقربي الساعات والدقائق (متوسط)',
+      'level4.badge': 'المستوى ٤', 'level4.desc': 'اضبط عقربي الساعات والدقائق (متقدم)',
+      'instr.heading': 'التعليمات',
+      'instr.text': 'انقر واسحب عقارب الساعة لضبطها على الوقت الصحيح للإجابة عن الأسئلة.',
+      'hint.label': 'تلميح:',
+      'hint.text': 'الساعة على اليسار تعرض ١:٣٠. لاحظ أن عقرب الساعات في منتصف المسافة بين الواحدة والاثنتين.',
+      'btn.menu': 'القائمة', 'btn.check': 'تحقّق', 'btn.next': 'التالي →',
+      'btn.playagain': 'العب مرة أخرى', 'btn.mainmenu': 'القائمة الرئيسية',
+      'score.label': 'النتيجة:',
+      'progress': '{n} من {total}',
+      'banner.hour': 'اضبط عقرب الساعات على {time}.',
+      'banner.both': 'اضبط عقارب الساعة على {time}.',
+      'fb.correct': 'صحيح!',
+      'fb.wrong': 'ليس تمامًا!',
+      'fb.detail': 'الوقت الصحيح كان {time}',
+      'res.perfect': 'مثالي!', 'res.excellent': 'ممتاز!', 'res.welldone': 'أحسنت!',
+      'res.goodtry': 'محاولة جيدة!', 'res.practice': 'واصل التدريب!',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-derive dynamic (JS-generated) text from current game state G.
+  function refreshDynamic() {
+    if (typeof G === 'undefined' || !G.questions) return;
+    const q = G.questions[G.current];
+    // Game screen banner + progress
+    const banner = document.getElementById('instr-banner');
+    if (banner && q) {
+      banner.textContent = (G.level === 1)
+        ? window.t('banner.hour', { time: fmtTime(q.h, q.m) })
+        : window.t('banner.both', { time: fmtTime(q.h, q.m) });
+    }
+    const progEl = document.getElementById('progress-text');
+    if (progEl) progEl.textContent = window.t('progress', { n: G.current + 1, total: 10 });
+    // Feedback overlay (if visible — this game uses the 'active' class)
+    const overlay = document.getElementById('feedback-overlay');
+    if (overlay && overlay.classList.contains('active') && q) {
+      const title = document.getElementById('feedback-title');
+      const detail = document.getElementById('feedback-detail');
+      if (G.lastOk) { title.textContent = window.t('fb.correct'); detail.textContent = ''; }
+      else { title.textContent = window.t('fb.wrong'); detail.textContent = window.t('fb.detail', { time: fmtTime(q.h, q.m) }); }
+    }
+    // End screen result title
+    if (G.resultKey && document.getElementById('screen-end').classList.contains('active')) {
+      document.getElementById('end-title').textContent = window.t(G.resultKey);
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 <script>
 // ══════════════════════════════════════════
 //  MATH HELPERS
@@ -612,13 +734,12 @@ function startLevel(level) {
 
 function loadQuestion() {
   const q = G.questions[G.current];
-  document.getElementById('progress-text').textContent  = `${G.current + 1} OF 10`;
+  document.getElementById('progress-text').textContent  = t('progress', { n: G.current + 1, total: 10 });
   document.getElementById('score-display').textContent  = G.score;
 
-  const t = fmtTime(q.h, q.m);
   document.getElementById('instr-banner').textContent =
-    G.level === 1 ? `SET THE HOUR HAND TO ${t}.`
-                  : `SET THE CLOCK'S HANDS TO ${t}.`;
+    G.level === 1 ? t('banner.hour', { time: fmtTime(q.h, q.m) })
+                  : t('banner.both', { time: fmtTime(q.h, q.m) });
 
   G.hDeg = 0; G.mDeg = 0;
   drawClock(gameCanvas(), G.hDeg, G.mDeg, G.level > 1);
@@ -637,6 +758,7 @@ function checkAnswer() {
 
   if (correct) G.score++;
   document.getElementById('score-display').textContent = G.score;
+  G.lastOk = correct;
 
   const card   = document.getElementById('feedback-card');
   const title  = document.getElementById('feedback-title');
@@ -646,15 +768,15 @@ function checkAnswer() {
   if (correct) {
     card.className    = 'feedback-card';
     title.className   = 'feedback-title';
-    title.textContent = 'Correct!';
+    title.textContent = t('fb.correct');
     emoji.textContent = '⭐';
     detail.textContent = '';
   } else {
     card.className    = 'feedback-card wrong';
     title.className   = 'feedback-title wrong';
-    title.textContent = 'Not quite!';
+    title.textContent = t('fb.wrong');
     emoji.textContent = '❌';
-    detail.textContent = `The correct time was ${fmtTime(q.h, q.m)}`;
+    detail.textContent = t('fb.detail', { time: fmtTime(q.h, q.m) });
   }
 
   document.getElementById('feedback-overlay').classList.add('active');
@@ -669,15 +791,18 @@ function nextQuestion() {
 
 function showEndScreen() {
   document.getElementById('final-score').textContent = G.score;
+  const totEl = document.getElementById('final-total');
+  if (totEl) totEl.textContent = '10';
 
-  let msg, stars;
-  if      (G.score === 10) { msg = 'PERFECT!';        stars = '⭐⭐⭐'; }
-  else if (G.score >= 8)   { msg = 'EXCELLENT!';      stars = '⭐⭐⭐'; }
-  else if (G.score >= 6)   { msg = 'WELL DONE!';      stars = '⭐⭐'; }
-  else if (G.score >= 4)   { msg = 'GOOD TRY!';       stars = '⭐'; }
-  else                     { msg = 'KEEP PRACTICING!'; stars = ''; }
+  let key, stars;
+  if      (G.score === 10) { key = 'res.perfect';   stars = '⭐⭐⭐'; }
+  else if (G.score >= 8)   { key = 'res.excellent'; stars = '⭐⭐⭐'; }
+  else if (G.score >= 6)   { key = 'res.welldone';  stars = '⭐⭐'; }
+  else if (G.score >= 4)   { key = 'res.goodtry';   stars = '⭐'; }
+  else                     { key = 'res.practice';  stars = ''; }
+  G.resultKey = key;
 
-  document.getElementById('end-title').textContent = msg;
+  document.getElementById('end-title').textContent = t(key);
   document.getElementById('end-stars').textContent = stars;
   showScreen('screen-end');
 }

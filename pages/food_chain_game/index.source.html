@@ -276,10 +276,35 @@ html, body {
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed; top: 12px; right: 12px; z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: 12px; }
+[dir="rtl"] .sg-badge   { left: auto; right: 12px; }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage">
 <div id="game-frame">
 
@@ -287,7 +312,7 @@ html, body {
   <div id="screen-loading" class="screen active">
     <div class="loading-card">
       <div class="loading-spinner"></div>
-      <div class="loading-text">Food Chain Game</div>
+      <div class="loading-text" data-i18n="loading">Food Chain Game</div>
       <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
       <div id="loading-label">0%</div>
     </div>
@@ -295,15 +320,15 @@ html, body {
 
   <!-- START -->
   <div id="screen-start" class="screen">
-    <h1 class="start-title">🌿 Food Chain Game</h1>
-    <p class="start-subtitle">Can you put the food chain in the right order?</p>
+    <h1 class="start-title" data-i18n="start.title">🌿 Food Chain Game</h1>
+    <p class="start-subtitle" data-i18n="start.subtitle">Can you put the food chain in the right order?</p>
     <div class="start-card">
-      <strong>How to Play</strong>
-      <p>Drag the animals into the correct slots to build the food chain — from the producer to the top predator!</p>
-      <p class="hint">Wrong placements won't stick. Try for zero mistakes!</p>
+      <strong data-i18n="howto.heading">How to Play</strong>
+      <p data-i18n="howto.body">Drag the animals into the correct slots to build the food chain — from the producer to the top predator!</p>
+      <p class="hint" data-i18n="howto.hint">Wrong placements won't stick. Try for zero mistakes!</p>
     </div>
-    <div class="chain-preview">5 levels: Forest · Grassland · Ocean · Mixed · Full Cycle</div>
-    <button class="play-btn" onclick="startGame()">▶ Play Now!</button>
+    <div class="chain-preview" data-i18n="preview">5 levels: Forest · Grassland · Ocean · Mixed · Full Cycle</div>
+    <button class="play-btn" onclick="startGame()" data-i18n="btn.play">▶ Play Now!</button>
   </div>
 
   <!-- GAME -->
@@ -313,15 +338,15 @@ html, body {
         <span class="level-num" id="level-num">LEVEL 1 OF 5</span>
         <span class="level-name" id="level-name">Simple Chain</span>
       </div>
-      <div class="mistake-badge">Mistakes:<span class="m-count" id="mistake-count">0</span></div>
+      <div class="mistake-badge"><span data-i18n="mistakes.label">Mistakes:</span><span class="m-count" id="mistake-count">0</span></div>
     </div>
     <div class="game-body">
       <div class="chain-wrap">
-        <div class="section-label">Build the food chain</div>
+        <div class="section-label" data-i18n="sec.build">Build the food chain</div>
         <div id="chain-area" class="chain-area"></div>
       </div>
       <div class="cards-wrap">
-        <div class="section-label">Drag these animals</div>
+        <div class="section-label" data-i18n="sec.drag">Drag these animals</div>
         <div id="cards-area" class="cards-area"></div>
       </div>
     </div>
@@ -343,13 +368,152 @@ html, body {
     <div class="finish-trophy">🏆</div>
     <h2 class="finish-title" id="finish-title">All 5 Chains Complete!</h2>
     <div class="all-chains-grid" id="all-chains-grid"></div>
-    <div class="finish-score">Total mistakes: <span id="final-mistakes">0</span></div>
+    <div class="finish-score"><span data-i18n="total.label">Total mistakes: </span><span id="final-mistakes">0</span></div>
     <div class="finish-rating" id="finish-rating"></div>
-    <button class="replay-btn" onclick="resetGame()">🔄 Play Again</button>
+    <button class="replay-btn" onclick="resetGame()" data-i18n="btn.playagain">🔄 Play Again</button>
   </div>
 
 </div>
 </div>
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'loading': 'Food Chain Game',
+      'start.title': '🌿 Food Chain Game',
+      'start.subtitle': 'Can you put the food chain in the right order?',
+      'howto.heading': 'How to Play',
+      'howto.body': 'Drag the animals into the correct slots to build the food chain — from the producer to the top predator!',
+      'howto.hint': "Wrong placements won't stick. Try for zero mistakes!",
+      'preview': '5 levels: Forest · Grassland · Ocean · Mixed · Full Cycle',
+      'btn.play': '▶ Play Now!',
+      'btn.playagain': '🔄 Play Again',
+      'btn.next': 'Next Level →',
+      'btn.seeResults': 'See Your Results! 🏆',
+      'mistakes.label': 'Mistakes:',
+      'sec.build': 'Build the food chain',
+      'sec.drag': 'Drag these animals',
+      'total.label': 'Total mistakes: ',
+      'cycle.hint': '← decomposer (returns nutrients to soil)',
+      'level.num': 'LEVEL {n} OF {total}',
+      'win.levelComplete': '{name} Complete!',
+      'win.perfect': '⭐ Perfect! No mistakes!',
+      'win.mistake': '{n} mistake on this level.',
+      'win.mistakes': '{n} mistakes on this level.',
+      'finish.titlePerfect': '🏆 Perfect Score! All 5 Chains Complete!',
+      'finish.title': '🎉 All 5 Food Chains Complete!',
+      'finish.rating0': '🌟🌟🌟 Food Chain Master!',
+      'finish.rating1': '🌟🌟 Food Chain Expert!',
+      'finish.rating2': '🌟 Food Chain Learner',
+    },
+    ar: {
+      'loading': 'لعبة السلسلة الغذائية',
+      'start.title': '🌿 لعبة السلسلة الغذائية',
+      'start.subtitle': 'هل تستطيع ترتيب السلسلة الغذائية بالترتيب الصحيح؟',
+      'howto.heading': 'طريقة اللعب',
+      'howto.body': 'اسحب الحيوانات إلى الخانات الصحيحة لبناء السلسلة الغذائية — من المُنتِج إلى المفترس الأعلى!',
+      'howto.hint': 'الوضع الخاطئ لن يثبت. حاول ألا ترتكب أي خطأ!',
+      'preview': '٥ مستويات: غابة · مراعٍ · محيط · مختلط · دورة كاملة',
+      'btn.play': 'العب الآن! ◀',
+      'btn.playagain': '🔄 العب مرة أخرى',
+      'btn.next': '← المستوى التالي',
+      'btn.seeResults': 'شاهد نتائجك! 🏆',
+      'mistakes.label': 'الأخطاء:',
+      'sec.build': 'ابنِ السلسلة الغذائية',
+      'sec.drag': 'اسحب هذه الحيوانات',
+      'total.label': 'إجمالي الأخطاء: ',
+      'cycle.hint': 'المُحلِّل (يعيد المغذيات إلى التربة) →',
+      'level.num': 'المستوى {n} من {total}',
+      'win.levelComplete': 'اكتمل {name}!',
+      'win.perfect': '⭐ ممتاز! بلا أخطاء!',
+      'win.mistake': 'خطأ واحد في هذا المستوى.',
+      'win.mistakes': '{n} أخطاء في هذا المستوى.',
+      'finish.titlePerfect': '🏆 نتيجة كاملة! اكتملت السلاسل الـ٥!',
+      'finish.title': '🎉 اكتملت السلاسل الغذائية الـ٥!',
+      'finish.rating0': '🌟🌟🌟 سيد السلاسل الغذائية!',
+      'finish.rating1': '🌟🌟 خبير السلاسل الغذائية!',
+      'finish.rating2': '🌟 متعلم السلاسل الغذائية',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-label the dynamic (JS-generated) text of whichever screen is showing,
+  // without disturbing the player's in-progress placements.
+  function refreshDynamic() {
+    const active = document.querySelector('.screen.active');
+    if (!active || typeof LEVELS === 'undefined') return;
+    const lv = LEVELS[typeof currentLvl === 'number' ? currentLvl : 0];
+
+    if (active.id === 'screen-game' && lv) {
+      const ln = document.getElementById('level-num');
+      const nm = document.getElementById('level-name');
+      if (ln) ln.textContent = window.t('level.num', { n: lv.id, total: LEVELS.length });
+      if (nm) nm.textContent = lv.icon + ' ' + lvlName(lv);
+      // Re-label cards still in the tray.
+      document.querySelectorAll('#cards-area .animal-card').forEach(card => {
+        const it = lv.chain.find(c => c.id === card.dataset.id);
+        const lbl = card.querySelector('.c-lbl');
+        if (it && lbl) lbl.textContent = itemLabel(it);
+      });
+      // Re-label animals already placed in slots.
+      document.querySelectorAll('#chain-area .slot.filled').forEach((slot, idx) => {
+        const it = lv.chain[+slot.dataset.index];
+        const lbl = slot.querySelector('.lbl');
+        if (it && lbl) lbl.textContent = itemLabel(it);
+      });
+      // Re-render the cycle hint if present.
+      const ch = document.querySelector('.cycle-hint');
+      if (ch) ch.textContent = window.t('cycle.hint');
+    } else if (active.id === 'screen-win' && typeof showWin === 'function') {
+      showWin();
+    } else if (active.id === 'screen-finish' && typeof showFinish === 'function') {
+      showFinish();
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  // Apply dir/lang immediately so first paint is correct.
+  applyStatic();
+})();
+</script>
 <script>
 /* ═══════════════════════════════════════════
    SVG ANIMAL ILLUSTRATIONS
@@ -659,58 +823,61 @@ mushrooms: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 ═══════════════════════════════════════════ */
 const LEVELS = [
   {
-    id: 1, name: "Simple Chain", icon: '🌿',
+    id: 1, name: "Simple Chain", nameAr: "سلسلة بسيطة", icon: '🌿',
     headerBg: '#2E7D32',
     chain: [
-      { id:'flower',      label:'Flower',      svgId:'flower' },
-      { id:'caterpillar', label:'Caterpillar', svgId:'caterpillar' },
-      { id:'bird',        label:'Bird',        svgId:'bird' },
+      { id:'flower',      label:'Flower',      labelAr:'زهرة',   svgId:'flower' },
+      { id:'caterpillar', label:'Caterpillar', labelAr:'يرقة',   svgId:'caterpillar' },
+      { id:'bird',        label:'Bird',        labelAr:'طائر',   svgId:'bird' },
     ]
   },
   {
-    id: 2, name: "Bigger Chain", icon: '🌾',
+    id: 2, name: "Bigger Chain", nameAr: "سلسلة أكبر", icon: '🌾',
     headerBg: '#BF360C',
     chain: [
-      { id:'acorns', label:'Acorns', svgId:'acorn' },
-      { id:'mouse',  label:'Mouse',  svgId:'mouse' },
-      { id:'snake',  label:'Snake',  svgId:'snake' },
-      { id:'hawk',   label:'Hawk',   svgId:'hawk' },
+      { id:'acorns', label:'Acorns', labelAr:'ثمار البلوط', svgId:'acorn' },
+      { id:'mouse',  label:'Mouse',  labelAr:'فأر',         svgId:'mouse' },
+      { id:'snake',  label:'Snake',  labelAr:'ثعبان',       svgId:'snake' },
+      { id:'hawk',   label:'Hawk',   labelAr:'صقر',         svgId:'hawk' },
     ]
   },
   {
-    id: 3, name: "Marine Chain", icon: '🌊',
+    id: 3, name: "Marine Chain", nameAr: "سلسلة بحرية", icon: '🌊',
     headerBg: '#01579B',
     chain: [
-      { id:'algae',      label:'Algae',      svgId:'algae' },
-      { id:'small_fish', label:'Small Fish', svgId:'small_fish' },
-      { id:'big_fish',   label:'Big Fish',   svgId:'big_fish' },
-      { id:'dolphin',    label:'Dolphin',    svgId:'dolphin' },
+      { id:'algae',      label:'Algae',      labelAr:'طحالب',      svgId:'algae' },
+      { id:'small_fish', label:'Small Fish', labelAr:'سمكة صغيرة', svgId:'small_fish' },
+      { id:'big_fish',   label:'Big Fish',   labelAr:'سمكة كبيرة', svgId:'big_fish' },
+      { id:'dolphin',    label:'Dolphin',    labelAr:'دلفين',      svgId:'dolphin' },
     ]
   },
   {
-    id: 4, name: "Mixed Chain", icon: '🌍',
+    id: 4, name: "Mixed Chain", nameAr: "سلسلة مختلطة", icon: '🌍',
     headerBg: '#4A148C',
     chain: [
-      { id:'flower2',     label:'Flower',     svgId:'red_flower' },
-      { id:'insect',      label:'Insect',     svgId:'insect' },
-      { id:'small_fish2', label:'Small Fish', svgId:'small_fish' },
-      { id:'big_fish2',   label:'Big Fish',   svgId:'big_fish' },
-      { id:'seagull',     label:'Seagull',    svgId:'seagull' },
+      { id:'flower2',     label:'Flower',     labelAr:'زهرة',       svgId:'red_flower' },
+      { id:'insect',      label:'Insect',     labelAr:'حشرة',       svgId:'insect' },
+      { id:'small_fish2', label:'Small Fish', labelAr:'سمكة صغيرة', svgId:'small_fish' },
+      { id:'big_fish2',   label:'Big Fish',   labelAr:'سمكة كبيرة', svgId:'big_fish' },
+      { id:'seagull',     label:'Seagull',    labelAr:'نورس',       svgId:'seagull' },
     ]
   },
   {
-    id: 5, name: "Full Cycle", icon: '♻️',
+    id: 5, name: "Full Cycle", nameAr: "الدورة الكاملة", icon: '♻️',
     headerBg: '#1B5E20',
     layoutType: 'cycle',
     chain: [
-      { id:'plant',       label:'Plant',       svgId:'plant' },
-      { id:'grasshopper', label:'Grasshopper', svgId:'grasshopper' },
-      { id:'lizard',      label:'Lizard',      svgId:'lizard' },
-      { id:'eagle',       label:'Eagle',       svgId:'eagle' },
-      { id:'mushrooms',   label:'Mushrooms',   svgId:'mushrooms' },
+      { id:'plant',       label:'Plant',       labelAr:'نبات',  svgId:'plant' },
+      { id:'grasshopper', label:'Grasshopper', labelAr:'جرادة', svgId:'grasshopper' },
+      { id:'lizard',      label:'Lizard',      labelAr:'سحلية', svgId:'lizard' },
+      { id:'eagle',       label:'Eagle',       labelAr:'نسر',   svgId:'eagle' },
+      { id:'mushrooms',   label:'Mushrooms',   labelAr:'فطر',   svgId:'mushrooms' },
     ]
   }
 ];
+// Active-language accessors for level/item names (fall back to English).
+function lvlName(lv) { return (window.SGLANG === 'ar' && lv.nameAr) ? lv.nameAr : lv.name; }
+function itemLabel(it) { return (window.SGLANG === 'ar' && it.labelAr) ? it.labelAr : it.label; }
 
 /* ═══════════════════════════════════════════
    STATE
@@ -757,8 +924,8 @@ function loadLevel() {
   slots = new Array(lv.chain.length).fill(null);
 
   document.getElementById('level-header').style.background = lv.headerBg;
-  document.getElementById('level-num').textContent  = `LEVEL ${lv.id} OF ${LEVELS.length}`;
-  document.getElementById('level-name').textContent = lv.icon + ' ' + lv.name;
+  document.getElementById('level-num').textContent  = t('level.num', { n: lv.id, total: LEVELS.length });
+  document.getElementById('level-name').textContent = lv.icon + ' ' + lvlName(lv);
   document.getElementById('mistake-count').textContent = totalMistakes;
 
   buildChainArea(lv);
@@ -790,7 +957,7 @@ function buildChainArea(lv) {
     bot.appendChild(mkSlot(4, lv));
     const hint = document.createElement('span');
     hint.className = 'cycle-hint';
-    hint.textContent = '← decomposer (returns nutrients to soil)';
+    hint.textContent = t('cycle.hint');
     bot.appendChild(hint);
     wrap.appendChild(top);
     wrap.appendChild(bot);
@@ -969,7 +1136,8 @@ function handleDrop(slotIndex) {
 ═══════════════════════════════════════════ */
 function showWin() {
   const lv = LEVELS[currentLvl];
-  document.getElementById('win-level-name').textContent = lv.icon + ' ' + lv.name + ' Complete!';
+  document.getElementById('win-level-name').textContent =
+    t('win.levelComplete', { name: lv.icon + ' ' + lvlName(lv) });
 
   const row = document.getElementById('win-chain-row');
   row.innerHTML = '';
@@ -977,7 +1145,7 @@ function showWin() {
     const d = document.createElement('div');
     d.className = 'win-animal';
     d.innerHTML = SVGS[item.svgId];
-    d.title = item.label;
+    d.title = itemLabel(item);
     row.appendChild(d);
     if (i < lv.chain.length - 1) {
       const a = document.createElement('span');
@@ -991,10 +1159,12 @@ function showWin() {
   });
 
   document.getElementById('win-sub').textContent =
-    lvlMistakes === 0 ? '⭐ Perfect! No mistakes!' : `${lvlMistakes} mistake${lvlMistakes>1?'s':''} on this level.`;
+    lvlMistakes === 0
+      ? t('win.perfect')
+      : t(lvlMistakes > 1 ? 'win.mistakes' : 'win.mistake', { n: lvlMistakes });
 
   document.getElementById('next-btn').textContent =
-    currentLvl === LEVELS.length - 1 ? 'See Your Results! 🏆' : 'Next Level →';
+    currentLvl === LEVELS.length - 1 ? t('btn.seeResults') : t('btn.next');
 
   showScreen('screen-win');
   launchConfetti();
@@ -1012,10 +1182,10 @@ function showFinish() {
   const m = totalMistakes;
   document.getElementById('final-mistakes').textContent = m;
   document.getElementById('finish-title').textContent =
-    m === 0 ? '🏆 Perfect Score! All 5 Chains Complete!' : '🎉 All 5 Food Chains Complete!';
+    m === 0 ? t('finish.titlePerfect') : t('finish.title');
   document.getElementById('finish-rating').textContent =
-    m === 0 ? '🌟🌟🌟 Food Chain Master!' :
-    m <= 5  ? '🌟🌟 Food Chain Expert!'   : '🌟 Food Chain Learner';
+    m === 0 ? t('finish.rating0') :
+    m <= 5  ? t('finish.rating1')  : t('finish.rating2');
 
   const grid = document.getElementById('all-chains-grid');
   grid.innerHTML = '';
@@ -1024,13 +1194,13 @@ function showFinish() {
     row.className = 'chain-row-summary';
     const lbl = document.createElement('span');
     lbl.className = 'chain-lbl';
-    lbl.textContent = lv.icon + ' ' + lv.name;
+    lbl.textContent = lv.icon + ' ' + lvlName(lv);
     row.appendChild(lbl);
     lv.chain.forEach((item, i) => {
       const e = document.createElement('div');
       e.className = 'se';
       e.innerHTML = SVGS[item.svgId];
-      e.title = item.label;
+      e.title = itemLabel(item);
       row.appendChild(e);
       if (i < lv.chain.length - 1) {
         const a = document.createElement('span');
