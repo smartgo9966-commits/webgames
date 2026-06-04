@@ -241,10 +241,50 @@ html,body{
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 
 <div class="fit-stage">
 <div class="stage-content">
@@ -255,7 +295,7 @@ html,body{
 <div id="scr-main">
   <!-- Title bar -->
   <div id="main-titlebar">
-    <div id="main-title">animal classification Paint &amp; Makes</div>
+    <div id="main-title" data-i18n="main.title">animal classification Paint &amp; Makes</div>
   </div>
 
   <!-- MAMMALS — brown tabby cat -->
@@ -286,7 +326,7 @@ html,body{
       <path d="M58,72 C76,63 80,48 70,40" fill="none" stroke="#CC8844" stroke-width="9" stroke-linecap="round"/>
       <path d="M58,72 C76,63 80,48 70,40" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    MAMMALS
+    <span data-i18n="cat.mammals">MAMMALS</span>
   </div>
 
   <!-- REPTILES — green turtle with yellow spots -->
@@ -308,7 +348,7 @@ html,body{
       <ellipse cx="46" cy="16" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(-55,46,16)"/>
       <ellipse cx="46" cy="64" rx="12" ry="6" fill="#338833" stroke="#000" stroke-width="2" transform="rotate(50,46,64)"/>
     </svg>
-    REPTILES
+    <span data-i18n="cat.reptiles">REPTILES</span>
   </div>
 
   <!-- BIRDS — dark blue crow with yellow beak -->
@@ -327,7 +367,7 @@ html,body{
       <line x1="32" y1="76" x2="24" y2="86" stroke="#000" stroke-width="3" stroke-linecap="round"/>
       <path d="M24,86 L16,90 M24,86 L20,92 M24,86 L30,92" stroke="#000" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    BIRDS
+    <span data-i18n="cat.birds">BIRDS</span>
   </div>
 
   <!-- AMPHIBIANS — bright green frog -->
@@ -350,7 +390,7 @@ html,body{
       <circle cx="60" cy="14" r="2" fill="#FFF"/>
       <path d="M23,38 Q39,48 55,38" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
     </svg>
-    AMPHIBIANS
+    <span data-i18n="cat.amphibians">AMPHIBIANS</span>
   </div>
 
   <!-- FISH — orange fish with scales -->
@@ -368,7 +408,7 @@ html,body{
       <circle cx="66" cy="20" r="5" fill="#000"/>
       <circle cx="64" cy="18" r="2" fill="#FFF"/>
     </svg>
-    FISH
+    <span data-i18n="cat.fish">FISH</span>
   </div>
 
   <!-- ALL — mixed colorful animals -->
@@ -386,10 +426,10 @@ html,body{
       <circle cx="76" cy="43" r="2.5" fill="#000"/>
       <circle cx="88" cy="43" r="2.5" fill="#000"/>
     </svg>
-    ALL
+    <span data-i18n="cat.all">ALL</span>
   </div>
 
-  <div id="main-credit">by JASMINE CHAPGAR</div>
+  <div id="main-credit" data-i18n-html="main.credit">by JASMINE CHAPGAR</div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -398,17 +438,17 @@ html,body{
 <div id="scr-paint">
   <!-- LEFT PANEL -->
   <div id="paint-left">
-    <div id="left-title">PAINT MENU</div>
+    <div id="left-title" data-i18n="paint.menu">PAINT MENU</div>
     <div id="left-tools">
       <!-- Clear button: red no-entry sign -->
-      <div class="tool-btn" title="Clear all" onclick="clearAll()">
+      <div class="tool-btn" title="Clear all" data-i18n-title="tip.clearall" onclick="clearAll()">
         <svg viewBox="0 0 36 36" width="36" height="36">
           <circle cx="18" cy="18" r="16" fill="#EE0000" stroke="#000" stroke-width="2.5"/>
           <rect x="5" y="15" width="26" height="6" rx="3" fill="#EEE" stroke="#000" stroke-width="1.2"/>
         </svg>
       </div>
       <!-- Pencil button -->
-      <div class="tool-btn active" title="Paint brush">
+      <div class="tool-btn active" title="Paint brush" data-i18n-title="tip.paintbrush">
         <svg viewBox="0 0 36 36" width="36" height="36">
           <rect x="13" y="3" width="10" height="21" rx="2" fill="#FFCC00" stroke="#000" stroke-width="1.8"/>
           <rect x="13" y="3" width="10" height="8" rx="2" fill="#FF8888" stroke="#000" stroke-width="1.8"/>
@@ -420,15 +460,15 @@ html,body{
     </div>
     <div id="color-preview"></div>
     <div id="palette-grid"></div>
-    <div id="drag-label">DRAG + DROP</div>
+    <div id="drag-label" data-i18n="drag.label">DRAG + DROP</div>
     <div id="sticker-src" draggable="true"></div>
-    <button id="btn-more" onclick="nextSticker()">◄ Click ► for more objects</button>
+    <button id="btn-more" onclick="nextSticker()" data-i18n="btn.more">◄ Click ► for more objects</button>
   </div>
 
   <!-- RIGHT PANEL -->
   <div id="paint-right">
     <div id="paint-topbar">
-      <button id="btn-back" onclick="goToMain()">← Menu</button>
+      <button id="btn-back" onclick="goToMain()" data-i18n="btn.back">← Menu</button>
       <span id="topbar-cat"></span>
     </div>
     <div id="paint-canvas-wrap"
@@ -441,6 +481,117 @@ html,body{
 
 </div>
 </div>
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  // Category labels (also used by the SVG scene titles + topbar via window.CAT / catLabel()).
+  window.CAT = {
+    mammals:    { en: 'MAMMALS',    ar: 'الثدييات' },
+    reptiles:   { en: 'REPTILES',   ar: 'الزواحف' },
+    birds:      { en: 'BIRDS',      ar: 'الطيور' },
+    amphibians: { en: 'AMPHIBIANS', ar: 'البرمائيات' },
+    fish:       { en: 'FISH',       ar: 'الأسماك' },
+    all:        { en: 'ALL',        ar: 'الكل' },
+  };
+  const I18N = {
+    en: {
+      'main.title': 'animal classification Paint & Makes',
+      'main.credit': 'by JASMINE CHAPGAR',
+      'cat.mammals': 'MAMMALS',
+      'cat.reptiles': 'REPTILES',
+      'cat.birds': 'BIRDS',
+      'cat.amphibians': 'AMPHIBIANS',
+      'cat.fish': 'FISH',
+      'cat.all': 'ALL',
+      'paint.menu': 'PAINT MENU',
+      'tip.clearall': 'Clear all',
+      'tip.paintbrush': 'Paint brush',
+      'drag.label': 'DRAG + DROP',
+      'btn.more': '◄ Click ► for more objects',
+      'btn.back': '← Menu',
+    },
+    ar: {
+      'main.title': 'تصنيف الحيوانات: لوّن واصنع',
+      'main.credit': 'بقلم JASMINE CHAPGAR',
+      'cat.mammals': 'الثدييات',
+      'cat.reptiles': 'الزواحف',
+      'cat.birds': 'الطيور',
+      'cat.amphibians': 'البرمائيات',
+      'cat.fish': 'الأسماك',
+      'cat.all': 'الكل',
+      'paint.menu': 'قائمة الرسم',
+      'tip.clearall': 'مسح الكل',
+      'tip.paintbrush': 'فرشاة الرسم',
+      'drag.label': 'اسحب + أفلت',
+      'btn.more': '◄ انقر ► لمزيد من العناصر',
+      'btn.back': 'القائمة →',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-label the open paint scene IN PLACE (SVG scene titles + topbar) so the
+  // user's coloring and placed stickers are preserved across a language switch.
+  function refreshDynamic() {
+    // Update every scene-title <text> node already in the SVG by its data-cat.
+    document.querySelectorAll('#animal-svg .scene-title[data-cat]').forEach(el => {
+      const id = el.getAttribute('data-cat');
+      if (typeof catLabel === 'function') el.textContent = catLabel(id);
+    });
+    // Update the topbar category label.
+    const tb = document.getElementById('topbar-cat');
+    if (tb && typeof curCat !== 'undefined' && curCat && typeof catLabel === 'function') {
+      tb.textContent = catLabel(curCat);
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 // ─── GLOBALS ──────────────────────────────────────────────────────────────────
@@ -708,15 +859,22 @@ function flowerSVG(x, y, r=10) {
   return petals + `<circle ${C} cx="${x}" cy="${y}" r="${r}" fill="white" ${ST}/>`;
 }
 
-function titleText(text) {
-  return `<text x="330" y="50" text-anchor="middle" font-family="Fredoka One,cursive" font-size="50"
-    fill="white" stroke="#000" stroke-width="4" paint-order="stroke">${text}</text>`;
+// Active-language category label (falls back to English). CAT map lives on window (set by the i18n IIFE).
+function catLabel(id) {
+  const c = (window.CAT) ? window.CAT[id] : null;
+  if (!c) return (id || '').toUpperCase();
+  return (window.SGLANG === 'ar' && c.ar) ? c.ar : c.en;
+}
+
+function titleText(catId) {
+  return `<text class="scene-title" data-cat="${catId}" x="330" y="50" text-anchor="middle" font-family="Fredoka One,cursive" font-size="50"
+    fill="white" stroke="#000" stroke-width="4" paint-order="stroke">${catLabel(catId)}</text>`;
 }
 
 // ─── SCENE: MAMMALS ──────────────────────────────────────────────────────────
 function buildMammalsSVG() {
   return `
-${titleText('MAMMALS')}
+${titleText('mammals')}
 <!-- ── RABBIT ── -->
 <!-- ears -->
 <ellipse ${C} cx="118" cy="150" rx="17" ry="56" fill="white" ${ST}/>
@@ -839,7 +997,7 @@ ${flowerSVG(530, 458, 8)}
 // ─── SCENE: BIRDS ─────────────────────────────────────────────────────────────
 function buildBirdsSVG() {
   return `
-${titleText('BIRDS')}
+${titleText('birds')}
 <!-- ── CLOUDS ── -->
 <circle ${C} cx="110" cy="75" r="28" fill="white" ${ST}/>
 <circle ${C} cx="140" cy="62" r="32" fill="white" ${ST}/>
@@ -928,7 +1086,7 @@ ${titleText('BIRDS')}
 // ─── SCENE: REPTILES ──────────────────────────────────────────────────────────
 function buildReptilesSVG() {
   return `
-${titleText('REPTILES')}
+${titleText('reptiles')}
 <!-- terrain lines (decorative) -->
 <path d="M 0,220 C 80,180 200,240 340,200 C 480,160 580,210 660,180" fill="none" stroke="#CCCCCC" stroke-width="30" stroke-linecap="round"/>
 <path d="M 0,350 C 100,320 220,370 360,340 C 480,315 590,360 660,330" fill="none" stroke="#DDDDDD" stroke-width="25" stroke-linecap="round"/>
@@ -1012,8 +1170,8 @@ function buildAmphibiansSVG() {
   return `
 <!-- AMPHIBIANS title oval -->
 <ellipse ${C} cx="330" cy="46" rx="190" ry="36" fill="white" stroke="#111" stroke-width="3"/>
-<text x="330" y="54" text-anchor="middle" font-family="Fredoka One,cursive" font-size="36"
-  fill="#333" pointer-events="none">AMPHIBIANS</text>
+<text class="scene-title" data-cat="amphibians" x="330" y="54" text-anchor="middle" font-family="Fredoka One,cursive" font-size="36"
+  fill="#333" pointer-events="none">${catLabel('amphibians')}</text>
 
 <!-- divider curves -->
 <path d="M 0,150 C 120,120 260,180 330,150 C 400,120 520,160 660,130" fill="none" stroke="#DDD" stroke-width="20" stroke-linecap="round"/>
@@ -1111,8 +1269,8 @@ function buildFishSVG() {
   return `
 <!-- FISH title bubble -->
 <ellipse ${C} cx="108" cy="72" rx="90" ry="58" fill="white" stroke="#111" stroke-width="3"/>
-<text x="108" y="82" text-anchor="middle" font-family="Fredoka One,cursive" font-size="46"
-  fill="#333" pointer-events="none">FISH</text>
+<text class="scene-title" data-cat="fish" x="108" y="82" text-anchor="middle" font-family="Fredoka One,cursive" font-size="46"
+  fill="#333" pointer-events="none">${catLabel('fish')}</text>
 
 <!-- bubbles (decorative) -->
 <circle cx="460" cy="50" r="14" fill="none" stroke="#AACCEE" stroke-width="2"/>
@@ -1198,11 +1356,11 @@ function buildAllSVG() {
 <path d="M 0,350 C 120,320 240,370 330,350 C 420,330 540,370 660,340" fill="none" stroke="#E0E0E0" stroke-width="22" stroke-linecap="round"/>
 
 <!-- Zone labels -->
-<text x="130" y="110" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#AA44BB" stroke="#FFF" stroke-width="3" paint-order="stroke">MAMMALS</text>
-<text x="510" y="100" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#555500" stroke="#FFF" stroke-width="3" paint-order="stroke">REPTILES</text>
-<text x="110" y="300" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#004488" stroke="#FFF" stroke-width="3" paint-order="stroke">BIRDS</text>
-<text x="500" y="280" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#005566" stroke="#FFF" stroke-width="3" paint-order="stroke">FISH</text>
-<text x="330" y="454" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#880033" stroke="#FFF" stroke-width="3" paint-order="stroke">AMPHIBIANS</text>
+<text class="scene-title" data-cat="mammals" x="130" y="110" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#AA44BB" stroke="#FFF" stroke-width="3" paint-order="stroke">${catLabel('mammals')}</text>
+<text class="scene-title" data-cat="reptiles" x="510" y="100" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#555500" stroke="#FFF" stroke-width="3" paint-order="stroke">${catLabel('reptiles')}</text>
+<text class="scene-title" data-cat="birds" x="110" y="300" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#004488" stroke="#FFF" stroke-width="3" paint-order="stroke">${catLabel('birds')}</text>
+<text class="scene-title" data-cat="fish" x="500" y="280" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#005566" stroke="#FFF" stroke-width="3" paint-order="stroke">${catLabel('fish')}</text>
+<text class="scene-title" data-cat="amphibians" x="330" y="454" text-anchor="middle" font-family="Fredoka One,cursive" font-size="34" fill="#880033" stroke="#FFF" stroke-width="3" paint-order="stroke">${catLabel('amphibians')}</text>
 
 <!-- ── CAT (top left zone) ── -->
 <ellipse ${C} cx="100" cy="170" rx="30" ry="38" fill="white" ${ST}/>
@@ -1311,7 +1469,7 @@ function goTo(cat) {
   // sticker
   showSticker(0);
   // topbar
-  document.getElementById('topbar-cat').textContent = cat.toUpperCase();
+  document.getElementById('topbar-cat').textContent = catLabel(cat);
   // switch screens
   document.getElementById('scr-main').style.display = 'none';
   document.getElementById('scr-paint').style.display = 'flex';

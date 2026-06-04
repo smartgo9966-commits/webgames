@@ -475,10 +475,50 @@ html,body{
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage"><div class="game-wrap">
 
 <!-- ══════════════════════════════════════
@@ -489,25 +529,25 @@ html,body{
     <div class="cell-svg-wrap" id="main-svg-wrap"></div>
   </div>
   <div class="main-info-col">
-    <div class="main-title">Animal Cell</div>
-    <div class="main-subtitle">A Tiny Society</div>
+    <div class="main-title" data-i18n="main.title">Animal Cell</div>
+    <div class="main-subtitle" data-i18n="main.subtitle">A Tiny Society</div>
     <div class="org-info" id="org-info-panel">
       <div class="org-info-name" id="oip-name"></div>
       <div class="org-info-nick" id="oip-nick"></div>
       <div class="org-info-text" id="oip-text"></div>
     </div>
-    <p class="main-desc" id="main-desc1">All animals are made up of cells. Some animals, like humans, have trillions of cells, while others, like bacteria, are made of just one cell.</p>
-    <p class="main-desc" id="main-desc2">Cells are like little societies in which each organelle performs a different job.</p>
-    <p class="main-instruct">Roll over the cell or click on the text below to learn about the organelles.</p>
+    <p class="main-desc" id="main-desc1" data-i18n="main.desc1">All animals are made up of cells. Some animals, like humans, have trillions of cells, while others, like bacteria, are made of just one cell.</p>
+    <p class="main-desc" id="main-desc2" data-i18n="main.desc2">Cells are like little societies in which each organelle performs a different job.</p>
+    <p class="main-instruct" data-i18n="main.instruct">Roll over the cell or click on the text below to learn about the organelles.</p>
     <ul class="org-list" id="org-list"></ul>
     <div class="main-btns">
       <button class="btn-game" onclick="showGame()">
-        <span class="btn-small-lbl">Play the</span>
-        <span class="btn-big-lbl">GAME! &rarr;</span>
+        <span class="btn-small-lbl" data-i18n="btn.playthe">Play the</span>
+        <span class="btn-big-lbl" data-i18n-html="btn.game">GAME! &rarr;</span>
       </button>
       <button class="btn-quiz" onclick="showQuiz()">
-        <span class="btn-small-lbl">Take the</span>
-        <span class="btn-big-lbl">QUIZ! &rarr;</span>
+        <span class="btn-small-lbl" data-i18n="btn.takethe">Take the</span>
+        <span class="btn-big-lbl" data-i18n-html="btn.quiz">QUIZ! &rarr;</span>
       </button>
     </div>
   </div>
@@ -521,25 +561,25 @@ html,body{
     <div class="cell-svg-wrap" id="game-svg-wrap"></div>
   </div>
   <div class="game-labels-col">
-    <h3>Drag to the cell</h3>
+    <h3 data-i18n="game.dragheading">Drag to the cell</h3>
     <div id="label-panel"></div>
   </div>
   <div class="game-nav">
     <span class="nav-link" onclick="showMain()">
       <svg viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Tutorial
+      <span data-i18n="nav.tutorial">Tutorial</span>
     </span>
     <span class="nav-link" onclick="showQuiz()">
       <svg viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Quiz
+      <span data-i18n="nav.quiz">Quiz</span>
     </span>
   </div>
   <div class="celebrate" id="celebrate">
-    <h2>&#x2728; Excellent! &#x2728;</h2>
-    <p>You correctly labeled all the organelles! A magical cellular spectacular!</p>
+    <h2 data-i18n-html="celebrate.title">&#x2728; Excellent! &#x2728;</h2>
+    <p data-i18n="celebrate.body">You correctly labeled all the organelles! A magical cellular spectacular!</p>
     <div class="celebrate-btns">
-      <button class="cel-btn cel-btn-game" onclick="resetGame()">Play Again</button>
-      <button class="cel-btn cel-btn-quiz" onclick="showQuiz()">Take the Quiz</button>
+      <button class="cel-btn cel-btn-game" onclick="resetGame()" data-i18n="btn.playagain">Play Again</button>
+      <button class="cel-btn cel-btn-quiz" onclick="showQuiz()" data-i18n="btn.takequiz">Take the Quiz</button>
     </div>
   </div>
 </div>
@@ -553,39 +593,184 @@ html,body{
   </div>
   <div class="quiz-info-col">
     <div class="quiz-score" id="quiz-score">Score: 0 / 8</div>
-    <div class="quiz-instruction">Click on the organelle that best fits the description below:</div>
+    <div class="quiz-instruction" data-i18n="quiz.instruction">Click on the organelle that best fits the description below:</div>
     <div class="quiz-question" id="quiz-question"></div>
     <div class="quiz-feedback">
-      <div class="oops-text" id="oops">Oops!</div>
+      <div class="oops-text" id="oops" data-i18n="quiz.oops">Oops!</div>
       <div class="next-arrow" id="next-arrow" onclick="nextQuestion()">
         <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#C0204A"/><polyline points="14,13 26,20 14,27" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        next question...
+        <span data-i18n="quiz.next">next question...</span>
       </div>
     </div>
   </div>
   <div class="quiz-nav">
     <span class="nav-link" onclick="showGame()">
       <svg viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Game
+      <span data-i18n="nav.game">Game</span>
     </span>
     <span class="nav-link" onclick="showMain()">
       <svg viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Tutorial
+      <span data-i18n="nav.tutorial">Tutorial</span>
     </span>
   </div>
   <div class="quiz-result" id="quiz-result">
-    <h2>Quiz Complete!</h2>
+    <h2 data-i18n="quiz.complete">Quiz Complete!</h2>
     <div class="score-big" id="result-score"></div>
     <div class="stars" id="result-stars"></div>
     <p id="result-msg"></p>
     <div class="celebrate-btns">
-      <button class="cel-btn cel-btn-quiz" onclick="resetQuiz()">Play Again</button>
-      <button class="cel-btn cel-btn-game" onclick="showMain()">Back to Learn</button>
+      <button class="cel-btn cel-btn-quiz" onclick="resetQuiz()" data-i18n="btn.playagain">Play Again</button>
+      <button class="cel-btn cel-btn-game" onclick="showMain()" data-i18n="btn.backtolearn">Back to Learn</button>
     </div>
   </div>
 </div>
 
 </div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'main.title': 'Animal Cell',
+      'main.subtitle': 'A Tiny Society',
+      'main.desc1': 'All animals are made up of cells. Some animals, like humans, have trillions of cells, while others, like bacteria, are made of just one cell.',
+      'main.desc2': 'Cells are like little societies in which each organelle performs a different job.',
+      'main.instruct': 'Roll over the cell or click on the text below to learn about the organelles.',
+      'btn.playthe': 'Play the',
+      'btn.game': 'GAME! &rarr;',
+      'btn.takethe': 'Take the',
+      'btn.quiz': 'QUIZ! &rarr;',
+      'game.dragheading': 'Drag to the cell',
+      'nav.tutorial': 'Tutorial',
+      'nav.quiz': 'Quiz',
+      'nav.game': 'Game',
+      'celebrate.title': '&#x2728; Excellent! &#x2728;',
+      'celebrate.body': 'You correctly labeled all the organelles! A magical cellular spectacular!',
+      'btn.playagain': 'Play Again',
+      'btn.takequiz': 'Take the Quiz',
+      'btn.backtolearn': 'Back to Learn',
+      'quiz.instruction': 'Click on the organelle that best fits the description below:',
+      'quiz.oops': 'Oops!',
+      'quiz.next': 'next question...',
+      'quiz.complete': 'Quiz Complete!',
+      'quiz.score': 'Score: {s} / {total}',
+      'result.msg3': 'Amazing! You know the cell inside out!',
+      'result.msg2': "Great job! A little more practice and you'll be perfect.",
+      'result.msg1': 'Keep exploring — the cell has more secrets to reveal!',
+    },
+    ar: {
+      'main.title': 'الخلية الحيوانية',
+      'main.subtitle': 'مجتمع صغير',
+      'main.desc1': 'تتكوّن جميع الحيوانات من خلايا. بعض الحيوانات، كالبشر، لديها تريليونات الخلايا، بينما يتكوّن غيرها، كالبكتيريا، من خلية واحدة فقط.',
+      'main.desc2': 'الخلايا أشبه بمجتمعات صغيرة تؤدي فيها كل عُضيّة وظيفة مختلفة.',
+      'main.instruct': 'مرّر فوق الخلية أو انقر على النص بالأسفل لتتعرّف على العُضيّات.',
+      'btn.playthe': 'العب',
+      'btn.game': '&larr; اللعبة!',
+      'btn.takethe': 'خُض',
+      'btn.quiz': '&larr; الاختبار!',
+      'game.dragheading': 'اسحب إلى الخلية',
+      'nav.tutorial': 'الشرح',
+      'nav.quiz': 'الاختبار',
+      'nav.game': 'اللعبة',
+      'celebrate.title': '&#x2728; ممتاز! &#x2728;',
+      'celebrate.body': 'لقد وسمت جميع العُضيّات بشكل صحيح! عرض خلوي ساحر!',
+      'btn.playagain': 'العب مرة أخرى',
+      'btn.takequiz': 'خُض الاختبار',
+      'btn.backtolearn': 'العودة للتعلّم',
+      'quiz.instruction': 'انقر على العُضيّة التي تناسب الوصف التالي:',
+      'quiz.oops': 'عذرًا!',
+      'quiz.next': 'السؤال التالي...',
+      'quiz.complete': 'اكتمل الاختبار!',
+      'quiz.score': 'النتيجة: {s} / {total}',
+      'result.msg3': 'مذهل! أنت تعرف الخلية تمامًا!',
+      'result.msg2': 'عمل رائع! قليل من التدريب وستكون مثاليًا.',
+      'result.msg1': 'واصل الاستكشاف — لدى الخلية أسرار أخرى لتكشفها!',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Rebuild the JS-generated, language-dependent content (organelle names in the
+  // list / game pills / SVG labels, the open info panel, the live quiz question,
+  // score, and the result message) without losing the player's progress.
+  function refreshDynamic() {
+    if (typeof ORGANELLES === 'undefined') return;
+    if (typeof buildOrgList === 'function') buildOrgList();
+    // Rebuild game + quiz SVG label text by re-running their builders.
+    try {
+      if (typeof buildGameSVG === 'function') {
+        const gw = document.getElementById('game-svg-wrap');
+        if (gw) { gw.innerHTML = ''; gw.appendChild(buildGameSVG()); }
+        if (typeof buildGameLabels === 'function') buildGameLabels();
+      }
+      if (typeof buildQuizSVG === 'function') {
+        const qw = document.getElementById('quiz-svg-wrap');
+        if (qw) { qw.innerHTML = ''; qw.appendChild(buildQuizSVG()); }
+      }
+    } catch (e) { /* builders not ready yet */ }
+    // Re-show the current quiz question + score if the quiz is mid-flight.
+    if (typeof Q !== 'undefined' && Q.queue && Q.queue.length) {
+      if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+      if (!Q.answered && typeof showQuestion === 'function') showQuestion();
+    }
+    // Re-render the open info panel (if a tutorial organelle is selected).
+    const sel = document.querySelector('.org-list li.active');
+    if (sel && typeof selectOrganelleInfo === 'function') selectOrganelleInfo(sel.dataset.id);
+    // Re-render the result message if the result card is showing.
+    const resCard = document.getElementById('quiz-result');
+    if (resCard && resCard.classList.contains('show') && Q && Q.resultStars) {
+      const k = Q.resultStars === '★★★' ? 'result.msg3' : Q.resultStars === '★★☆' ? 'result.msg2' : 'result.msg1';
+      document.getElementById('result-msg').textContent = window.t(k);
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 /* ════════════════════════════════════════
@@ -595,60 +780,98 @@ const ORGANELLES = [
   {
     id:'plasma-membrane',
     name:'Plasma Membrane',
+    nameAr:'الغشاء البلازمي (Plasma Membrane)',
     nick:'The Security Gate',
+    nickAr:'البوابة الأمنية',
     info:'Controls what enters and exits the cell, acting like a security gate. It is made of a double layer of phospholipids that keeps the cell intact.',
-    quiz:'This thin, flexible layer controls what enters and leaves the cell, acting like a security gate.'
+    infoAr:'يتحكم في ما يدخل الخلية ويخرج منها، كأنه بوابة أمنية. يتكوّن من طبقة مزدوجة من الدهون الفوسفاتية تحافظ على تماسك الخلية.',
+    quiz:'This thin, flexible layer controls what enters and leaves the cell, acting like a security gate.',
+    quizAr:'هذه الطبقة الرقيقة المرنة تتحكم في ما يدخل الخلية ويخرج منها، كأنها بوابة أمنية.'
   },
   {
     id:'nucleus',
     name:'Nucleus',
+    nameAr:'النواة (Nucleus)',
     nick:'The Control Center',
+    nickAr:'مركز التحكم',
     info:'Contains the cell\'s DNA and directs all cell activities. It is the largest organelle and acts as the cell\'s command center.',
-    quiz:'This organelle acts as the cell\'s control center, containing the DNA and directing all cell activities.'
+    infoAr:'تحتوي على الحمض النووي (DNA) للخلية وتوجّه جميع أنشطتها. وهي أكبر عُضيّة وتعمل كمركز قيادة الخلية.',
+    quiz:'This organelle acts as the cell\'s control center, containing the DNA and directing all cell activities.',
+    quizAr:'هذه العُضيّة تعمل كمركز تحكم الخلية، وتحتوي على الحمض النووي وتوجّه جميع أنشطة الخلية.'
   },
   {
     id:'mitochondria',
     name:'Mitochondria',
+    nameAr:'الميتوكوندريا (Mitochondria)',
     nick:'The Powerhouse',
+    nickAr:'محطة الطاقة',
     info:'Produce energy (ATP) through cellular respiration. Known as the powerhouse of the cell, they have their own DNA.',
-    quiz:'Known as the "powerhouse of the cell," these structures produce energy in the form of ATP.'
+    infoAr:'تنتج الطاقة (ATP) عبر التنفس الخلوي. تُعرف بمحطة طاقة الخلية، ولها حمضها النووي الخاص.',
+    quiz:'Known as the "powerhouse of the cell," these structures produce energy in the form of ATP.',
+    quizAr:'تُعرف بـ«محطة طاقة الخلية»، وهذه التراكيب تنتج الطاقة على هيئة ATP.'
   },
   {
     id:'ribosomes',
     name:'Ribosomes',
+    nameAr:'الرايبوسومات (Ribosomes)',
     nick:'The Protein Builders',
+    nickAr:'بُناة البروتين',
     info:'Tiny structures that build proteins by reading genetic instructions from the nucleus. They can be free or attached to the ER.',
-    quiz:'These tiny structures are responsible for building proteins by reading genetic instructions.'
+    infoAr:'تراكيب صغيرة تبني البروتينات بقراءة التعليمات الوراثية من النواة. قد تكون حرة أو ملتصقة بالشبكة الإندوبلازمية.',
+    quiz:'These tiny structures are responsible for building proteins by reading genetic instructions.',
+    quizAr:'هذه التراكيب الصغيرة مسؤولة عن بناء البروتينات بقراءة التعليمات الوراثية.'
   },
   {
     id:'golgi',
     name:'Golgi Apparatus',
+    nameAr:'جهاز جولجي (Golgi Apparatus)',
     nick:'The Packaging Plant',
+    nickAr:'مصنع التغليف',
     info:'Sorts and packages proteins and lipids into vesicles and ships them to their destinations inside or outside the cell.',
-    quiz:'Like a packaging plant, this organelle sorts and ships proteins and lipids to where they need to go.'
+    infoAr:'يفرز ويغلّف البروتينات والدهون في حويصلات ويشحنها إلى وجهاتها داخل الخلية أو خارجها.',
+    quiz:'Like a packaging plant, this organelle sorts and ships proteins and lipids to where they need to go.',
+    quizAr:'كمصنع تغليف، تفرز هذه العُضيّة وتشحن البروتينات والدهون إلى حيث يجب أن تذهب.'
   },
   {
     id:'cytoplasm',
     name:'Cytoplasm',
+    nameAr:'السيتوبلازم (Cytoplasm)',
     nick:'The Cellular Soup',
+    nickAr:'حساء الخلية',
     info:'The fluid-filled space inside the cell membrane that surrounds and holds all the organelles, maintaining internal pressure.',
-    quiz:'This fluid maintains the internal pressure of the cell, and holds many important nutrients.'
+    infoAr:'الحيز المملوء بالسائل داخل غشاء الخلية الذي يحيط بجميع العُضيّات ويحملها، ويحافظ على الضغط الداخلي.',
+    quiz:'This fluid maintains the internal pressure of the cell, and holds many important nutrients.',
+    quizAr:'هذا السائل يحافظ على الضغط الداخلي للخلية، ويحمل كثيرًا من المغذيات المهمة.'
   },
   {
     id:'lysosomes',
     name:'Lysosomes & Peroxisomes',
+    nameAr:'الليسوسومات والبيروكسيسومات (Lysosomes & Peroxisomes)',
     nick:'The Waste Managers',
+    nickAr:'مديرو النفايات',
     info:'Break down waste products, worn-out organelles, and cellular debris. Peroxisomes also detoxify harmful substances.',
-    quiz:'These organelles break down the cell\'s waste products and detoxify poisons.'
+    infoAr:'تحلّل الفضلات والعُضيّات البالية والحطام الخلوي. كما تزيل البيروكسيسومات سُميّة المواد الضارة.',
+    quiz:'These organelles break down the cell\'s waste products and detoxify poisons.',
+    quizAr:'هذه العُضيّات تحلّل فضلات الخلية وتزيل سُميّة السموم.'
   },
   {
     id:'er',
     name:'Endoplasmic Reticulum',
+    nameAr:'الشبكة الإندوبلازمية (Endoplasmic Reticulum)',
     nick:'The Transport Highway',
+    nickAr:'طريق النقل السريع',
     info:'A network of membranes that acts as the cell\'s internal transport system, moving proteins and lipids around the cell.',
-    quiz:'This network of membranes is the cell\'s internal transport highway, helping move materials around.'
+    infoAr:'شبكة من الأغشية تعمل كنظام النقل الداخلي للخلية، فتنقل البروتينات والدهون في أنحاء الخلية.',
+    quiz:'This network of membranes is the cell\'s internal transport highway, helping move materials around.',
+    quizAr:'هذه الشبكة من الأغشية هي طريق النقل الداخلي السريع للخلية، وتساعد على نقل المواد في أنحائها.'
   }
 ];
+
+/* Active-language accessors for organelle fields (fall back to English). */
+function orgName(o) { return (window.SGLANG === 'ar' && o.nameAr) ? o.nameAr : o.name; }
+function orgNick(o) { return (window.SGLANG === 'ar' && o.nickAr) ? o.nickAr : o.nick; }
+function orgInfo(o) { return (window.SGLANG === 'ar' && o.infoAr) ? o.infoAr : o.info; }
+function orgQuiz(o) { return (window.SGLANG === 'ar' && o.quizAr) ? o.quizAr : o.quiz; }
 
 /* label endpoint positions (in SVG 680×560 coordinate space for quiz; 560×560 for game lines)
    lx,ly = pill anchor (left-edge of pill for left-side; right-edge x for right-side computed below)
@@ -896,9 +1119,9 @@ function highlightOrganelle(id) {
 function selectOrganelleInfo(id) {
   const org = ORGANELLES.find(o => o.id === id);
   if (!org) return;
-  document.getElementById('oip-name').textContent = org.name;
-  document.getElementById('oip-nick').textContent = org.nick;
-  document.getElementById('oip-text').textContent = org.info;
+  document.getElementById('oip-name').textContent = orgName(org);
+  document.getElementById('oip-nick').textContent = orgNick(org);
+  document.getElementById('oip-text').textContent = orgInfo(org);
   document.getElementById('org-info-panel').classList.add('visible');
   document.getElementById('main-desc1').style.display = 'none';
   document.getElementById('main-desc2').style.display = 'none';
@@ -1039,7 +1262,7 @@ function placeLabel(id) {
   const ns = 'http://www.w3.org/2000/svg';
   const g = document.createElementNS(ns,'g');
   g.classList.add('placed-label-g');
-  const txt = org.name;
+  const txt = orgName(org);
   const tw = Math.max(txt.length * 6.5 + 20, 80);
   // game SVG is 560×560; clamp label to visible area
   const pillX = lp.side === 'right' ? Math.min(lp.lx - tw, 520 - tw) : lp.lx;
@@ -1083,7 +1306,7 @@ function buildQuizSVG() {
   ORGANELLES.forEach(org => {
     const lp = LABEL_POS[org.id];
     if (!lp) return;
-    const txt = org.name;
+    const txt = orgName(org);
     const tw = Math.max(txt.length * 6.5 + 20, 80);
 
     const g = document.createElementNS(ns,'g');
@@ -1161,7 +1384,8 @@ function initQuiz() {
 }
 
 function updateScoreDisplay() {
-  document.getElementById('quiz-score').textContent = `Score: ${Q.score} / ${ORGANELLES.length}`;
+  document.getElementById('quiz-score').textContent =
+    window.t('quiz.score', { s: Q.score, total: ORGANELLES.length });
 }
 
 function showQuestion() {
@@ -1171,7 +1395,7 @@ function showQuestion() {
 
   const id = Q.queue[Q.idx];
   const org = ORGANELLES.find(o=>o.id===id);
-  document.getElementById('quiz-question').textContent = org.quiz;
+  document.getElementById('quiz-question').textContent = orgQuiz(org);
 
   // reset all labels
   document.querySelectorAll('.quiz-label-g').forEach(g => {
@@ -1213,17 +1437,14 @@ function nextQuestion() {
 }
 
 function showResult() {
-  const s = Q.score, t = ORGANELLES.length;
-  document.getElementById('result-score').textContent = `${s} / ${t}`;
-  const pct = s/t;
+  const s = Q.score, tot = ORGANELLES.length;
+  document.getElementById('result-score').textContent = `${s} / ${tot}`;
+  const pct = s/tot;
   const stars = pct >= 0.88 ? '★★★' : pct >= 0.63 ? '★★☆' : '★☆☆';
+  Q.resultStars = stars;
   document.getElementById('result-stars').textContent = stars;
-  const msgs = {
-    '★★★':'Amazing! You know the cell inside out!',
-    '★★☆':'Great job! A little more practice and you\'ll be perfect.',
-    '★☆☆':'Keep exploring — the cell has more secrets to reveal!'
-  };
-  document.getElementById('result-msg').textContent = msgs[stars];
+  const msgKey = stars === '★★★' ? 'result.msg3' : stars === '★★☆' ? 'result.msg2' : 'result.msg1';
+  document.getElementById('result-msg').textContent = window.t(msgKey);
   document.getElementById('quiz-result').classList.add('show');
 }
 
@@ -1276,7 +1497,7 @@ function buildGameLabels() {
   shuffled.forEach(org => {
     const pill = document.createElement('div');
     pill.className = 'label-pill';
-    pill.textContent = org.name;
+    pill.textContent = orgName(org);
     pill.setAttribute('data-id', org.id);
     pill.style.touchAction = 'none';
     if (gamePlaced[org.id]) pill.classList.add('placed');
@@ -1328,7 +1549,7 @@ function buildOrgList() {
   list.innerHTML = '';
   ORGANELLES.forEach(org => {
     const li = document.createElement('li');
-    li.textContent = org.name;
+    li.textContent = orgName(org);
     li.setAttribute('data-id', org.id);
     li.addEventListener('mouseenter', () => highlightOrganelle(org.id));
     li.addEventListener('mouseleave', () => highlightOrganelle(null));
