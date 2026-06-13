@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Place Value Towers</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#4a3110">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Nunito', sans-serif;
+  background: radial-gradient(ellipse at 50% 20%, #8a5a1e 0%, #4a3110 58%, #2a1c08 100%);
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 960px;
+  height: 540px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 2;
+}
+.screen.active { display: flex; }
+#screen-game.active { display: flex; gap: 0; justify-content: flex-start; }
+
+/* ── MENU ── */
+.menu-icon { font-size: 50px; animation: pvt-float 2.6s ease-in-out infinite; }
+@keyframes pvt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 50px; color: #ffe040; letter-spacing: 1px; text-align: center;
+  text-shadow: 0 4px 0 #4a3110, 0 10px 26px rgba(138,90,30,.5);
+}
+.menu-sub { font-family: 'Patrick Hand', cursive; font-size: 26px; color: #ffd9a0; }
+.howto {
+  background: rgba(255,255,255,.07);
+  border: 2px solid rgba(220,170,90,.5);
+  border-radius: 18px; padding: 14px 28px;
+  display: flex; flex-direction: column; gap: 7px; max-width: 680px;
+}
+.howto p { color: #fff0db; font-size: 17px; font-weight: 700; }
+
+.big-btn {
+  font-family: 'Fredoka One', cursive; font-size: 24px;
+  color: #4a3110; background: linear-gradient(135deg, #ffd45a, #e0962e);
+  border: none; border-radius: 999px; padding: 14px 52px; cursor: pointer;
+  box-shadow: 0 7px 0 #9a6a1e, 0 14px 30px rgba(0,0,0,.45);
+  transition: transform .12s, box-shadow .12s;
+}
+.big-btn:hover { transform: translateY(-2px); }
+.big-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #9a6a1e, 0 8px 18px rgba(0,0,0,.4); }
+.big-btn.small { font-size: 18px; padding: 10px 28px; box-shadow: 0 5px 0 #9a6a1e, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.small:active { box-shadow: 0 2px 0 #9a6a1e, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.alt { background: linear-gradient(135deg, #2bb3a3, #0e6e63); color: #eafffc; box-shadow: 0 5px 0 #07473f, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.alt:active { box-shadow: 0 2px 0 #07473f, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.ghost { background: rgba(255,255,255,.12); color: #fff0db; border: 2px solid rgba(255,255,255,.3); box-shadow: 0 5px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.35); }
+.big-btn.ghost:active { box-shadow: 0 2px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.3); }
+
+/* ── LEVEL SELECT ── */
+.lvl-title {
+  font-family: 'Fredoka One', cursive; font-size: 36px; color: #ffe040;
+  text-shadow: 0 3px 0 #4a3110;
+}
+.lvl-grid { display: flex; gap: 16px; }
+.lvl-card {
+  width: 184px;
+  background: rgba(255,255,255,.07);
+  border: 2.5px solid rgba(220,170,90,.55);
+  border-radius: 20px; padding: 16px 10px;
+  text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  transition: transform .15s, border-color .15s, background .15s;
+}
+.lvl-card:hover { transform: translateY(-5px); border-color: #ffe040; background: rgba(255,255,255,.12); }
+.lvl-mission { font-size: 12px; font-weight: 800; color: #ffd9a0; letter-spacing: 1.5px; text-transform: uppercase; }
+.lvl-name { font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff; }
+.lvl-tag { font-family: 'Fredoka One', cursive; font-size: 14px; color: #ffe040; direction: ltr; }
+.lvl-stars { font-size: 18px; letter-spacing: 2px; }
+.star-off { color: rgba(255,255,255,.28); }
+.lvl-lock-hint { font-size: 12px; color: #ffc0a0; font-weight: 700; }
+.lvl-card.locked { opacity: .5; cursor: not-allowed; filter: grayscale(.55); }
+.lvl-card.locked:hover { transform: none; border-color: rgba(220,170,90,.55); background: rgba(255,255,255,.07); }
+
+/* ── GAME SCREEN ── */
+.hud {
+  width: 100%; height: 58px; flex: 0 0 58px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 16px;
+  background: rgba(42,28,8,.6);
+  border-bottom: 2px solid rgba(220,170,90,.4);
+  z-index: 5;
+}
+.hud-group { display: flex; align-items: center; gap: 12px; }
+.hud-q {
+  font-family: 'Fredoka One', cursive; font-size: 22px; color: #fff;
+  background: linear-gradient(135deg, #e0962e, #9a6a1e);
+  padding: 6px 24px; border-radius: 999px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.45);
+  text-align: center; max-width: 600px;
+}
+.hud-q b { color: #ffe040; }
+.hud-progress { font-family: 'Fredoka One', cursive; font-size: 17px; color: #ffd9a0; direction: ltr; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid rgba(220,170,90,.6);
+  background: rgba(255,255,255,.08); color: #fff;
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: rgba(255,255,255,.18); }
+
+/* ── PLAY AREA ── */
+.play {
+  flex: 1 1 auto; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 10px;
+}
+
+/* BUILD MODE — columns of base-10 blocks */
+.cols { display: flex; gap: 18px; align-items: flex-end; justify-content: center; }
+.col {
+  width: 150px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.col-stack {
+  width: 100%; height: 232px;
+  display: flex; flex-direction: column-reverse; align-items: center; gap: 4px;
+  padding: 8px; border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  border: 2px dashed rgba(220,170,90,.45);
+  overflow: hidden;
+}
+.col-label {
+  font-family: 'Fredoka One', cursive; font-size: 16px; color: #ffe040;
+  background: rgba(0,0,0,.25); border-radius: 10px; padding: 3px 10px;
+}
+.col-count { font-family: 'Fredoka One', cursive; font-size: 20px; color: #fff; }
+.col-btns { display: flex; gap: 8px; }
+.step-btn {
+  width: 46px; height: 46px; border-radius: 12px; border: none;
+  font-family: 'Fredoka One', cursive; font-size: 26px; color: #4a3110;
+  background: linear-gradient(135deg, #ffd45a, #e0962e); cursor: pointer;
+  box-shadow: 0 4px 0 #9a6a1e; line-height: 1;
+}
+.step-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #9a6a1e; }
+.step-btn.minus { background: linear-gradient(135deg, #f0a0a0, #c05050); color: #fff; box-shadow: 0 4px 0 #7a2a2a; }
+.step-btn.minus:active { box-shadow: 0 1px 0 #7a2a2a; }
+.step-btn:disabled { opacity: .4; cursor: default; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+
+/* block glyphs (SVG sized) */
+.blk { display: block; }
+.blk.thousand { width: 40px; height: 40px; }
+.blk.hundred  { width: 64px; height: 22px; }
+.blk.ten      { width: 12px; height: 56px; }
+.blk.one      { width: 14px; height: 14px; }
+.ones-grid { display: flex; flex-wrap: wrap-reverse; gap: 3px; width: 100%; justify-content: center; }
+
+.built-num {
+  font-family: 'Fredoka One', cursive; font-size: 30px; color: #ffe040;
+  background: rgba(0,0,0,.3); border-radius: 14px; padding: 6px 26px;
+  direction: ltr; min-width: 150px; text-align: center;
+}
+.check-btn {
+  font-family: 'Fredoka One', cursive; font-size: 22px; color: #fff;
+  background: linear-gradient(135deg, #2ecc71, #1e8e4f);
+  border: none; border-radius: 999px; padding: 11px 40px; cursor: pointer;
+  box-shadow: 0 6px 0 #145e34, 0 10px 22px rgba(0,0,0,.4);
+}
+.check-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #145e34; }
+
+/* READ MODE — stack display + choices */
+.read-stack {
+  display: flex; gap: 22px; align-items: flex-end; justify-content: center;
+  min-height: 200px; padding: 14px 18px; border-radius: 18px;
+  background: rgba(255,255,255,.06); border: 2px solid rgba(220,170,90,.4);
+}
+.read-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.read-col .col-stack { border-style: solid; height: 180px; }
+.read-col .col-label { font-size: 14px; }
+.choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.choice {
+  font-family: 'Fredoka One', cursive; font-size: 30px; color: #4a3110;
+  min-width: 130px; padding: 14px 10px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #ffd45a, #e0962e); cursor: pointer;
+  box-shadow: 0 6px 0 #9a6a1e; direction: ltr;
+}
+.choice:active { transform: translateY(3px); box-shadow: 0 3px 0 #9a6a1e; }
+.choice.good { background: linear-gradient(135deg, #2ecc71, #1e8e4f); color: #fff; box-shadow: 0 6px 0 #145e34; }
+.choice.bad  { background: linear-gradient(135deg, #aaa, #777); color: #fff; box-shadow: 0 6px 0 #444; }
+.choice:disabled { cursor: default; }
+
+.toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive; font-size: 60px;
+  pointer-events: none; opacity: 0; z-index: 30;
+  text-shadow: 0 4px 0 rgba(0,0,0,.4);
+}
+.toast.show { animation: pvt-toast 0.9s ease-out; }
+@keyframes pvt-toast {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+/* ── WIN PANEL ── */
+.panel {
+  background: rgba(36,24,8,.93);
+  border: 3px solid rgba(220,170,90,.65);
+  border-radius: 26px; padding: 28px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 11px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+}
+.panel-title {
+  font-family: 'Fredoka One', cursive; font-size: 38px; color: #ffe040;
+  text-shadow: 0 3px 0 #4a3110;
+}
+.panel-stars { font-size: 46px; letter-spacing: 8px; }
+.panel-line { font-size: 19px; font-weight: 800; color: #fff0db; }
+.panel-line.gold { color: #ffe040; }
+.panel-btns { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* ── PAUSE MODAL ── */
+.modal {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  background: rgba(20,14,4,.66);
+  align-items: center; justify-content: center;
+}
+.modal.show { display: flex; }
+
+/* ── SMART GO BADGE ── */
+.sg-badge {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
+<div class="fit-stage"><div class="game-wrap">
+
+<!-- ══════════════════ MENU ══════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-icon">🏯</div>
+  <h1 class="menu-title" data-i18n="title">Place Value Towers</h1>
+  <div class="menu-sub" data-i18n="subtitle">Build numbers with blocks!</div>
+  <div class="howto">
+    <p data-i18n="how.1">🧱 Tap + and − to add blocks to the Ones, Tens, and Hundreds towers.</p>
+    <p data-i18n="how.2">🔢 Match the target number, then press Check!</p>
+    <p data-i18n="how.3">👀 In Read mode, look at the towers and pick the right number.</p>
+  </div>
+  <button class="big-btn" onclick="goLevels()" data-i18n="btn.start">Start</button>
+</div>
+
+<!-- ══════════════════ LEVEL SELECT ══════════════════ -->
+<div id="screen-level" class="screen">
+  <h2 class="lvl-title" data-i18n="level.title">Choose a Mission</h2>
+  <div class="lvl-grid" id="lvl-grid"></div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-group">
+      <span class="hud-q" id="hud-q">Build the number 342</span>
+    </div>
+    <div class="hud-group">
+      <span class="hud-progress" id="hud-progress">0 / 6</span>
+      <button class="icon-btn" id="btn-sound" onclick="toggleSound()" data-i18n-title="sound.on" title="Sound on">🔊</button>
+      <button class="icon-btn" onclick="togglePause()" data-i18n-title="pause.title" title="Paused">⏸</button>
+    </div>
+  </div>
+  <div class="play" id="play"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ══════════════════ WIN ══════════════════ -->
+<div id="screen-win" class="screen">
+  <div class="panel">
+    <div class="panel-title" id="win-title">Mission Complete!</div>
+    <div class="panel-stars" id="win-stars">⭐⭐⭐</div>
+    <div class="panel-line" id="win-correct"></div>
+    <div class="panel-line gold" id="win-mistakes"></div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="replayLevel()" data-i18n="btn.replay">Play Again</button>
+      <button class="big-btn small alt" id="btn-next" onclick="nextMission()">Next Mission</button>
+      <button class="big-btn small ghost" onclick="toMenu()" data-i18n="btn.menu">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAUSE MODAL ══════════════════ -->
+<div id="pause-modal" class="modal">
+  <div class="panel">
+    <div class="panel-title" data-i18n="pause.title">Paused</div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="resumeGame()" data-i18n="btn.resume">Resume</button>
+      <button class="big-btn small ghost" onclick="quitToLevels()" data-i18n="btn.quit">Quit to Menu</button>
+    </div>
+  </div>
+</div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'Place Value Towers',
+      'subtitle': 'Build numbers with blocks!',
+      'how.1': '🧱 Tap + and − to add blocks to the Ones, Tens, and Hundreds towers.',
+      'how.2': '🔢 Match the target number, then press Check!',
+      'how.3': '👀 In Read mode, look at the towers and pick the right number.',
+      'btn.start': 'Start',
+      'btn.replay': 'Play Again',
+      'btn.next': 'Next Mission',
+      'btn.menu': 'Menu',
+      'btn.resume': 'Resume',
+      'btn.quit': 'Quit to Menu',
+      'btn.check': 'Check!',
+      'level.title': 'Choose a Mission',
+      'level.mission': 'Mission {n}',
+      'level.name.1': 'Tens',
+      'level.name.2': 'Hundreds',
+      'level.name.3': 'Read It',
+      'level.name.4': 'Thousands',
+      'level.tag.1': 'Up to 99',
+      'level.tag.2': 'Up to 999',
+      'level.tag.3': 'Read the towers',
+      'level.tag.4': 'Up to 9999',
+      'level.locked': 'Clear the previous mission!',
+      'col.ones': 'Ones',
+      'col.tens': 'Tens',
+      'col.hundreds': 'Hundreds',
+      'col.thousands': 'Thousands',
+      'mode.build': 'Build the number {n}',
+      'mode.read': 'What number is this?',
+      'pause.title': 'Paused',
+      'win.title.3': 'Master Builder!',
+      'win.title.2': 'Great Building!',
+      'win.title.1': 'Mission Complete!',
+      'win.correct': 'Correct: {n} / {g}',
+      'win.nomistakes': 'No mistakes — amazing!',
+      'win.mistakes': '{n} mistakes',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'fb.tryagain': 'Try again!',
+      'sound.on': 'Sound on',
+      'sound.off': 'Sound off',
+    },
+    ar: {
+      'title': 'أبراج القيمة المكانية',
+      'subtitle': 'ابنِ الأعداد بالمكعبات!',
+      'how.1': '🧱 اضغط + و− لإضافة مكعبات إلى أبراج الآحاد والعشرات والمئات.',
+      'how.2': '🔢 طابِق العدد المطلوب ثم اضغط تحقّق!',
+      'how.3': '👀 في نمط القراءة، انظر إلى الأبراج واختر العدد الصحيح.',
+      'btn.start': 'ابدأ',
+      'btn.replay': 'العب مرة أخرى',
+      'btn.next': 'المهمة التالية',
+      'btn.menu': 'القائمة',
+      'btn.resume': 'متابعة',
+      'btn.quit': 'الخروج إلى القائمة',
+      'btn.check': 'تحقّق!',
+      'level.title': 'اختر مهمة',
+      'level.mission': 'المهمة {n}',
+      'level.name.1': 'العشرات',
+      'level.name.2': 'المئات',
+      'level.name.3': 'اقرأ العدد',
+      'level.name.4': 'الآلاف',
+      'level.tag.1': 'حتى ٩٩',
+      'level.tag.2': 'حتى ٩٩٩',
+      'level.tag.3': 'اقرأ الأبراج',
+      'level.tag.4': 'حتى ٩٩٩٩',
+      'level.locked': 'أكمل المهمة السابقة!',
+      'col.ones': 'الآحاد',
+      'col.tens': 'العشرات',
+      'col.hundreds': 'المئات',
+      'col.thousands': 'الآلاف',
+      'mode.build': 'ابنِ العدد {n}',
+      'mode.read': 'ما هذا العدد؟',
+      'pause.title': 'إيقاف مؤقت',
+      'win.title.3': 'بنّاء بارع!',
+      'win.title.2': 'بناء رائع!',
+      'win.title.1': 'اكتملت المهمة!',
+      'win.correct': 'الصحيح: {n} / {g}',
+      'win.nomistakes': 'بلا أخطاء — رائع!',
+      'win.mistakes': '{n} أخطاء',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'fb.tryagain': 'حاول مجددًا!',
+      'sound.on': 'الصوت مفعّل',
+      'sound.off': 'الصوت متوقف',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-render the dynamic (JS-generated) screens on language change.
+  function refreshDynamic() {
+    const active = id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    };
+    if (typeof buildLevelCards === 'function' && active('screen-level')) buildLevelCards();
+    if (typeof renderWin === 'function' && active('screen-win')) renderWin();
+    if (typeof rerenderQuestion === 'function' && active('screen-game')) rerenderQuestion();
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
+
+<script>
+// ── UTILS ─────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function rand(a, b) { return a + Math.random() * (b - a); }
+function randi(a, b) { return Math.floor(rand(a, b + 1)); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── AUDIO (synthesized — no asset files required) ────────────
+let audioCtx = null, soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+}
+function playTone(freq, dur, type) {
+  if (!soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.16, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+function sfxClick()  { playTone(520, 0.05, 'sine'); }
+function sfxPlace()  { playTone(330, 0.06, 'square'); setTimeout(() => playTone(440, 0.05, 'square'), 40); }
+function sfxRemove() { playTone(300, 0.06, 'sine'); }
+function sfxCorrect(){ playTone(660, 0.1, 'triangle'); setTimeout(() => playTone(990, 0.16, 'triangle'), 90); }
+function sfxWrong()  { playTone(240, 0.16, 'sawtooth'); setTimeout(() => playTone(160, 0.24, 'sawtooth'), 130); }
+function sfxWin()    {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'triangle'), i * 120));
+}
+function toggleSound() {
+  soundOn = !soundOn;
+  const b = document.getElementById('btn-sound');
+  b.textContent = soundOn ? '🔊' : '🔇';
+  b.title = window.t(soundOn ? 'sound.on' : 'sound.off');
+  if (soundOn) sfxClick();
+}
+
+// ── CONFIG ────────────────────────────────────────────────────
+// places: which place columns this level uses (largest → smallest), max value, mode.
+const PLACE_KEYS = { 1: 'col.ones', 10: 'col.tens', 100: 'col.hundreds', 1000: 'col.thousands' };
+const LEVELS = [
+  { places: [10, 1],            max: 99,   goal: 6, modes: ['build'] },
+  { places: [100, 10, 1],       max: 999,  goal: 6, modes: ['build'] },
+  { places: [100, 10, 1],       max: 999,  goal: 6, modes: ['read'] },
+  { places: [1000, 100, 10, 1], max: 9999, goal: 6, modes: ['build', 'read'] },
+];
+
+// ── PROGRESS ──────────────────────────────────────────────────
+const SAVE_KEY = 'placeValueTowers.progress';
+function loadProgress() {
+  try {
+    const p = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (p && typeof p === 'object') return Object.assign({ l1: 0, l2: 0, l3: 0, l4: 0 }, p);
+  } catch (e) {}
+  return { l1: 0, l2: 0, l3: 0, l4: 0 };
+}
+let PROG = loadProgress();
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(PROG)); } catch (e) {}
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  levelIdx: 0,
+  goal: 6, solved: 0, mistakes: 0,
+  mode: 'build',
+  target: 0, digits: {},        // digits per place for current target
+  current: {},                  // build-mode: current count per place
+  choices: [],
+  questionLocked: false,
+  running: false, paused: false,
+};
+
+// ── NUMBER HELPERS ────────────────────────────────────────────
+function digitsOf(n, places) {
+  const d = {};
+  for (const p of places) d[p] = Math.floor(n / p) % 10;
+  return d;
+}
+function valueOf(counts, places) {
+  let v = 0;
+  for (const p of places) v += (counts[p] || 0) * p;
+  return v;
+}
+
+// ── QUESTION GENERATION ───────────────────────────────────────
+const recentTargets = [];
+function genTarget(lv) {
+  let n, guard = 0;
+  const minV = lv.places.includes(1000) ? 1000 : lv.places.includes(100) ? 100 : 10;
+  do {
+    n = randi(minV, lv.max);
+    // ensure the top place is non-zero (a "real" number of that size) and not all-trailing-zeros boring
+  } while ((recentTargets.includes(n) || isTrivial(n, lv)) && ++guard < 40);
+  recentTargets.push(n);
+  if (recentTargets.length > 4) recentTargets.shift();
+  return n;
+}
+function isTrivial(n, lv) {
+  // avoid numbers that are an exact single multiple (e.g. 300, 50) so several columns are exercised
+  const d = digitsOf(n, lv.places);
+  const nonZero = lv.places.filter(p => d[p] > 0).length;
+  return nonZero < 2;
+}
+
+function nextQuestion() {
+  const lv = LEVELS[S.levelIdx];
+  S.mode = lv.modes[randi(0, lv.modes.length - 1)];
+  S.target = genTarget(lv);
+  S.digits = digitsOf(S.target, lv.places);
+  S.questionLocked = false;
+  if (S.mode === 'build') {
+    S.current = {};
+    for (const p of lv.places) S.current[p] = 0;
+  } else {
+    // READ — generate plausible distractors (digit swaps / off-by-place)
+    S.choices = shuffle([S.target].concat(makeReadDistractors(S.target, lv, 3)));
+  }
+  rerenderQuestion();
+  updateHUD();
+}
+
+function makeReadDistractors(target, lv, n) {
+  const places = lv.places;
+  const pool = [];
+  const push = v => {
+    if (Number.isInteger(v) && v >= 0 && v <= lv.max && v !== target && !pool.includes(v)) pool.push(v);
+  };
+  const d = digitsOf(target, places);
+  // swap two adjacent place digits (classic place-value confusion)
+  for (let i = 0; i < places.length - 1; i++) {
+    const hi = places[i], lo = places[i + 1];
+    const swapped = target - d[hi] * hi - d[lo] * lo + d[lo] * hi + d[hi] * lo;
+    push(swapped);
+  }
+  // bump one place by ±1 ten/hundred
+  for (const p of places) { push(target + p); push(target - p); }
+  shuffle(pool);
+  const picked = pool.slice(0, n);
+  let guard = 0;
+  while (picked.length < n && guard++ < 80) {
+    const v = target + randi(-9, 9);
+    if (v >= 0 && v <= lv.max && v !== target && !picked.includes(v)) picked.push(v);
+  }
+  return picked;
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────
+function placeLabel(p) { return window.t(PLACE_KEYS[p]); }
+
+function blockSVG(kind) {
+  // returns an SVG string for a base-10 block glyph
+  if (kind === 1000) {
+    return '<svg class="blk thousand" viewBox="0 0 40 40"><defs><linearGradient id="g1k" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd45a"/><stop offset="1" stop-color="#c98a10"/></linearGradient></defs>' +
+      '<path d="M6 12 L20 4 L34 12 L34 30 L20 38 L6 30 Z" fill="url(#g1k)" stroke="#7a5410" stroke-width="1.5"/>' +
+      '<path d="M6 12 L20 20 L34 12" fill="none" stroke="#7a5410" stroke-width="1"/><path d="M20 20 L20 38" stroke="#7a5410" stroke-width="1"/></svg>';
+  }
+  if (kind === 100) {
+    return '<svg class="blk hundred" viewBox="0 0 64 22"><rect x="1" y="1" width="62" height="20" rx="2" fill="#e0962e" stroke="#7a5410" stroke-width="1.5"/>' +
+      '<path d="M11 1 V21 M21 1 V21 M31 1 V21 M41 1 V21 M51 1 V21 M1 8 H63 M1 15 H63" stroke="#7a5410" stroke-width="0.6" opacity="0.5"/></svg>';
+  }
+  if (kind === 10) {
+    return '<svg class="blk ten" viewBox="0 0 12 56"><rect x="1" y="1" width="10" height="54" rx="2" fill="#2bb3a3" stroke="#0e6e63" stroke-width="1.2"/>' +
+      '<path d="M1 7 H11 M1 13 H11 M1 19 H11 M1 25 H11 M1 31 H11 M1 37 H11 M1 43 H11 M1 49 H11" stroke="#0e6e63" stroke-width="0.6" opacity="0.6"/></svg>';
+  }
+  return '<svg class="blk one" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2" fill="#f0a0a0" stroke="#b03a3a" stroke-width="1.2"/></svg>';
+}
+
+function stackHTML(p, count) {
+  // ones use a wrap grid; others stack vertically
+  let inner = '';
+  for (let i = 0; i < count; i++) inner += blockSVG(p);
+  if (p === 1) return '<div class="ones-grid">' + inner + '</div>';
+  return inner;
+}
+
+function rerenderQuestion() {
+  if (!S.running) return;
+  const lv = LEVELS[S.levelIdx];
+  const play = document.getElementById('play');
+  if (S.mode === 'build') {
+    document.getElementById('hud-q').innerHTML = window.t('mode.build', { n: '<b>' + S.target + '</b>' });
+    let cols = '<div class="cols">';
+    for (const p of lv.places) {
+      const c = S.current[p] || 0;
+      cols +=
+        '<div class="col">' +
+          '<div class="col-stack" id="stack-' + p + '">' + stackHTML(p, c) + '</div>' +
+          '<div class="col-label">' + placeLabel(p) + '</div>' +
+          '<div class="col-count" id="count-' + p + '">' + c + '</div>' +
+          '<div class="col-btns">' +
+            '<button class="step-btn minus" data-p="' + p + '" data-d="-1">−</button>' +
+            '<button class="step-btn plus" data-p="' + p + '" data-d="1">+</button>' +
+          '</div>' +
+        '</div>';
+    }
+    cols += '</div>';
+    const built = valueOf(S.current, lv.places);
+    play.innerHTML = cols +
+      '<div class="built-num" id="built-num">' + built + '</div>' +
+      '<button class="check-btn" id="check-btn">' + window.t('btn.check') + '</button>';
+    play.querySelectorAll('.step-btn').forEach(b => {
+      b.addEventListener('click', () => onStep(parseInt(b.dataset.p, 10), parseInt(b.dataset.d, 10)));
+    });
+    document.getElementById('check-btn').addEventListener('click', onCheckBuild);
+    updateStepDisabled();
+  } else {
+    document.getElementById('hud-q').textContent = window.t('mode.read');
+    let stack = '<div class="read-stack">';
+    for (const p of lv.places) {
+      stack +=
+        '<div class="read-col">' +
+          '<div class="col-stack">' + stackHTML(p, S.digits[p]) + '</div>' +
+          '<div class="col-label">' + placeLabel(p) + '</div>' +
+        '</div>';
+    }
+    stack += '</div>';
+    let ch = '<div class="choices">';
+    S.choices.forEach(v => { ch += '<button class="choice" data-v="' + v + '">' + v + '</button>'; });
+    ch += '</div>';
+    play.innerHTML = stack + ch;
+    play.querySelectorAll('.choice').forEach(b => {
+      b.addEventListener('click', () => onChoose(parseInt(b.dataset.v, 10), b));
+    });
+  }
+}
+
+function updateStepDisabled() {
+  const lv = LEVELS[S.levelIdx];
+  for (const p of lv.places) {
+    const c = S.current[p] || 0;
+    const minus = document.querySelector('.step-btn.minus[data-p="' + p + '"]');
+    const plus = document.querySelector('.step-btn.plus[data-p="' + p + '"]');
+    if (minus) minus.disabled = c <= 0;
+    if (plus) plus.disabled = c >= 9;     // each place 0..9 blocks
+  }
+}
+
+// ── INTERACTION ───────────────────────────────────────────────
+function onStep(p, d) {
+  if (S.questionLocked) return;
+  const c = S.current[p] || 0;
+  const nc = c + d;
+  if (nc < 0 || nc > 9) return;
+  S.current[p] = nc;
+  if (d > 0) sfxPlace(); else sfxRemove();
+  // update just this column + total
+  const lv = LEVELS[S.levelIdx];
+  document.getElementById('stack-' + p).innerHTML = stackHTML(p, nc);
+  document.getElementById('count-' + p).textContent = nc;
+  document.getElementById('built-num').textContent = valueOf(S.current, lv.places);
+  updateStepDisabled();
+}
+
+function showToast(txt) {
+  const el = document.getElementById('toast');
+  el.textContent = txt;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+
+function onCheckBuild() {
+  if (S.questionLocked) return;
+  const lv = LEVELS[S.levelIdx];
+  const built = valueOf(S.current, lv.places);
+  if (built === S.target) {
+    S.questionLocked = true;
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    sfxWrong(); showToast(window.t('fb.wrong'));
+    S.mistakes++;
+    // leave the build as-is so they can adjust and re-check
+  }
+}
+
+function onChoose(v, btn) {
+  if (S.questionLocked) return;
+  if (v === S.target) {
+    S.questionLocked = true;
+    btn.classList.add('good');
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+    advanceAfterCorrect();
+  } else {
+    btn.classList.add('bad');
+    btn.disabled = true;
+    sfxWrong(); showToast(window.t('fb.wrong'));
+    S.mistakes++;
+  }
+}
+
+function advanceAfterCorrect() {
+  S.solved++;
+  updateHUD();
+  setTimeout(() => {
+    if (!S.running) return;
+    if (S.solved >= S.goal) winLevel();
+    else nextQuestion();
+  }, 850);
+}
+
+// ── GAME FLOW ─────────────────────────────────────────────────
+function goLevels() { ensureAudio(); sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+function toMenu()   { sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+
+function startLevel(idx) {
+  S.levelIdx = idx; S.goal = LEVELS[idx].goal;
+  S.solved = 0; S.mistakes = 0;
+  S.running = true; S.paused = false;
+  recentTargets.length = 0;
+  document.getElementById('pause-modal').classList.remove('show');
+  nextQuestion();
+  showScreen('screen-game');
+}
+function replayLevel() { sfxClick(); startLevel(S.levelIdx); }
+function nextMission() {
+  sfxClick();
+  if (S.lastWin && S.lastWin.levelIdx < 3) startLevel(S.lastWin.levelIdx + 1);
+  else { buildLevelCards(); showScreen('screen-level'); }
+}
+
+function winLevel() {
+  S.running = false;
+  const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
+  const key = 'l' + (S.levelIdx + 1);
+  if (stars > PROG[key]) { PROG[key] = stars; saveProgress(); }
+  S.lastWin = { stars, correct: S.solved, goal: S.goal, mistakes: S.mistakes, levelIdx: S.levelIdx };
+  renderWin();
+  showScreen('screen-win');
+  sfxWin();
+}
+function renderWin() {
+  const w = S.lastWin;
+  if (!w) return;
+  document.getElementById('win-title').textContent = window.t('win.title.' + w.stars);
+  document.getElementById('win-stars').innerHTML =
+    '⭐'.repeat(w.stars) + '<span class="star-off">' + '★'.repeat(3 - w.stars) + '</span>';
+  document.getElementById('win-correct').textContent = window.t('win.correct', { n: w.correct, g: w.goal });
+  document.getElementById('win-mistakes').textContent =
+    w.mistakes === 0 ? window.t('win.nomistakes') : window.t('win.mistakes', { n: w.mistakes });
+  const nextBtn = document.getElementById('btn-next');
+  if (w.levelIdx < 3) { nextBtn.style.display = ''; nextBtn.textContent = window.t('btn.next'); }
+  else nextBtn.style.display = 'none';
+}
+
+// ── LEVEL SELECT CARDS ────────────────────────────────────────
+function buildLevelCards() {
+  const grid = document.getElementById('lvl-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const stars = PROG['l' + (i + 1)];
+    const locked = i > 0 && PROG['l' + i] === 0;
+    const card = document.createElement('div');
+    card.className = 'lvl-card' + (locked ? ' locked' : '');
+    card.innerHTML =
+      '<div class="lvl-mission">' + window.t('level.mission', { n: i + 1 }) + '</div>' +
+      '<div class="lvl-name">' + window.t('level.name.' + (i + 1)) + '</div>' +
+      '<div class="lvl-tag">' + window.t('level.tag.' + (i + 1)) + '</div>' +
+      (locked
+        ? '<div class="lvl-stars">🔒</div><div class="lvl-lock-hint">' + window.t('level.locked') + '</div>'
+        : '<div class="lvl-stars">' + '⭐'.repeat(stars) + '<span class="star-off">' + '★'.repeat(3 - stars) + '</span></div>');
+    if (!locked) card.addEventListener('click', () => { ensureAudio(); sfxClick(); startLevel(i); });
+    grid.appendChild(card);
+  });
+}
+
+// ── HUD ───────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('hud-progress').textContent = S.solved + ' / ' + S.goal;
+}
+
+// ── PAUSE ─────────────────────────────────────────────────────
+function togglePause() {
+  if (!S.running || S.paused) return;
+  S.paused = true;
+  document.getElementById('pause-modal').classList.add('show');
+}
+function resumeGame() {
+  sfxClick();
+  S.paused = false;
+  document.getElementById('pause-modal').classList.remove('show');
+}
+function quitToLevels() {
+  sfxClick();
+  S.paused = false; S.running = false;
+  document.getElementById('pause-modal').classList.remove('show');
+  buildLevelCards();
+  showScreen('screen-level');
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateHUD();
+});
+
+// Scale-to-fit so the game fills phone / big touch screens
+(function () {
+  const baseW = 960, baseH = 540;
+  function fitStage() {
+    const wrap = document.querySelector('.game-wrap');
+    if (!wrap) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  document.addEventListener('DOMContentLoaded', fitStage);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v25';
+const CACHE = 'games-v26';
 
 const PRECACHE = [
   './',
@@ -68,6 +68,8 @@ const PRECACHE = [
   './on_time/index.html',
   './pattern_pop/',
   './pattern_pop/index.html',
+  './place_value_towers/',
+  './place_value_towers/index.html',
   './pile_of_balls/',
   './pile_of_balls/index.html',
   './rounding_rocket/',
