@@ -392,37 +392,77 @@ html, body {
   position: absolute; inset: 0;
   pointer-events: none; z-index: 30;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 
 <div class="fit-stage">
 <div class="game-wrap" id="gameWrap">
 
   <!-- ═══════════ MENU ═══════════ -->
   <div class="screen active" id="screen-menu">
-    <div class="menu-title"><span class="wand">🪄</span><span>WORD WIZARD</span></div>
-    <div class="menu-subtitle">Look at the picture — spell the word!</div>
+    <div class="menu-title"><span class="wand">🪄</span><span data-i18n="menu.title">WORD WIZARD</span></div>
+    <div class="menu-subtitle" data-i18n="menu.subtitle">Look at the picture — spell the word!</div>
     <div class="level-row">
-      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">3 letters</span></button>
-      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">4 letters</span></button>
-      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">5 letters</span></button>
-      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">6–7 letters</span></button>
+      <button class="level-btn" data-level="1"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">1</span><span class="meta" data-i18n="menu.l3">3 letters</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">2</span><span class="meta" data-i18n="menu.l4">4 letters</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">3</span><span class="meta" data-i18n="menu.l5">5 letters</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">4</span><span class="meta" data-i18n="menu.l67">6–7 letters</span></button>
     </div>
     <div class="practice-row" id="practiceToggle">
       <span class="toggle"></span>
-      <span>Practice mode (unlimited hints &amp; skips)</span>
+      <span data-i18n="menu.practice">Practice mode (unlimited hints &amp; skips)</span>
     </div>
   </div>
 
   <!-- ═══════════ INSTRUCTIONS ═══════════ -->
   <div class="screen" id="screen-instructions">
-    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-title" data-i18n="instr.title">HOW TO PLAY</div>
     <div class="instr-step-row">
       <div class="instr-card">
         <div class="demo-svg" id="demo-picture"></div>
-        <div class="lbl">SEE THE PICTURE</div>
+        <div class="lbl" data-i18n="instr.see">SEE THE PICTURE</div>
       </div>
       <div class="instr-arrow">→</div>
       <div class="instr-card">
@@ -431,7 +471,7 @@ html, body {
           <div class="instr-mini-slot"></div>
           <div class="instr-mini-slot"></div>
         </div>
-        <div class="lbl">TAP A TILE,<br>THEN A SLOT</div>
+        <div class="lbl" data-i18n-html="instr.tap">TAP A TILE,<br>THEN A SLOT</div>
       </div>
       <div class="instr-arrow">→</div>
       <div class="instr-card">
@@ -440,15 +480,15 @@ html, body {
           <div class="instr-mini-slot filled">A</div>
           <div class="instr-mini-slot filled">T</div>
         </div>
-        <div class="lbl">SPELL THE WORD!</div>
+        <div class="lbl" data-i18n="instr.spell">SPELL THE WORD!</div>
       </div>
     </div>
-    <div class="instr-tip">
+    <div class="instr-tip" data-i18n="instr.tip">
       💡 Stuck? Use a hint to fill the next letter — but you only get a few per level!
     </div>
     <div class="instr-buttons">
-      <button class="btn" id="btn-instr-menu">MENU</button>
-      <button class="btn primary big" id="btn-instr-start">START</button>
+      <button class="btn" id="btn-instr-menu" data-i18n="btn.menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start" data-i18n="btn.start">START</button>
     </div>
   </div>
 
@@ -468,9 +508,9 @@ html, body {
         <div class="slot-row" id="slot-row"></div>
         <div class="pool" id="pool"></div>
         <div class="controls-row">
-          <button class="ctrl-btn" id="btn-hint">💡 Hint <span class="count" id="hint-count">3</span></button>
-          <button class="ctrl-btn" id="btn-backspace">⌫ Erase</button>
-          <button class="ctrl-btn" id="btn-skip">⏭ Skip <span class="count" id="skip-count">3</span></button>
+          <button class="ctrl-btn" id="btn-hint">💡 <span data-i18n="btn.hint">Hint</span> <span class="count" id="hint-count">3</span></button>
+          <button class="ctrl-btn" id="btn-backspace">⌫ <span data-i18n="btn.erase">Erase</span></button>
+          <button class="ctrl-btn" id="btn-skip">⏭ <span data-i18n="btn.skip">Skip</span> <span class="count" id="skip-count">3</span></button>
         </div>
       </div>
     </div>
@@ -487,14 +527,111 @@ html, body {
       <div class="modal-body" id="results-body">Great job!</div>
       <div class="modal-stats" id="results-stats"></div>
       <div class="modal-buttons">
-        <button class="btn" id="btn-results-menu">MENU</button>
-        <button class="btn primary" id="btn-results-again">PLAY AGAIN</button>
+        <button class="btn" id="btn-results-menu" data-i18n="btn.menu">MENU</button>
+        <button class="btn primary" id="btn-results-again" data-i18n="btn.playagain">PLAY AGAIN</button>
       </div>
     </div>
   </div>
 
 </div>
 </div>
+
+<script>
+/* ════════════════ i18n (EN / ع) ════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'menu.title': 'WORD WIZARD',
+      'menu.subtitle': 'Look at the picture — spell the word!',
+      'menu.level': 'LEVEL',
+      'menu.l3': '3 letters',
+      'menu.l4': '4 letters',
+      'menu.l5': '5 letters',
+      'menu.l67': '6–7 letters',
+      'menu.practice': 'Practice mode (unlimited hints & skips)',
+      'instr.title': 'HOW TO PLAY',
+      'instr.see': 'SEE THE PICTURE',
+      'instr.tap': 'TAP A TILE,<br>THEN A SLOT',
+      'instr.spell': 'SPELL THE WORD!',
+      'instr.tip': '💡 Stuck? Use a hint to fill the next letter — but you only get a few per level!',
+      'btn.menu': 'MENU',
+      'btn.start': 'START',
+      'btn.hint': 'Hint',
+      'btn.erase': 'Erase',
+      'btn.skip': 'Skip',
+      'btn.playagain': 'PLAY AGAIN',
+      'hud.level': 'LEVEL {n}',
+      'res.complete': 'LEVEL COMPLETE!',
+      'res.tryagain': 'TRY AGAIN',
+      'res.perfect': 'Perfect run! 🪄',
+      'res.nice': 'Nice spelling!',
+      'res.good': 'Good job — keep practicing!',
+      'res.lost': 'You can do it next time!',
+      'res.stats': 'Score: <b>{s}</b><br>Perfect words: <b>{p} / {total}</b>',
+    },
+    ar: {
+      'menu.title': 'ساحر الكلمات',
+      'menu.subtitle': 'انظر إلى الصورة — وتهجّأ الكلمة!',
+      'menu.level': 'المستوى',
+      'menu.l3': '٣ أحرف',
+      'menu.l4': '٤ أحرف',
+      'menu.l5': '٥ أحرف',
+      'menu.l67': '٦–٧ أحرف',
+      'menu.practice': 'وضع التدريب (تلميحات وتخطّيات غير محدودة)',
+      'instr.title': 'كيفية اللعب',
+      'instr.see': 'انظر إلى الصورة',
+      'instr.tap': 'انقر حرفًا،<br>ثم خانة',
+      'instr.spell': 'تهجّأ الكلمة!',
+      'instr.tip': '💡 محتار؟ استخدم تلميحًا لملء الحرف التالي — لكن لديك عدد محدود في كل مستوى!',
+      'btn.menu': 'القائمة',
+      'btn.start': 'ابدأ',
+      'btn.hint': 'تلميح',
+      'btn.erase': 'مسح',
+      'btn.skip': 'تخطٍّ',
+      'btn.playagain': 'العب مجددًا',
+      'hud.level': 'المستوى {n}',
+      'res.complete': 'اكتمل المستوى!',
+      'res.tryagain': 'حاول مجددًا',
+      'res.perfect': 'أداء مثالي! 🪄',
+      'res.nice': 'تهجئة رائعة!',
+      'res.good': 'أحسنت — واصل التدرّب!',
+      'res.lost': 'يمكنك النجاح في المرة القادمة!',
+      'res.stats': 'النقاط: <b>{s}</b><br>كلمات مثالية: <b>{p} / {total}</b>',
+    },
+  };
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  window.SGLANG = lang;
+  window.t = function (k, vars) {
+    let s = (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : (I18N.en[k] != null ? I18N.en[k] : k);
+    if (vars) for (const n in vars) s = s.split('{' + n + '}').join(vars[n]);
+    return s;
+  };
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = window.t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('#lang-toggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  }
+  window.setLang = function (l) {
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    if (typeof window.refreshDynamic === 'function') window.refreshDynamic();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-lang]'); if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 'use strict';
@@ -1001,7 +1138,7 @@ function loadWord(idx) {
 
 function renderGame() {
   // HUD
-  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-level').textContent = window.t('hud.level', { n: state.level });
   document.getElementById('hud-score').textContent = state.score;
   document.getElementById('hud-hints').textContent = state.practice ? '∞' : state.hintsLeft;
   document.getElementById('hud-skips').textContent = state.practice ? '∞' : state.skipsLeft;
@@ -1122,21 +1259,35 @@ function endLevel(won) {
   if (ratio >= 0.6) stars = 2;
   if (ratio >= 0.9) stars = 3;
 
-  // Populate modal
-  document.getElementById('results-title').textContent = won ? 'LEVEL COMPLETE!' : 'TRY AGAIN';
-  document.getElementById('results-body').textContent =
-    won
-      ? (state.perfectWords === totalWords ? 'Perfect run! 🪄' :
-         state.perfectWords >= totalWords * 0.6 ? 'Nice spelling!' : 'Good job — keep practicing!')
-      : 'You can do it next time!';
-  document.getElementById('results-stats').innerHTML =
-    'Score: <b>' + state.score + '</b><br>Perfect words: <b>' + state.perfectWords + ' / ' + totalWords + '</b>';
-  const starEls = document.querySelectorAll('#results-stars .star');
-  starEls.forEach((el, i) => {
-    el.classList.toggle('lit', i < stars);
-  });
+  state.lastResult = { won, totalWords, stars, score: state.score, perfectWords: state.perfectWords };
+  renderResults();
   openModal('modal-results');
 }
+
+function renderResults() {
+  const r = state.lastResult;
+  if (!r) return;
+  document.getElementById('results-title').textContent = r.won ? window.t('res.complete') : window.t('res.tryagain');
+  document.getElementById('results-body').textContent =
+    r.won
+      ? (r.perfectWords === r.totalWords ? window.t('res.perfect') :
+         r.perfectWords >= r.totalWords * 0.6 ? window.t('res.nice') : window.t('res.good'))
+      : window.t('res.lost');
+  document.getElementById('results-stats').innerHTML =
+    window.t('res.stats', { s: r.score, p: r.perfectWords, total: r.totalWords });
+  const starEls = document.querySelectorAll('#results-stars .star');
+  starEls.forEach((el, i) => {
+    el.classList.toggle('lit', i < r.stars);
+  });
+}
+
+// Re-render visible dynamic text on language toggle
+window.refreshDynamic = function () {
+  if (document.getElementById('screen-game').classList.contains('active'))
+    document.getElementById('hud-level').textContent = window.t('hud.level', { n: state.level });
+  const resModal = document.getElementById('modal-results');
+  if (resModal && resModal.classList.contains('active') && state.lastResult) renderResults();
+};
 
 // ════════════════════════════════════════════════════════════
 //  HINT / SKIP / BACKSPACE

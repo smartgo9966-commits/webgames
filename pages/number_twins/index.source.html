@@ -396,10 +396,50 @@ html, body {
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage">
   <div class="game-wrap tan-bg" id="gameWrap">
 
@@ -429,7 +469,7 @@ html, body {
               font-family="Fredoka One, cursive" font-size="82" font-weight="900"
               fill="#cc2a2a" stroke="#f8e8c8" stroke-width="6"
               paint-order="stroke fill"
-              style="filter: drop-shadow(2px 4px 0 rgba(0,0,0,.18))">Number Twins</text>
+              style="filter: drop-shadow(2px 4px 0 rgba(0,0,0,.18))" data-i18n="title">Number Twins</text>
 
         <!-- decorative balls -->
         <g transform="translate(110 280)">
@@ -457,24 +497,22 @@ html, body {
                 font-size="34" fill="#fff">3</text>
         </g>
       </svg>
-      <button class="btn-green title-start-btn" onclick="goLevels()">START</button>
+      <button class="btn-green title-start-btn" onclick="goLevels()" data-i18n="btn.start">START</button>
     </div>
 
     <!-- ═══ LEVEL SELECT ═══ -->
     <div id="screen-levels" class="screen">
-      <button class="back-btn" onclick="goTitle()">← Back</button>
+      <button class="back-btn" onclick="goTitle()" data-i18n="btn.back">← Back</button>
       <div class="level-grid" id="levelGrid"></div>
     </div>
 
     <!-- ═══ INSTRUCTIONS ═══ -->
     <div id="screen-intro" class="screen">
-      <button class="back-btn" onclick="goLevels()">← Back</button>
+      <button class="back-btn" onclick="goLevels()" data-i18n="btn.back">← Back</button>
       <div class="intro-content">
-        <div class="intro-title">Instructions</div>
+        <div class="intro-title" data-i18n="intro.title">Instructions</div>
         <div class="intro-text">
-          Match pairs of balls that add up to <span id="introSum">9</span>. Balls
-          can only be matched if they can be connected by a line that turns at
-          most twice.
+          <span data-i18n="intro.before">Match pairs of balls that add up to</span> <span id="introSum">9</span><span data-i18n="intro.after">. Balls can only be matched if they can be connected by a line that turns at most twice.</span>
         </div>
         <div class="intro-examples">
           <!-- example 1: L-shape (✓) -->
@@ -518,7 +556,7 @@ html, body {
             <text x="62" y="18" text-anchor="middle" font-size="26" fill="#cc2a2a" font-family="Fredoka One,cursive">✗</text>
           </svg>
         </div>
-        <button class="btn-green" onclick="goGame()">START</button>
+        <button class="btn-green" onclick="goGame()" data-i18n="btn.start">START</button>
       </div>
     </div>
 
@@ -527,14 +565,14 @@ html, body {
       <div class="game-layout">
         <div class="left-panel">
           <div class="timer-card">
-            <div class="timer-label">Time:</div>
+            <div class="timer-label" data-i18n="game.time">Time:</div>
             <div class="timer-value" id="timerValue">0.000</div>
           </div>
           <div class="target-label" id="targetLabel">Add to 9</div>
-          <button class="menu-btn" onclick="goLevels()">Menu</button>
+          <button class="menu-btn" onclick="goLevels()" data-i18n="btn.menu">Menu</button>
           <div class="icon-row">
-            <button class="icon-btn" title="Help" onclick="goIntro()">?</button>
-            <button class="icon-btn" title="Shuffle" onclick="shuffleBoard()">⚙</button>
+            <button class="icon-btn" title="Help" data-i18n-title="tip.help" onclick="goIntro()">?</button>
+            <button class="icon-btn" title="Shuffle" data-i18n-title="tip.shuffle" onclick="shuffleBoard()">⚙</button>
           </div>
         </div>
         <div class="board-wrap">
@@ -549,18 +587,95 @@ html, body {
     <!-- ═══ WIN SCREEN ═══ -->
     <div id="screen-win" class="screen">
       <div class="win-content">
-        <div class="win-title">You did it!</div>
+        <div class="win-title" data-i18n="win.title">You did it!</div>
         <div class="win-time" id="winTime">0.000 seconds</div>
         <div class="win-best" id="winBest"></div>
         <div class="win-buttons">
-          <button class="btn-green" onclick="goGame()">Replay</button>
-          <button class="btn-green" onclick="goLevels()">Levels</button>
+          <button class="btn-green" onclick="goGame()" data-i18n="btn.replay">Replay</button>
+          <button class="btn-green" onclick="goLevels()" data-i18n="btn.levels">Levels</button>
         </div>
       </div>
     </div>
 
   </div><!-- /game-wrap -->
 </div><!-- /fit-stage -->
+
+<script>
+/* ════════════════ i18n (EN / ع) ════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'Number Twins',
+      'btn.start': 'START',
+      'btn.back': '← Back',
+      'btn.menu': 'Menu',
+      'btn.replay': 'Replay',
+      'btn.levels': 'Levels',
+      'intro.title': 'Instructions',
+      'intro.before': 'Match pairs of balls that add up to',
+      'intro.after': '. Balls can only be matched if they can be connected by a line that turns at most twice.',
+      'game.time': 'Time:',
+      'tip.help': 'Help',
+      'tip.shuffle': 'Shuffle',
+      'win.title': 'You did it!',
+      'level.addto': 'Add to {n}',
+      'win.seconds': '{s} seconds',
+      'win.newbest': '⭐ NEW BEST TIME!',
+      'win.best': 'Best: {s}s',
+    },
+    ar: {
+      'title': 'التوأم العددي',
+      'btn.start': 'ابدأ',
+      'btn.back': '→ رجوع',
+      'btn.menu': 'القائمة',
+      'btn.replay': 'إعادة اللعب',
+      'btn.levels': 'المستويات',
+      'intro.title': 'التعليمات',
+      'intro.before': 'طابِق أزواج الكرات التي مجموعها',
+      'intro.after': '. لا يمكن مطابقة الكرات إلا إذا أمكن وصلها بخط ينعطف مرّتين على الأكثر.',
+      'game.time': 'الوقت:',
+      'tip.help': 'مساعدة',
+      'tip.shuffle': 'خلط',
+      'win.title': 'لقد نجحت!',
+      'level.addto': 'المجموع {n}',
+      'win.seconds': '{s} ثانية',
+      'win.newbest': '⭐ أفضل وقت جديد!',
+      'win.best': 'الأفضل: {s}ث',
+    },
+  };
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  window.SGLANG = lang;
+  window.t = function (k, vars) {
+    let s = (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : (I18N.en[k] != null ? I18N.en[k] : k);
+    if (vars) for (const n in vars) s = s.split('{' + n + '}').join(vars[n]);
+    return s;
+  };
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = window.t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('#lang-toggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  }
+  window.setLang = function (l) {
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    if (typeof window.refreshDynamic === 'function') window.refreshDynamic();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-lang]'); if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -634,7 +749,7 @@ function buildLevelGrid() {
   TARGET_SUMS.forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'level-btn';
-    btn.textContent = 'Add to ' + t;
+    btn.textContent = window.t('level.addto', { n: t });
     btn.onclick = () => { state.targetSum = t; goIntro(); };
     grid.appendChild(btn);
   });
@@ -685,7 +800,7 @@ function startLevel(target) {
   state.selected = null;
   state.cleared = 0;
   state.locked = false;
-  document.getElementById('targetLabel').textContent = 'Add to ' + target;
+  document.getElementById('targetLabel').textContent = window.t('level.addto', { n: target });
 
   let attempts = 0;
   do {
@@ -1039,18 +1154,37 @@ function onWin() {
   if (!document.getElementById('screen-game').classList.contains('active')) return;
   stopTimer();
   const elapsed = (performance.now() - state.timerStart) / 1000;
-  document.getElementById('winTime').textContent = elapsed.toFixed(3) + ' seconds';
 
   const key = 'numberTwins.bestTime.' + state.targetSum;
   const prev = parseFloat(localStorage.getItem(key) || '0');
+  let isBest;
   if (!prev || elapsed < prev) {
     localStorage.setItem(key, elapsed.toFixed(3));
-    document.getElementById('winBest').textContent = '⭐ NEW BEST TIME!';
+    isBest = true;
   } else {
-    document.getElementById('winBest').textContent = 'Best: ' + prev.toFixed(3) + 's';
+    isBest = false;
   }
+  state.lastWin = { elapsed, isBest, prev };
+  renderWin();
   setTimeout(() => showScreen('screen-win'), 380);
 }
+
+function renderWin() {
+  if (!state.lastWin) return;
+  const { elapsed, isBest, prev } = state.lastWin;
+  document.getElementById('winTime').textContent = window.t('win.seconds', { s: elapsed.toFixed(3) });
+  document.getElementById('winBest').textContent = isBest
+    ? window.t('win.newbest')
+    : window.t('win.best', { s: prev.toFixed(3) });
+}
+
+// Re-render visible dynamic text on language toggle
+window.refreshDynamic = function () {
+  if (document.getElementById('screen-levels').classList.contains('active')) buildLevelGrid();
+  if (document.getElementById('screen-game').classList.contains('active'))
+    document.getElementById('targetLabel').textContent = window.t('level.addto', { n: state.targetSum });
+  if (document.getElementById('screen-win').classList.contains('active')) renderWin();
+};
 
 // ═══════════════════════════════════════════════════════════════
 // VIEWPORT SCALING

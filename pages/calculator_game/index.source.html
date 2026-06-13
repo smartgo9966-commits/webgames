@@ -452,24 +452,65 @@ html, body {
 @keyframes cgFall {
   to { transform: translateY(110vh) rotate(720deg); }
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
+[dir="rtl"] .cg-stat-row { direction: rtl; }
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage"><div class="game-wrap">
 
 <!-- ══════════════════ START SCREEN ══════════════════ -->
 <div id="scr-start" class="screen active">
   <div class="cg-card">
     <div class="cg-header">
-      <h1>🧮 Calculator Puzzle</h1>
+      <h1 data-i18n="start.title">🧮 Calculator Puzzle</h1>
     </div>
     <div class="cg-start-body">
-      <p class="cg-start-blurb">
+      <p class="cg-start-blurb" data-i18n="start.blurb">
         Each row and column makes a math equation. Tap an empty circle and use the keypad to fill in the missing number — solve all equations to win!
       </p>
       <div class="cg-demo" id="demo-row"></div>
-      <button class="cg-oval-btn" onclick="goLevels()">▶ Play</button>
+      <button class="cg-oval-btn" onclick="goLevels()" data-i18n="btn.play">▶ Play</button>
     </div>
   </div>
 </div>
@@ -478,12 +519,12 @@ html, body {
 <div id="scr-levels" class="screen">
   <div class="cg-card">
     <div class="cg-header">
-      <h1>Pick a Level</h1>
+      <h1 data-i18n="levels.title">Pick a Level</h1>
     </div>
     <div class="cg-levels-body">
       <div class="cg-levels-grid" id="levels-grid"></div>
       <div style="display:flex; justify-content:center;">
-        <button class="cg-oval-btn alt small" onclick="goStart()">← Home</button>
+        <button class="cg-oval-btn alt small" onclick="goStart()" data-i18n="btn.home">← Home</button>
       </div>
     </div>
   </div>
@@ -493,21 +534,21 @@ html, body {
 <div id="scr-game" class="screen">
   <div class="cg-card">
     <div class="cg-header">
-      <h2 id="game-title">Level 1</h2>
+      <h2 id="game-title">Level 1</h2><!-- set via JS through t() -->
     </div>
     <div class="cg-game-body">
       <div class="cg-game-top">
         <div class="cg-game-title" id="game-subtitle">Add &amp; Subtract</div>
         <div class="cg-top-btns">
-          <button class="cg-oval-btn alt small" onclick="useHint()" id="hint-btn">💡 Hint</button>
-          <button class="cg-oval-btn alt small" onclick="resetPuzzle()">↺ Reset</button>
-          <button class="cg-oval-btn alt small" onclick="goLevels()">Levels</button>
+          <button class="cg-oval-btn alt small" onclick="useHint()" id="hint-btn" data-i18n="btn.hint">💡 Hint</button>
+          <button class="cg-oval-btn alt small" onclick="resetPuzzle()" data-i18n="btn.reset">↺ Reset</button>
+          <button class="cg-oval-btn alt small" onclick="goLevels()" data-i18n="btn.levels">Levels</button>
         </div>
       </div>
       <div class="cg-stat-row">
-        <div>Filled: <span class="val" id="stat-filled">0</span>/<span id="stat-total">0</span></div>
-        <div>Mistakes: <span class="val" id="stat-mistakes">0</span></div>
-        <div>Hints: <span class="val" id="stat-hints">0</span></div>
+        <div><span data-i18n="stat.filled">Filled:</span> <span class="val" id="stat-filled">0</span>/<span id="stat-total">0</span></div>
+        <div><span data-i18n="stat.mistakes">Mistakes:</span> <span class="val" id="stat-mistakes">0</span></div>
+        <div><span data-i18n="stat.hints">Hints:</span> <span class="val" id="stat-hints">0</span></div>
       </div>
       <div class="cg-play-area">
         <div class="cg-board" id="puzzle-board"></div>
@@ -521,22 +562,125 @@ html, body {
 <div id="scr-results" class="screen">
   <div class="cg-card">
     <div class="cg-header">
-      <h1 id="result-title">Solved!</h1>
+      <h1 id="result-title" data-i18n="res.title">Solved!</h1>
     </div>
     <div class="cg-result-body">
       <div id="result-stars" class="cg-result-stars">⭐⭐⭐</div>
       <div class="cg-result-line" id="result-line">Perfect — all equations check out!</div>
       <div class="cg-result-meta" id="result-meta">0 mistakes · 0 hints used</div>
       <div class="cg-result-btns">
-        <button class="cg-oval-btn" onclick="replayLevel()">↺ Play Again</button>
-        <button class="cg-oval-btn" onclick="nextLevel()" id="next-btn">Next Level →</button>
-        <button class="cg-oval-btn alt" onclick="goLevels()">Levels</button>
+        <button class="cg-oval-btn" onclick="replayLevel()" data-i18n="btn.playagain">↺ Play Again</button>
+        <button class="cg-oval-btn" onclick="nextLevel()" id="next-btn" data-i18n="btn.next">Next Level →</button>
+        <button class="cg-oval-btn alt" onclick="goLevels()" data-i18n="btn.levels">Levels</button>
       </div>
     </div>
   </div>
 </div>
 
 </div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ════════════════ i18n (EN / ع) ════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'start.title': '🧮 Calculator Puzzle',
+      'start.blurb': 'Each row and column makes a math equation. Tap an empty circle and use the keypad to fill in the missing number — solve all equations to win!',
+      'btn.play': '▶ Play',
+      'levels.title': 'Pick a Level',
+      'btn.home': '← Home',
+      'btn.hint': '💡 Hint',
+      'btn.reset': '↺ Reset',
+      'btn.levels': 'Levels',
+      'stat.filled': 'Filled:',
+      'stat.mistakes': 'Mistakes:',
+      'stat.hints': 'Hints:',
+      'btn.playagain': '↺ Play Again',
+      'btn.next': 'Next Level →',
+      'res.title': 'Solved!',
+      'lvl.title': 'Level {n}',
+      'lvl.cells': '{r}×{c} cells',
+      'lvl.locked': '🔒 Locked',
+      'lbl.addsub': 'Add & Subtract',
+      'lbl.plusminus': 'Plus & Minus',
+      'lbl.times': 'Times Tables',
+      'lbl.mixed': 'Mixed Ops',
+      'lbl.full': 'Full Grid',
+      'res.perfect': 'Perfect — all equations check out!',
+      'res.great': 'Great job — almost flawless!',
+      'res.solved': 'Solved! Try again for more stars.',
+      'res.meta': '{m} · {h}',
+      'res.mistakes1': '1 mistake',
+      'res.mistakesN': '{m} mistakes',
+      'res.hints1': '1 hint used',
+      'res.hintsN': '{h} hints used',
+    },
+    ar: {
+      'start.title': '🧮 لغز الآلة الحاسبة',
+      'start.blurb': 'كل صفّ وعمود يكوّن معادلة حسابية. انقر دائرة فارغة واستخدم لوحة الأرقام لملء الرقم الناقص — حُلّ كل المعادلات لتفوز!',
+      'btn.play': 'العب ▶',
+      'levels.title': 'اختر مستوى',
+      'btn.home': 'الرئيسية →',
+      'btn.hint': '💡 تلميح',
+      'btn.reset': '↺ إعادة',
+      'btn.levels': 'المستويات',
+      'stat.filled': 'مملوء:',
+      'stat.mistakes': 'الأخطاء:',
+      'stat.hints': 'التلميحات:',
+      'btn.playagain': '↺ العب مجددًا',
+      'btn.next': 'المستوى التالي →',
+      'res.title': 'تمّ الحل!',
+      'lvl.title': 'المستوى {n}',
+      'lvl.cells': '{r}×{c} خلية',
+      'lvl.locked': '🔒 مقفل',
+      'lbl.addsub': 'جمع وطرح',
+      'lbl.plusminus': 'زائد وناقص',
+      'lbl.times': 'جداول الضرب',
+      'lbl.mixed': 'عمليات متنوّعة',
+      'lbl.full': 'الشبكة الكاملة',
+      'res.perfect': 'ممتاز — كل المعادلات صحيحة!',
+      'res.great': 'أحسنت — أداء شبه مثالي!',
+      'res.solved': 'تمّ الحل! حاول مجددًا لمزيد من النجوم.',
+      'res.meta': '{m} · {h}',
+      'res.mistakes1': 'خطأ واحد',
+      'res.mistakesN': '{m} أخطاء',
+      'res.hints1': 'تلميح واحد',
+      'res.hintsN': '{h} تلميحات',
+    },
+  };
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  window.SGLANG = lang;
+  window.t = function (k, vars) {
+    let s = (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : (I18N.en[k] != null ? I18N.en[k] : k);
+    if (vars) for (const n in vars) s = s.split('{' + n + '}').join(vars[n]);
+    return s;
+  };
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = window.t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('#lang-toggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  }
+  window.setLang = function (l) {
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    if (typeof window.refreshDynamic === 'function') window.refreshDynamic();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-lang]'); if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 // ════════════════════════════════════════════════════════════
@@ -556,7 +700,7 @@ html, body {
 const LEVELS = [
   // ─── L1 ─────────────────────────────────────────────────
   {
-    label: 'Add & Subtract',
+    label: 'Add & Subtract', labelKey: 'lbl.addsub',
     rows: 5, cols: 5,
     layout: [
       [{k:'num',v:7},  {k:'op',op:'+'}, {k:'blank',id:'a',ans:3}, {k:'op',op:'='}, {k:'num',v:10}],
@@ -572,7 +716,7 @@ const LEVELS = [
   },
   // ─── L2 ─────────────────────────────────────────────────
   {
-    label: 'Plus & Minus',
+    label: 'Plus & Minus', labelKey: 'lbl.plusminus',
     rows: 5, cols: 5,
     layout: [
       [{k:'num',v:5},  {k:'op',op:'+'}, {k:'blank',id:'b',ans:7}, {k:'op',op:'='}, {k:'num',v:12}],
@@ -592,7 +736,7 @@ const LEVELS = [
   },
   // ─── L3 ─────────────────────────────────────────────────
   {
-    label: 'Times Tables',
+    label: 'Times Tables', labelKey: 'lbl.times',
     rows: 5, cols: 5,
     layout: [
       [{k:'num',v:3},  {k:'op',op:'×'}, {k:'num',v:4},             {k:'op',op:'='}, {k:'blank',id:'c',ans:12}],
@@ -612,7 +756,7 @@ const LEVELS = [
   },
   // ─── L4 ─────────────────────────────────────────────────
   {
-    label: 'Mixed Ops',
+    label: 'Mixed Ops', labelKey: 'lbl.mixed',
     rows: 5, cols: 7,
     layout: [
       [{k:'num',v:10},{k:'op',op:'+'},{k:'num',v:5},  {k:'op',op:'-'},{k:'blank',id:'c',ans:2}, {k:'op',op:'='},{k:'num',v:13}],
@@ -632,7 +776,7 @@ const LEVELS = [
   },
   // ─── L5 ─────────────────────────────────────────────────
   {
-    label: 'Full Grid',
+    label: 'Full Grid', labelKey: 'lbl.full',
     rows: 7, cols: 7,
     layout: [
       [{k:'num',v:10}, {k:'op',op:'+'},{k:'blank',id:'b',ans:3}, {k:'op',op:'+'},{k:'num',v:2}, {k:'op',op:'='},{k:'num',v:15}],
@@ -787,9 +931,9 @@ function renderLevelsScreen() {
     }
 
     const num = document.createElement('div'); num.className = 'cg-level-num'; num.textContent = i + 1;
-    const lbl = document.createElement('div'); lbl.className = 'cg-level-label'; lbl.textContent = lvl.label;
+    const lbl = document.createElement('div'); lbl.className = 'cg-level-label'; lbl.textContent = window.t(lvl.labelKey);
     const meta = document.createElement('div'); meta.className = 'cg-level-meta';
-    meta.textContent = prevSolved ? `${lvl.rows}×${lvl.cols} cells` : '🔒 Locked';
+    meta.textContent = prevSolved ? window.t('lvl.cells', { r: lvl.rows, c: lvl.cols }) : window.t('lvl.locked');
     const stars = document.createElement('div'); stars.className = 'cg-level-stars';
     if (G.results[i].solved) {
       stars.textContent = '⭐'.repeat(G.results[i].stars);
@@ -828,8 +972,8 @@ function startLevel(idx) {
   G.mistakes = 0;
   G.hintsUsed = 0;
 
-  document.getElementById('game-title').textContent = `Level ${idx + 1}`;
-  document.getElementById('game-subtitle').textContent = lvl.label;
+  document.getElementById('game-title').textContent = window.t('lvl.title', { n: idx + 1 });
+  document.getElementById('game-subtitle').textContent = window.t(lvl.labelKey);
 
   renderBoard();
   renderKeypad();
@@ -1089,13 +1233,8 @@ function finishLevel() {
   G.results[G.levelIdx] = { solved: true, stars: Math.max(prev.stars || 0, stars) };
   saveResults();
 
-  document.getElementById('result-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
-  document.getElementById('result-line').textContent =
-    stars === 3 ? 'Perfect — all equations check out!' :
-    stars === 2 ? 'Great job — almost flawless!' :
-    'Solved! Try again for more stars.';
-  document.getElementById('result-meta').textContent =
-    `${m} mistake${m !== 1 ? 's' : ''} · ${h} hint${h !== 1 ? 's' : ''} used`;
+  G.lastResult = { stars, m, h };
+  renderResult();
 
   const nextBtn = document.getElementById('next-btn');
   nextBtn.style.display = (G.levelIdx < LEVELS.length - 1) ? '' : 'none';
@@ -1103,6 +1242,29 @@ function finishLevel() {
   confetti();
   show('scr-results');
 }
+
+function renderResult() {
+  if (!G.lastResult) return;
+  const { stars, m, h } = G.lastResult;
+  document.getElementById('result-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+  document.getElementById('result-line').textContent =
+    stars === 3 ? window.t('res.perfect') :
+    stars === 2 ? window.t('res.great') :
+    window.t('res.solved');
+  const mPart = m === 1 ? window.t('res.mistakes1') : window.t('res.mistakesN', { m });
+  const hPart = h === 1 ? window.t('res.hints1') : window.t('res.hintsN', { h });
+  document.getElementById('result-meta').textContent = window.t('res.meta', { m: mPart, h: hPart });
+}
+
+// Re-render any visible dynamic text on language toggle
+window.refreshDynamic = function () {
+  if (document.getElementById('scr-levels').classList.contains('active')) renderLevelsScreen();
+  if (document.getElementById('scr-game').classList.contains('active') && LEVELS[G.levelIdx]) {
+    document.getElementById('game-title').textContent = window.t('lvl.title', { n: G.levelIdx + 1 });
+    document.getElementById('game-subtitle').textContent = window.t(LEVELS[G.levelIdx].labelKey);
+  }
+  if (document.getElementById('scr-results').classList.contains('active')) renderResult();
+};
 
 function replayLevel() { startLevel(G.levelIdx); }
 function nextLevel() {

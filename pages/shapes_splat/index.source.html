@@ -406,39 +406,79 @@ html, body {
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage">
 <div class="game-wrap" id="gameWrap">
 
 <!-- ════ SCREEN 1: LEVEL SELECT ════ -->
 <div class="screen active" id="screen-level">
-  <div class="level-title">SHAPES SPLAT</div>
-  <div class="level-subtitle">Click level below to play</div>
+  <div class="level-title" data-i18n="title">SHAPES SPLAT</div>
+  <div class="level-subtitle" data-i18n="level.subtitle">Click level below to play</div>
   <div class="level-cards" id="levelCards"></div>
 </div>
 
 <!-- ════ SCREEN 2: MODE SELECT ════ -->
 <div class="screen" id="screen-mode" style="position:absolute;">
-  <button class="mode-back-btn" onclick="showScreen('screen-level')">&#8592; Back</button>
-  <div class="mode-title">Choose your mode and speed:</div>
+  <button class="mode-back-btn" onclick="showScreen('screen-level')" data-i18n-html="btn.back">&#8592; Back</button>
+  <div class="mode-title" data-i18n="mode.title">Choose your mode and speed:</div>
   <div class="mode-cards">
     <div class="mode-blob">
-      <div class="mode-pill">Relaxed mode</div>
-      <div class="mode-desc">10 questions, untimed.<br>Try to get 100% correct!</div>
+      <div class="mode-pill" data-i18n="mode.relaxed">Relaxed mode</div>
+      <div class="mode-desc" data-i18n-html="mode.relaxedDesc">10 questions, untimed.<br>Try to get 100% correct!</div>
       <div class="speed-btns">
-        <button class="speed-btn btn-fast" onclick="startGame('relaxed','fast')">FAST</button>
-        <button class="speed-btn btn-slow" onclick="startGame('relaxed','slow')">SLOW</button>
+        <button class="speed-btn btn-fast" onclick="startGame('relaxed','fast')" data-i18n="speed.fast">FAST</button>
+        <button class="speed-btn btn-slow" onclick="startGame('relaxed','slow')" data-i18n="speed.slow">SLOW</button>
       </div>
     </div>
     <div class="mode-blob">
-      <div class="mode-pill">Timed Mode</div>
-      <div class="mode-desc">Answer as quickly and correctly as you can to increase your score.</div>
+      <div class="mode-pill" data-i18n="mode.timed">Timed Mode</div>
+      <div class="mode-desc" data-i18n="mode.timedDesc">Answer as quickly and correctly as you can to increase your score.</div>
       <div class="speed-btns">
-        <button class="speed-btn btn-fast" onclick="startGame('timed','fast')">FAST</button>
-        <button class="speed-btn btn-slow" onclick="startGame('timed','slow')">SLOW</button>
+        <button class="speed-btn btn-fast" onclick="startGame('timed','fast')" data-i18n="speed.fast">FAST</button>
+        <button class="speed-btn btn-slow" onclick="startGame('timed','slow')" data-i18n="speed.slow">SLOW</button>
       </div>
     </div>
   </div>
@@ -446,9 +486,9 @@ html, body {
 
 <!-- ════ SCREEN 3: GAMEPLAY ════ -->
 <div class="screen" id="screen-game">
-  <button id="game-back" onclick="endGame()">&#8592; Menu</button>
+  <button id="game-back" onclick="endGame()" data-i18n-html="btn.menu">&#8592; Menu</button>
   <div id="game-field"></div>
-  <div id="target-label">find: <span id="target-word">—</span></div>
+  <div id="target-label"><span data-i18n="find">find:</span> <span id="target-word">—</span></div>
   <div id="stats-panel">
     <div id="stat-score">SCORE : 0</div>
     <div id="stat-hits">HITS : 0</div>
@@ -460,12 +500,12 @@ html, body {
 <!-- ════ SCREEN 4: RESULTS ════ -->
 <div class="screen" id="screen-results">
   <div class="results-box">
-    <div class="results-title">GAME OVER!</div>
+    <div class="results-title" data-i18n="gameover">GAME OVER!</div>
     <div class="results-accuracy" id="res-accuracy">0%</div>
     <div class="results-stats" id="res-stats"></div>
     <div class="results-btns">
-      <button class="res-btn btn-again" onclick="playAgain()">Play Again</button>
-      <button class="res-btn btn-change" onclick="showScreen('screen-level')">Change Level</button>
+      <button class="res-btn btn-again" onclick="playAgain()" data-i18n="btn.again">Play Again</button>
+      <button class="res-btn btn-change" onclick="showScreen('screen-level')" data-i18n="btn.change">Change Level</button>
     </div>
   </div>
 </div>
@@ -473,6 +513,165 @@ html, body {
 </div><!-- /game-wrap -->
 </div><!-- /fit-stage -->
 
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'SHAPES SPLAT',
+      'level.subtitle': 'Click level below to play',
+      'btn.back': '&#8592; Back',
+      'mode.title': 'Choose your mode and speed:',
+      'mode.relaxed': 'Relaxed mode',
+      'mode.relaxedDesc': '10 questions, untimed.<br>Try to get 100% correct!',
+      'mode.timed': 'Timed Mode',
+      'mode.timedDesc': 'Answer as quickly and correctly as you can to increase your score.',
+      'speed.fast': 'FAST',
+      'speed.slow': 'SLOW',
+      'btn.menu': '&#8592; Menu',
+      'find': 'find:',
+      'gameover': 'GAME OVER!',
+      'btn.again': 'Play Again',
+      'btn.change': 'Change Level',
+      'stat.score': 'SCORE',
+      'stat.hits': 'HITS',
+      'stat.miss': 'MISS',
+      'stat.time': 'TIME',
+      'stat.qleft': 'Q : {n} left',
+      'res.score': 'Score',
+      'res.hits': 'Hits',
+      'res.misses': 'Misses',
+      // Level names
+      'level.basic': 'BASIC SHAPES',
+      'level.rotation': 'SHAPES W/ROTATION',
+      'level.more': 'SHAPES +MORE',
+      'level.3d': '3-D SHAPES',
+      // Shape names (keys are the lowercase shape id)
+      'shape.circle': 'CIRCLE',
+      'shape.triangle': 'TRIANGLE',
+      'shape.square': 'SQUARE',
+      'shape.rectangle': 'RECTANGLE',
+      'shape.oval': 'OVAL',
+      'shape.star': 'STAR',
+      'shape.pentagon': 'PENTAGON',
+      'shape.diamond': 'DIAMOND',
+      'shape.sphere': 'SPHERE',
+      'shape.cone': 'CONE',
+      'shape.cube': 'CUBE',
+      'shape.cylinder': 'CYLINDER',
+      'shape.pyramid': 'PYRAMID',
+    },
+    ar: {
+      'title': 'لطخة الأشكال',
+      'level.subtitle': 'انقر على مستوى بالأسفل للعب',
+      'btn.back': '&#8592; رجوع',
+      'mode.title': 'اختر نمطك وسرعتك:',
+      'mode.relaxed': 'النمط الهادئ',
+      'mode.relaxedDesc': '١٠ أسئلة، بلا توقيت.<br>حاول أن تصيب ١٠٠٪؜!',
+      'mode.timed': 'النمط الموقوت',
+      'mode.timedDesc': 'أجب بأسرع وأدق ما يمكنك لرفع نتيجتك.',
+      'speed.fast': 'سريع',
+      'speed.slow': 'بطيء',
+      'btn.menu': '&#8592; القائمة',
+      'find': 'جِد:',
+      'gameover': 'انتهت اللعبة!',
+      'btn.again': 'العب مرة أخرى',
+      'btn.change': 'غيّر المستوى',
+      'stat.score': 'النتيجة',
+      'stat.hits': 'إصابات',
+      'stat.miss': 'إخفاقات',
+      'stat.time': 'الوقت',
+      'stat.qleft': 'بقي : {n} سؤال',
+      'res.score': 'النتيجة',
+      'res.hits': 'الإصابات',
+      'res.misses': 'الإخفاقات',
+      // Level names
+      'level.basic': 'أشكال أساسية',
+      'level.rotation': 'أشكال مع تدوير',
+      'level.more': 'أشكال + المزيد',
+      'level.3d': 'أشكال ثلاثية الأبعاد',
+      // Shape names
+      'shape.circle': 'دائرة',
+      'shape.triangle': 'مثلث',
+      'shape.square': 'مربع',
+      'shape.rectangle': 'مستطيل',
+      'shape.oval': 'بيضاوي',
+      'shape.star': 'نجمة',
+      'shape.pentagon': 'خماسي',
+      'shape.diamond': 'معيّن',
+      'shape.sphere': 'كرة',
+      'shape.cone': 'مخروط',
+      'shape.cube': 'مكعّب',
+      'shape.cylinder': 'أسطوانة',
+      'shape.pyramid': 'هرم',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-render JS-generated text: level cards, the live target word, and stats.
+  function refreshDynamic() {
+    if (typeof buildLevelCards === 'function' &&
+        document.getElementById('screen-level').classList.contains('active')) {
+      buildLevelCards();
+    }
+    // Live target word (mid-round).
+    const tw = document.getElementById('target-word');
+    if (tw && typeof currentTarget !== 'undefined' && currentTarget) {
+      tw.textContent = window.t('shape.' + currentTarget);
+    }
+    if (typeof updateStats === 'function' &&
+        document.getElementById('screen-game').classList.contains('active')) {
+      updateStats();
+    }
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 <script>
 // ─── SVG SHAPE LIBRARY ───────────────────────────────────────────────────────
 
@@ -677,7 +876,7 @@ function buildLevelCards() {
 
     const header = document.createElement('div');
     header.className = 'card-header';
-    header.textContent = lvl.label;
+    header.textContent = window.t('level.' + key);
     card.appendChild(header);
 
     const body = document.createElement('div');
@@ -696,7 +895,7 @@ function buildLevelCards() {
       if (p.label) {
         const lbl = document.createElement('span');
         lbl.className = 'shape-label-text';
-        lbl.textContent = p.label;
+        lbl.textContent = window.t('shape.' + p.name);
         row.appendChild(lbl);
       }
       body.appendChild(row);
@@ -745,7 +944,7 @@ function nextRound() {
 
   // Pick random target
   currentTarget = shapes[Math.floor(Math.random() * shapes.length)];
-  document.getElementById('target-word').textContent = currentTarget;
+  document.getElementById('target-word').textContent = window.t('shape.' + currentTarget);
 
   // Build 8 tokens: 1 guaranteed correct + 7 random (may repeat)
   const pool = [currentTarget];
@@ -872,15 +1071,15 @@ function onTokenClick(btn, shapeName) {
 // ─── STATS UPDATE ────────────────────────────────────────────────────────────
 
 function updateStats() {
-  document.getElementById('stat-score').textContent = 'SCORE : ' + score;
-  document.getElementById('stat-hits').textContent  = 'HITS : '  + hits;
-  document.getElementById('stat-miss').textContent  = 'MISS : '  + misses;
+  document.getElementById('stat-score').textContent = window.t('stat.score') + ' : ' + score;
+  document.getElementById('stat-hits').textContent  = window.t('stat.hits')  + ' : ' + hits;
+  document.getElementById('stat-miss').textContent  = window.t('stat.miss')  + ' : ' + misses;
   const timeEl = document.getElementById('stat-time');
   if (curMode === 'timed') {
-    timeEl.textContent = 'TIME : ' + timeLeft;
+    timeEl.textContent = window.t('stat.time') + ' : ' + timeLeft;
     timeEl.style.color = timeLeft <= 10 ? '#cc2200' : '';
   } else {
-    timeEl.textContent = 'Q : ' + questionsLeft + ' left';
+    timeEl.textContent = window.t('stat.qleft', { n: questionsLeft });
   }
 }
 
@@ -893,7 +1092,7 @@ function endGame() {
   const pct   = total > 0 ? Math.round((hits / total) * 100) : 0;
   document.getElementById('res-accuracy').textContent = pct + '%';
   document.getElementById('res-stats').innerHTML =
-    `Score: ${score}&nbsp;&nbsp;|&nbsp;&nbsp;Hits: ${hits}&nbsp;&nbsp;|&nbsp;&nbsp;Misses: ${misses}`;
+    `${window.t('res.score')}: ${score}&nbsp;&nbsp;|&nbsp;&nbsp;${window.t('res.hits')}: ${hits}&nbsp;&nbsp;|&nbsp;&nbsp;${window.t('res.misses')}: ${misses}`;
   showScreen('screen-results');
 }
 

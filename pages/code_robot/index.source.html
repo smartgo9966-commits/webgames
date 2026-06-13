@@ -418,43 +418,83 @@ html, body {
   z-index: 40;
 }
 .toast.show { opacity: 1; }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 
 <div class="fit-stage">
 <div class="game-wrap" id="gameWrap">
 
   <!-- ═══════════ MENU ═══════════ -->
   <div class="screen active" id="screen-menu">
-    <div class="menu-title"><span class="robot-ico">🤖</span><span>CODE ROBOT</span></div>
-    <div class="menu-subtitle">Program the robot to reach the flag!</div>
+    <div class="menu-title"><span class="robot-ico">🤖</span><span data-i18n="menu.title">CODE ROBOT</span></div>
+    <div class="menu-subtitle" data-i18n="menu.subtitle">Program the robot to reach the flag!</div>
     <div class="level-row">
-      <button class="level-btn" data-level="1"><span class="lbl">LEVEL</span><span class="num">1</span><span class="meta">Tutorial</span></button>
-      <button class="level-btn" data-level="2"><span class="lbl">LEVEL</span><span class="num">2</span><span class="meta">Coins</span></button>
-      <button class="level-btn" data-level="3"><span class="lbl">LEVEL</span><span class="num">3</span><span class="meta">Mazes</span></button>
-      <button class="level-btn" data-level="4"><span class="lbl">LEVEL</span><span class="num">4</span><span class="meta">Repeat!</span></button>
+      <button class="level-btn" data-level="1"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">1</span><span class="meta" data-i18n="menu.m.tutorial">Tutorial</span></button>
+      <button class="level-btn" data-level="2"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">2</span><span class="meta" data-i18n="menu.m.coins">Coins</span></button>
+      <button class="level-btn" data-level="3"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">3</span><span class="meta" data-i18n="menu.m.mazes">Mazes</span></button>
+      <button class="level-btn" data-level="4"><span class="lbl" data-i18n="menu.level">LEVEL</span><span class="num">4</span><span class="meta" data-i18n="menu.m.repeat">Repeat!</span></button>
     </div>
     <div class="practice-row" id="practiceToggle">
       <span class="toggle"></span>
-      <span>Practice mode (unlimited resets, no stars)</span>
+      <span data-i18n="menu.practice">Practice mode (unlimited resets, no stars)</span>
     </div>
   </div>
 
   <!-- ═══════════ INSTRUCTIONS ═══════════ -->
   <div class="screen" id="screen-instructions">
-    <div class="instr-title">HOW TO PLAY</div>
+    <div class="instr-title" data-i18n="instr.title">HOW TO PLAY</div>
     <div class="instr-step-row">
       <div class="instr-card">
-        <div class="instr-block fwd"><span class="ico">⬆</span><span>FORWARD</span></div>
-        <div class="lbl">TAP A BLOCK</div>
+        <div class="instr-block fwd"><span class="ico">⬆</span><span data-i18n="block.forward">FORWARD</span></div>
+        <div class="lbl" data-i18n="instr.tap">TAP A BLOCK</div>
       </div>
       <div class="instr-arrow">→</div>
       <div class="instr-card">
-        <div class="instr-block fwd"><span class="ico">⬆</span><span>FORWARD</span></div>
-        <div class="instr-block fwd" style="margin-top:4px"><span class="ico">⬆</span><span>FORWARD</span></div>
-        <div class="lbl">BUILD A PROGRAM</div>
+        <div class="instr-block fwd"><span class="ico">⬆</span><span data-i18n="block.forward">FORWARD</span></div>
+        <div class="instr-block fwd" style="margin-top:4px"><span class="ico">⬆</span><span data-i18n="block.forward">FORWARD</span></div>
+        <div class="lbl" data-i18n="instr.build">BUILD A PROGRAM</div>
       </div>
       <div class="instr-arrow">→</div>
       <div class="instr-card">
@@ -462,16 +502,16 @@ html, body {
           <span class="demo-robot">🤖</span>
           <span class="demo-flag">🚩</span>
         </div>
-        <div class="instr-block run" style="margin-top:6px"><span>▶ RUN</span></div>
-        <div class="lbl">PRESS RUN!</div>
+        <div class="instr-block run" style="margin-top:6px"><span data-i18n="btn.run">▶ RUN</span></div>
+        <div class="lbl" data-i18n="instr.run">PRESS RUN!</div>
       </div>
     </div>
-    <div class="instr-tip">
+    <div class="instr-tip" data-i18n-html="instr.tip">
       🪙 Collect every coin <i>before</i> stepping on the flag. Hit a wall and the robot stops — tap RESET to try again!
     </div>
     <div class="instr-buttons">
-      <button class="btn" id="btn-instr-menu">MENU</button>
-      <button class="btn primary big" id="btn-instr-start">START</button>
+      <button class="btn" id="btn-instr-menu" data-i18n="btn.menu">MENU</button>
+      <button class="btn primary big" id="btn-instr-start" data-i18n="btn.start">START</button>
     </div>
   </div>
 
@@ -490,17 +530,17 @@ html, body {
         <canvas id="grid-canvas" width="424" height="424"></canvas>
       </div>
       <div class="program-pane">
-        <div class="program-title">PROGRAM</div>
+        <div class="program-title" data-i18n="game.program">PROGRAM</div>
         <div class="program-list" id="program-list">
-          <div class="empty-hint">Tap blocks on the right to build your program</div>
+          <div class="empty-hint" data-i18n="game.emptyhint">Tap blocks on the right to build your program</div>
         </div>
         <div class="controls-row">
-          <button class="btn run" id="btn-run">▶ RUN</button>
-          <button class="btn warn" id="btn-reset">↺ RESET</button>
+          <button class="btn run" id="btn-run" data-i18n="btn.run">▶ RUN</button>
+          <button class="btn warn" id="btn-reset" data-i18n="btn.reset">↺ RESET</button>
         </div>
       </div>
       <div class="palette-pane">
-        <div class="palette-title">BLOCKS</div>
+        <div class="palette-title" data-i18n="game.blocks">BLOCKS</div>
         <div id="palette-blocks"></div>
       </div>
     </div>
@@ -516,15 +556,134 @@ html, body {
       <div class="modal-body" id="results-body">Great job!</div>
       <div class="modal-stats" id="results-stats"></div>
       <div class="modal-buttons">
-        <button class="btn" id="btn-results-menu">MENU</button>
-        <button class="btn" id="btn-results-replay">REPLAY</button>
-        <button class="btn primary" id="btn-results-next">NEXT LEVEL</button>
+        <button class="btn" id="btn-results-menu" data-i18n="btn.menu">MENU</button>
+        <button class="btn" id="btn-results-replay" data-i18n="btn.replay">REPLAY</button>
+        <button class="btn primary" id="btn-results-next" data-i18n="btn.nextlevel">NEXT LEVEL</button>
       </div>
     </div>
   </div>
 
 </div>
 </div>
+
+<script>
+/* ════════════════ i18n (EN / ع) ════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'menu.title': 'CODE ROBOT',
+      'menu.subtitle': 'Program the robot to reach the flag!',
+      'menu.level': 'LEVEL',
+      'menu.m.tutorial': 'Tutorial',
+      'menu.m.coins': 'Coins',
+      'menu.m.mazes': 'Mazes',
+      'menu.m.repeat': 'Repeat!',
+      'menu.practice': 'Practice mode (unlimited resets, no stars)',
+      'instr.title': 'HOW TO PLAY',
+      'instr.tap': 'TAP A BLOCK',
+      'instr.build': 'BUILD A PROGRAM',
+      'instr.run': 'PRESS RUN!',
+      'instr.tip': '🪙 Collect every coin <i>before</i> stepping on the flag. Hit a wall and the robot stops — tap RESET to try again!',
+      'btn.menu': 'MENU',
+      'btn.start': 'START',
+      'btn.run': '▶ RUN',
+      'btn.reset': '↺ RESET',
+      'btn.replay': 'REPLAY',
+      'btn.nextlevel': 'NEXT LEVEL',
+      'game.program': 'PROGRAM',
+      'game.emptyhint': 'Tap blocks on the right to build your program',
+      'game.blocks': 'BLOCKS',
+      'block.forward': 'FORWARD',
+      'block.left': 'TURN LEFT',
+      'block.right': 'TURN RIGHT',
+      'block.repeat': 'REPEAT ×{n}',
+      'block.addinside': 'Tap a block to add inside',
+      'hud.level': 'LEVEL {n}',
+      'toast.addblocks': 'Add some blocks first!',
+      'toast.missedcoin': 'You missed a coin! 🪙',
+      'toast.noflag': "You didn't reach the flag!",
+      'toast.crash': '💥 Crash! Tap RESET',
+      'toast.solved': '🎉 Puzzle {n} solved!',
+      'res.complete': 'LEVEL {n} COMPLETE!',
+      'res.master': "Perfect! You're a coding master! 🤖",
+      'res.great': 'Great work, future programmer!',
+      'res.nice': 'Nice — try again for more stars!',
+      'res.stats': 'Stars: <b>{got} / {max}</b>',
+    },
+    ar: {
+      'menu.title': 'الروبوت المبرمَج',
+      'menu.subtitle': 'برمِج الروبوت ليصل إلى العَلَم!',
+      'menu.level': 'المستوى',
+      'menu.m.tutorial': 'تعليمي',
+      'menu.m.coins': 'العملات',
+      'menu.m.mazes': 'المتاهات',
+      'menu.m.repeat': 'تكرار!',
+      'menu.practice': 'وضع التدريب (إعادات غير محدودة، بلا نجوم)',
+      'instr.title': 'كيفية اللعب',
+      'instr.tap': 'انقر لبنة',
+      'instr.build': 'ابنِ برنامجًا',
+      'instr.run': 'اضغط تشغيل!',
+      'instr.tip': '🪙 اجمع كل عملة <i>قبل</i> الوقوف على العَلَم. إن اصطدم الروبوت بجدار توقّف — انقر إعادة للمحاولة مجددًا!',
+      'btn.menu': 'القائمة',
+      'btn.start': 'ابدأ',
+      'btn.run': '▶ تشغيل',
+      'btn.reset': '↺ إعادة',
+      'btn.replay': 'إعادة اللعب',
+      'btn.nextlevel': 'المستوى التالي',
+      'game.program': 'البرنامج',
+      'game.emptyhint': 'انقر اللبنات على اليمين لبناء برنامجك',
+      'game.blocks': 'اللبنات',
+      'block.forward': 'أمام',
+      'block.left': 'يسار',
+      'block.right': 'يمين',
+      'block.repeat': 'كرّر ×{n}',
+      'block.addinside': 'انقر لبنة لإضافتها بالداخل',
+      'hud.level': 'المستوى {n}',
+      'toast.addblocks': 'أضف بعض اللبنات أولًا!',
+      'toast.missedcoin': 'فاتتك عملة! 🪙',
+      'toast.noflag': 'لم تصل إلى العَلَم!',
+      'toast.crash': '💥 تحطّم! انقر إعادة',
+      'toast.solved': '🎉 حُلّ اللغز {n}!',
+      'res.complete': 'اكتمل المستوى {n}!',
+      'res.master': 'مثالي! أنت بارع في البرمجة! 🤖',
+      'res.great': 'عمل رائع، أيها المبرمج المستقبلي!',
+      'res.nice': 'جيّد — حاول مجددًا لمزيد من النجوم!',
+      'res.stats': 'النجوم: <b>{got} / {max}</b>',
+    },
+  };
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  window.SGLANG = lang;
+  window.t = function (k, vars) {
+    let s = (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : (I18N.en[k] != null ? I18N.en[k] : k);
+    if (vars) for (const n in vars) s = s.split('{' + n + '}').join(vars[n]);
+    return s;
+  };
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = window.t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('#lang-toggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  }
+  window.setLang = function (l) {
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    if (typeof window.refreshDynamic === 'function') window.refreshDynamic();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-lang]'); if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 'use strict';
@@ -571,13 +730,17 @@ const PALETTE_ICONS = {
   repeat3: '↻×3',
   repeat5: '↻×5'
 };
-const PALETTE_LABELS = {
-  forward: 'FORWARD',
-  left: 'TURN LEFT',
-  right: 'TURN RIGHT',
-  repeat3: 'REPEAT ×3',
-  repeat5: 'REPEAT ×5'
-};
+// Block label lookup is routed through window.t so it follows the active language.
+function paletteLabel(type) {
+  switch (type) {
+    case 'forward': return window.t('block.forward');
+    case 'left':    return window.t('block.left');
+    case 'right':   return window.t('block.right');
+    case 'repeat3': return window.t('block.repeat', { n: 3 });
+    case 'repeat5': return window.t('block.repeat', { n: 5 });
+    default:        return type;
+  }
+}
 
 // ════════════════════════════════════════════════════════════
 //  STATE
@@ -669,7 +832,7 @@ function resetPuzzle(){
 //  HUD / PROGRAM / PALETTE RENDERING
 // ════════════════════════════════════════════════════════════
 function renderHUD(){
-  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-level').textContent = window.t('hud.level', { n: state.level });
   document.getElementById('hud-puzzle').textContent = (state.puzzleIdx+1) + '/3';
   document.getElementById('hud-coins').textContent = state.coinsLeft.length;
   document.getElementById('hud-blockcount').textContent = countBlocks(state.program);
@@ -704,7 +867,7 @@ function renderPalette(){
     const b = document.createElement('div');
     const cssType = t.startsWith('repeat') ? 'repeat' : t;
     b.className = 'pal-block ' + cssType;
-    b.innerHTML = `<span class="ico">${PALETTE_ICONS[t]}</span><span>${PALETTE_LABELS[t]}</span>`;
+    b.innerHTML = `<span class="ico">${PALETTE_ICONS[t]}</span><span>${paletteLabel(t)}</span>`;
     b.addEventListener('click', () => onPaletteClick(t));
     pal.appendChild(b);
   }
@@ -716,7 +879,7 @@ function renderProgram(){
   if (state.program.length === 0){
     const hint = document.createElement('div');
     hint.className = 'empty-hint';
-    hint.textContent = 'Tap blocks on the right to build your program';
+    hint.textContent = window.t('game.emptyhint');
     list.appendChild(hint);
     return;
   }
@@ -725,16 +888,16 @@ function renderProgram(){
     if (b.type === 'repeat'){
       el.className = 'prog-block repeat';
       const childInner = b.child
-        ? `<div class="inner-block ${b.child.type}"><span class="ico">${PALETTE_ICONS[b.child.type]}</span><span>${PALETTE_LABELS[b.child.type]}</span></div>`
-        : 'Tap a block to add inside';
-      el.innerHTML = `<div class="rep-hdr"><span class="ico">${PALETTE_ICONS['repeat'+b.count]}</span><span>REPEAT ×${b.count}</span></div><div class="rep-child">${childInner}</div>`;
+        ? `<div class="inner-block ${b.child.type}"><span class="ico">${PALETTE_ICONS[b.child.type]}</span><span>${paletteLabel(b.child.type)}</span></div>`
+        : window.t('block.addinside');
+      el.innerHTML = `<div class="rep-hdr"><span class="ico">${PALETTE_ICONS['repeat'+b.count]}</span><span>${window.t('block.repeat', { n: b.count })}</span></div><div class="rep-child">${childInner}</div>`;
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         onProgramClick(idx);
       });
     } else {
       el.className = 'prog-block ' + b.type;
-      el.innerHTML = `<span class="ico">${PALETTE_ICONS[b.type]}</span><span>${PALETTE_LABELS[b.type]}</span>`;
+      el.innerHTML = `<span class="ico">${PALETTE_ICONS[b.type]}</span><span>${paletteLabel(b.type)}</span>`;
       el.addEventListener('click', () => onProgramClick(idx));
     }
     list.appendChild(el);
@@ -794,7 +957,7 @@ function flattenProgram(prog){
 function runProgram(){
   if (state.running) return;
   if (state.program.length === 0){
-    toast('Add some blocks first!');
+    toast(window.t('toast.addblocks'));
     return;
   }
   // Always reset state to puzzle start
@@ -820,9 +983,9 @@ function runProgram(){
       if (r.x === g[0] && r.y === g[1] && state.coinsLeft.length === 0){
         onPuzzleSolved();
       } else if (r.x === g[0] && r.y === g[1] && state.coinsLeft.length > 0){
-        toast('You missed a coin! 🪙');
+        toast(window.t('toast.missedcoin'));
       } else {
-        toast("You didn't reach the flag!");
+        toast(window.t('toast.noflag'));
       }
       return;
     }
@@ -844,7 +1007,7 @@ function applyInstruction(inst){
       // Crash!
       state.shake = 12;
       state.running = false;
-      toast('💥 Crash! Tap RESET');
+      toast(window.t('toast.crash'));
       return;
     }
     r.x = nx; r.y = ny;
@@ -870,7 +1033,7 @@ function onPuzzleSolved(){
   renderHUD();
 
   triggerConfetti();
-  toast('🎉 Puzzle ' + (state.puzzleIdx+1) + ' solved!');
+  toast(window.t('toast.solved', { n: state.puzzleIdx + 1 }));
 
   setTimeout(() => {
     const next = state.puzzleIdx + 1;
@@ -885,28 +1048,46 @@ function onPuzzleSolved(){
 function endLevel(){
   const totalStars = state.starsByPuzzle.reduce((a,b)=>a+b, 0);
   const maxStars = 9;
-  document.getElementById('results-title').textContent = 'LEVEL ' + state.level + ' COMPLETE!';
-
-  const starsEl = document.getElementById('results-stars');
-  starsEl.innerHTML = '';
-  for (let i=0;i<maxStars;i++){
-    const s = document.createElement('span');
-    s.className = 'star' + (i < totalStars ? ' lit' : '');
-    s.textContent = '★';
-    starsEl.appendChild(s);
-  }
-  document.getElementById('results-body').textContent =
-    totalStars === 9 ? "Perfect! You're a coding master! 🤖" :
-    totalStars >= 6 ? 'Great work, future programmer!' :
-    'Nice — try again for more stars!';
-  document.getElementById('results-stats').innerHTML =
-    'Stars: <b>' + totalStars + ' / ' + maxStars + '</b>';
+  state.lastResult = { level: state.level, totalStars, maxStars };
+  renderResults();
 
   document.getElementById('btn-results-next').style.display =
     state.level < 4 ? 'inline-block' : 'none';
 
   openModal('modal-results');
 }
+
+function renderResults(){
+  const r = state.lastResult;
+  if (!r) return;
+  document.getElementById('results-title').textContent = window.t('res.complete', { n: r.level });
+
+  const starsEl = document.getElementById('results-stars');
+  starsEl.innerHTML = '';
+  for (let i=0;i<r.maxStars;i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < r.totalStars ? ' lit' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+  document.getElementById('results-body').textContent =
+    r.totalStars === 9 ? window.t('res.master') :
+    r.totalStars >= 6 ? window.t('res.great') :
+    window.t('res.nice');
+  document.getElementById('results-stats').innerHTML =
+    window.t('res.stats', { got: r.totalStars, max: r.maxStars });
+}
+
+// Re-render visible dynamic text on language toggle
+window.refreshDynamic = function () {
+  if (document.getElementById('screen-game').classList.contains('active')) {
+    renderHUD();
+    renderPalette();
+    renderProgram();
+  }
+  const resModal = document.getElementById('modal-results');
+  if (resModal && resModal.classList.contains('active') && state.lastResult) renderResults();
+};
 
 // ════════════════════════════════════════════════════════════
 //  CANVAS RENDERING

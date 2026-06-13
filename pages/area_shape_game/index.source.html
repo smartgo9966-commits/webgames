@@ -490,10 +490,50 @@ button { font-family: inherit; }
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 <div class="fit-stage">
 <div class="game-wrap" id="gameWrap">
 
@@ -501,13 +541,13 @@ button { font-family: inherit; }
   <div id="screen-title" class="screen active">
     <div class="title-band"></div>
     <div class="title-band2">
-      <div class="title-area">Area</div>
-      <div class="title-game">Shape Game</div>
+      <div class="title-area" data-i18n="title.area">Area</div>
+      <div class="title-game" data-i18n="title.game">Shape Game</div>
     </div>
     <div class="title-body" id="titleBody">
       <!-- decorative shapes inserted by JS -->
       <div class="title-start-wrap">
-        <button class="start-btn" id="titleStart">START</button>
+        <button class="start-btn" id="titleStart" data-i18n="btn.start">START</button>
       </div>
     </div>
   </div>
@@ -516,24 +556,24 @@ button { font-family: inherit; }
   <div id="screen-instructions" class="screen">
     <div class="instr-card">
       <div class="instr-row">
-        <span class="instr-label">Area:</span>
-        <span class="instr-text">The number of square units needed<br>to cover a figure.</span>
+        <span class="instr-label" data-i18n="instr.areaLabel">Area:</span>
+        <span class="instr-text" data-i18n-html="instr.areaDef">The number of square units needed<br>to cover a figure.</span>
       </div>
       <div class="instr-row">
-        <span class="instr-label">Example:</span>
+        <span class="instr-label" data-i18n="instr.exampleLabel">Example:</span>
         <div class="instr-shape" id="instrLshape"></div>
-        <span class="instr-text">This figure has 3 squares<br>so its area is 3 square units.</span>
+        <span class="instr-text" data-i18n-html="instr.example1">This figure has 3 squares<br>so its area is 3 square units.</span>
       </div>
       <div class="instr-row">
         <div class="instr-rect-wrap" id="instrRect">
-          <span class="lbl-left">2<br>ft</span>
-          <span class="lbl-bottom">6 ft</span>
+          <span class="lbl-left" data-i18n-html="instr.lblLeft">2<br>ft</span>
+          <span class="lbl-bottom" data-i18n="instr.lblBottom">6 ft</span>
         </div>
-        <span class="instr-text">This rectangle's area is 12 sq feet<br>because 2ft × 6ft = 12 sq ft</span>
+        <span class="instr-text" data-i18n-html="instr.example2">This rectangle's area is 12 sq feet<br>because 2ft × 6ft = 12 sq ft</span>
       </div>
     </div>
     <div class="instr-start-wrap">
-      <button class="start-btn" id="instrStart">START</button>
+      <button class="start-btn" id="instrStart" data-i18n="btn.start">START</button>
     </div>
   </div>
 
@@ -542,24 +582,24 @@ button { font-family: inherit; }
     <div class="game-header">
       <span id="target-text">Click the shapes with an area of 4 square units.</span>
     </div>
-    <button class="game-back" id="gameBack">‹ Back</button>
+    <button class="game-back" id="gameBack" data-i18n="btn.back">‹ Back</button>
     <div class="game-board" id="gameBoard"></div>
     <div class="floating-star" id="floatingStar">★</div>
     <div class="game-footer">
-      <span>ROUND:<strong id="stat-round">1 / 4</strong></span>
-      <span>HITS:<strong id="stat-hits">0</strong></span>
-      <span>MISSES:<strong id="stat-misses">0</strong></span>
-      <span>SCORE:<strong id="stat-score">0</strong></span>
+      <span><span data-i18n="stat.round">ROUND:</span><strong id="stat-round">1 / 4</strong></span>
+      <span><span data-i18n="stat.hits">HITS:</span><strong id="stat-hits">0</strong></span>
+      <span><span data-i18n="stat.misses">MISSES:</span><strong id="stat-misses">0</strong></span>
+      <span><span data-i18n="stat.score">SCORE:</span><strong id="stat-score">0</strong></span>
       <span class="icon-spacer"></span>
-      <button class="icon-btn" id="helpBtn" title="Help">?</button>
-      <button class="icon-btn" id="soundBtn" title="Toggle sound">♪</button>
+      <button class="icon-btn" id="helpBtn" title="Help" data-i18n-title="tip.help">?</button>
+      <button class="icon-btn" id="soundBtn" title="Toggle sound" data-i18n-title="tip.sound">♪</button>
     </div>
 
     <div class="help-overlay" id="helpOverlay">
       <div class="help-box">
-        <h3>How to Play</h3>
-        <p>Click every shape whose area matches the target<br>(the number of colored squares). Wrong picks add a miss.<br>Complete all 4 rounds to see your score!</p>
-        <button class="help-close" id="helpClose">Got it!</button>
+        <h3 data-i18n="help.title">How to Play</h3>
+        <p data-i18n-html="help.body">Click every shape whose area matches the target<br>(the number of colored squares). Wrong picks add a miss.<br>Complete all 4 rounds to see your score!</p>
+        <button class="help-close" id="helpClose" data-i18n="help.gotit">Got it!</button>
       </div>
     </div>
   </div>
@@ -567,12 +607,12 @@ button { font-family: inherit; }
   <!-- ════ SCREEN 4: RESULTS ════ -->
   <div id="screen-results" class="screen">
     <div class="results-card">
-      <div class="results-title">Great job!</div>
+      <div class="results-title" data-i18n="results.title">Great job!</div>
       <div class="results-accuracy" id="res-accuracy">100%</div>
       <div class="results-stats" id="res-stats">Score 0 · Hits 0 · Misses 0</div>
       <div class="results-buttons">
-        <button class="start-btn" id="playAgainBtn">PLAY AGAIN</button>
-        <button class="start-btn alt" id="titleBtn">TITLE</button>
+        <button class="start-btn" id="playAgainBtn" data-i18n="btn.playagain">PLAY AGAIN</button>
+        <button class="start-btn alt" id="titleBtn" data-i18n="btn.title">TITLE</button>
       </div>
     </div>
   </div>
@@ -580,6 +620,136 @@ button { font-family: inherit; }
 </div>
 </div>
 
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title.area': 'Area',
+      'title.game': 'Shape Game',
+      'btn.start': 'START',
+      'btn.back': '‹ Back',
+      'btn.playagain': 'PLAY AGAIN',
+      'btn.title': 'TITLE',
+      'instr.areaLabel': 'Area:',
+      'instr.areaDef': 'The number of square units needed<br>to cover a figure.',
+      'instr.exampleLabel': 'Example:',
+      'instr.example1': 'This figure has 3 squares<br>so its area is 3 square units.',
+      'instr.lblLeft': '2<br>ft',
+      'instr.lblBottom': '6 ft',
+      'instr.example2': "This rectangle's area is 12 sq feet<br>because 2ft × 6ft = 12 sq ft",
+      'stat.round': 'ROUND:',
+      'stat.hits': 'HITS:',
+      'stat.misses': 'MISSES:',
+      'stat.score': 'SCORE:',
+      'tip.help': 'Help',
+      'tip.sound': 'Toggle sound',
+      'help.title': 'How to Play',
+      'help.body': 'Click every shape whose area matches the target<br>(the number of colored squares). Wrong picks add a miss.<br>Complete all 4 rounds to see your score!',
+      'help.gotit': 'Got it!',
+      'results.title': 'Great job!',
+      'target.text': 'Click the shapes with an area of {n} square units.',
+      'res.score': 'Score',
+      'res.hits': 'Hits',
+      'res.misses': 'Misses',
+      'unit.ft': 'ft',
+    },
+    ar: {
+      'title.area': 'المساحة',
+      'title.game': 'لعبة الأشكال',
+      'btn.start': 'ابدأ',
+      'btn.back': '‹ رجوع',
+      'btn.playagain': 'العب مرة أخرى',
+      'btn.title': 'الرئيسية',
+      'instr.areaLabel': 'المساحة:',
+      'instr.areaDef': 'عدد الوحدات المربعة اللازمة<br>لتغطية الشكل.',
+      'instr.exampleLabel': 'مثال:',
+      'instr.example1': 'هذا الشكل به ٣ مربعات<br>إذًا مساحته ٣ وحدات مربعة.',
+      'instr.lblLeft': '2<br>قدم',
+      'instr.lblBottom': '6 قدم',
+      'instr.example2': 'مساحة هذا المستطيل ١٢ قدمًا مربعًا<br>لأن ٢ قدم × ٦ قدم = ١٢ قدمًا مربعًا',
+      'stat.round': 'الجولة:',
+      'stat.hits': 'إصابات:',
+      'stat.misses': 'إخفاقات:',
+      'stat.score': 'النتيجة:',
+      'tip.help': 'مساعدة',
+      'tip.sound': 'تبديل الصوت',
+      'help.title': 'طريقة اللعب',
+      'help.body': 'انقر على كل شكل تطابق مساحته الهدف<br>(عدد المربعات الملوّنة). الاختيارات الخاطئة تضيف إخفاقًا.<br>أكمل الجولات الأربع لترى نتيجتك!',
+      'help.gotit': 'فهمت!',
+      'results.title': 'عمل رائع!',
+      'target.text': 'انقر على الأشكال التي مساحتها {n} وحدات مربعة.',
+      'res.score': 'النتيجة',
+      'res.hits': 'الإصابات',
+      'res.misses': 'الإخفاقات',
+      'unit.ft': 'قدم',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Re-render JS-generated text: title deco unit labels, live target text, stats.
+  function refreshDynamic() {
+    // Rebuild title decorations so the "ft" unit labels swap (clear old .deco first).
+    if (typeof buildTitleDeco === 'function') {
+      document.querySelectorAll('#titleBody .deco').forEach(el => el.remove());
+      buildTitleDeco();
+    }
+    // Live target text (mid-round).
+    const tt = document.getElementById('target-text');
+    if (tt && typeof targetArea !== 'undefined' &&
+        document.getElementById('screen-game').classList.contains('active')) {
+      tt.textContent = window.t('target.text', { n: targetArea });
+    }
+    if (typeof updateStats === 'function') updateStats();
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 <script>
 // ════════════════════════════════════════════════════════════════
 // SHAPE LIBRARY — polyominoes keyed by area
@@ -752,18 +922,20 @@ function playRoundEnd() {
 function buildTitleDeco() {
   const body = document.getElementById('titleBody');
   // shape decorations: each = { type, x, y, ...spec }
+  // Unit-bearing labels build from numbers + the translated unit, so they swap on language change.
+  const U = window.t('unit.ft');
   const decos = [
     // Top row in title body
     { kind:'grid', x:170, y:14, shape:SHAPES[4][0], color:'#c0238a', gw:7, gh:6, cell:13 },
-    { kind:'rect', x:430, y:18, wFt:6, hFt:2, color:'#d56eed', lblL:'2\nft', lblB:'6 ft' },
+    { kind:'rect', x:430, y:18, wFt:6, hFt:2, color:'#d56eed', lblL:'2\n'+U, lblB:'6 '+U },
     { kind:'grid', x:710, y:14, shape:SHAPES[4][7], color:'#9a2a4a', gw:7, gh:6, cell:13 },
     // Middle-left vertical rectangle
-    { kind:'rect', x:38, y:60, wFt:2, hFt:6, color:'#4a7a7c', lblL:'6\nft', lblB:'2 ft' },
+    { kind:'rect', x:38, y:60, wFt:2, hFt:6, color:'#4a7a7c', lblL:'6\n'+U, lblB:'2 '+U },
     // Bottom row
     { kind:'grid', x:170, y:148, shape:SHAPES[4][8], color:'#2a4ec0', gw:7, gh:6, cell:13 },
-    { kind:'rect', x:380, y:170, wFt:5, hFt:2, color:'#2aa0c8', lblL:'2\nft', lblB:'5 ft' },
+    { kind:'rect', x:380, y:170, wFt:5, hFt:2, color:'#2aa0c8', lblL:'2\n'+U, lblB:'5 '+U },
     { kind:'grid', x:520, y:148, shape:SHAPES[4][5], color:'#8a3ad8', gw:7, gh:6, cell:13 },
-    { kind:'rect', x:760, y:152, wFt:4, hFt:3, color:'#4ac641', lblL:'3\nft', lblB:'4 ft' }
+    { kind:'rect', x:760, y:152, wFt:4, hFt:3, color:'#4ac641', lblL:'3\n'+U, lblB:'4 '+U }
   ];
 
   decos.forEach(d => {
@@ -845,7 +1017,7 @@ function nextRound() {
   if (curRoundIdx >= 4) { endGame(); return; }
   targetArea = roundOrder[curRoundIdx];
   document.getElementById('target-text').textContent =
-    `Click the shapes with an area of ${targetArea} square units.`;
+    window.t('target.text', { n: targetArea });
 
   const board = document.getElementById('gameBoard');
   board.innerHTML = '';
@@ -942,7 +1114,7 @@ function endGame() {
   const pct = total > 0 ? Math.round((hits / total) * 100) : 0;
   document.getElementById('res-accuracy').textContent = pct + '%';
   document.getElementById('res-stats').textContent =
-    `Score ${score} · Hits ${hits} · Misses ${misses}`;
+    `${window.t('res.score')} ${score} · ${window.t('res.hits')} ${hits} · ${window.t('res.misses')} ${misses}`;
   showScreen('screen-results');
 }
 

@@ -441,10 +441,50 @@ html, body {
 .flash.show { opacity: 1; }
 .flash.red { background: rgba(220, 40, 40, 0.35); }
 .flash.green { background: rgba(80, 220, 100, 0.30); }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 
 <div class="fit-stage">
 <div class="game-wrap" id="gameWrap">
@@ -452,38 +492,38 @@ html, body {
   <!-- ═══════════ SCREEN 1 — MENU ═══════════ -->
   <div class="screen active" id="screen-menu">
     <div class="menu-header">
-      <div class="menu-title">MATH MAN</div>
-      <div class="menu-subtitle">REDUCE THE FRACTION TO THE LOWEST TERM</div>
+      <div class="menu-title" data-i18n="menu.title">MATH MAN</div>
+      <div class="menu-subtitle" data-i18n="menu.subtitle">REDUCE THE FRACTION TO THE LOWEST TERM</div>
     </div>
     <div class="menu-cols">
       <div class="menu-col">
-        <div class="menu-col-title">SELECT A LEVEL:</div>
-        <button class="level-btn" data-level="1">LEVEL 1</button>
-        <button class="level-btn" data-level="2">LEVEL 2</button>
-        <button class="level-btn" data-level="3">LEVEL 3</button>
-        <button class="level-btn" data-level="4">LEVEL 4</button>
+        <div class="menu-col-title" data-i18n="menu.selectlevel">SELECT A LEVEL:</div>
+        <button class="level-btn" data-level="1" data-i18n="menu.level1">LEVEL 1</button>
+        <button class="level-btn" data-level="2" data-i18n="menu.level2">LEVEL 2</button>
+        <button class="level-btn" data-level="3" data-i18n="menu.level3">LEVEL 3</button>
+        <button class="level-btn" data-level="4" data-i18n="menu.level4">LEVEL 4</button>
       </div>
       <div class="menu-col">
-        <div class="menu-col-title">EXAMPLES:</div>
+        <div class="menu-col-title" data-i18n="menu.examples">EXAMPLES:</div>
         <div class="examples-list">
           <div class="example-row">
             <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">2</span><span style="display:block;padding:0 4px">4</span></span></div>
-            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-arrow" data-i18n="ex.reduces">REDUCES TO</div>
             <div class="ex-ghost" data-color="#e63946"><span>1<br>2</span></div>
           </div>
           <div class="example-row">
             <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">6</span><span style="display:block;padding:0 4px">9</span></span></div>
-            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-arrow" data-i18n="ex.reduces">REDUCES TO</div>
             <div class="ex-ghost" data-color="#f08820"><span>2<br>3</span></div>
           </div>
           <div class="example-row">
             <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">12</span><span style="display:block;padding:0 4px">28</span></span></div>
-            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-arrow" data-i18n="ex.reduces">REDUCES TO</div>
             <div class="ex-ghost" data-color="#2a9d3a"><span>3<br>7</span></div>
           </div>
           <div class="example-row">
             <div class="ex-frac"><span style="display:inline-block;text-align:center"><span style="display:block;border-bottom:2px solid #fff;padding:0 4px">48</span><span style="display:block;padding:0 4px">54</span></span></div>
-            <div class="ex-arrow">REDUCES TO</div>
+            <div class="ex-arrow" data-i18n="ex.reduces">REDUCES TO</div>
             <div class="ex-ghost" data-color="#d92834"><span>8<br>9</span></div>
           </div>
         </div>
@@ -494,9 +534,9 @@ html, body {
   <!-- ═══════════ SCREEN 2 — INSTRUCTIONS ═══════════ -->
   <div class="screen" id="screen-instructions">
     <div class="instr-header">
-      <div class="instr-title">INSTRUCTIONS</div>
+      <div class="instr-title" data-i18n="instr.title">INSTRUCTIONS</div>
     </div>
-    <div class="instr-body">
+    <div class="instr-body" data-i18n-html="instr.body">
       USE THE ARROW KEYS TO MOVE MATH MAN TO EAT ALL THE GHOSTS.<br>
       YOU CAN ONLY EAT THE GHOST WITH A NUMBER THAT ANSWERS THE QUESTION.
     </div>
@@ -518,19 +558,19 @@ html, body {
         </svg>
         <span>1<br>2</span>
       </div>
-      <div class="caption">EAT THE GHOST WITH THE FRACTION 2/4 IN SIMPLEST FORM</div>
+      <div class="caption" data-i18n="instr.caption">EAT THE GHOST WITH THE FRACTION 2/4 IN SIMPLEST FORM</div>
     </div>
 
     <div class="instr-tips-row">
-      <div class="instr-tip">
+      <div class="instr-tip" data-i18n="instr.tip1">
         TIP: THE SPACEBAR KEY WILL SCATTER THE GHOSTS, YOU HAVE LIMITED SCATTERS.
       </div>
       <div class="instr-buttons">
-        <button class="instr-btn" id="btn-instr-menu">MENU</button>
-        <button class="instr-btn" id="btn-instr-practice">PRACTICE GAME</button>
-        <button class="instr-btn big" id="btn-instr-start">START</button>
+        <button class="instr-btn" id="btn-instr-menu" data-i18n="btn.menu">MENU</button>
+        <button class="instr-btn" id="btn-instr-practice" data-i18n="btn.practice">PRACTICE GAME</button>
+        <button class="instr-btn big" id="btn-instr-start" data-i18n="btn.start">START</button>
       </div>
-      <div class="instr-tip">
+      <div class="instr-tip" data-i18n="instr.tip2">
         TIP: IF YOU EAT A ★ THE GHOSTS WILL FREEZE FOR A FEW SECONDS.
       </div>
     </div>
@@ -541,11 +581,11 @@ html, body {
     <div class="game-hud">
       <div class="hud-left">
         <span id="hud-level">LEVEL 1</span>
-        <span>SCORE</span>
+        <span data-i18n="hud.score">SCORE</span>
         <span id="hud-score">0</span>
       </div>
       <div class="hud-right">
-        <span>LIVES</span>
+        <span data-i18n="hud.lives">LIVES</span>
         <div class="hud-lives" id="hud-lives"></div>
       </div>
     </div>
@@ -554,7 +594,7 @@ html, body {
 
     <div class="game-statusbar">
       <div class="scatter-info">
-        <div class="scatter-label">PRESS THE SPACE BAR<br>TO SCATTER GHOSTS</div>
+        <div class="scatter-label" data-i18n-html="scatter.label">PRESS THE SPACE BAR<br>TO SCATTER GHOSTS</div>
         <div class="scatter-pips" id="scatter-pips"></div>
       </div>
       <div class="question-text" id="question-text">
@@ -562,7 +602,7 @@ html, body {
         <span class="frac"><span class="num">4</span><span class="den">8</span></span>
         in simplest form
       </div>
-      <div class="math-review-pill">MATH REVIEW</div>
+      <div class="math-review-pill" data-i18n="game.mathreview">MATH REVIEW</div>
     </div>
 
     <div class="flash" id="flash"></div>
@@ -575,8 +615,8 @@ html, body {
       <div class="modal-body" id="results-body">Great job!</div>
       <div class="modal-stats" id="results-stats"></div>
       <div class="modal-buttons">
-        <button class="instr-btn" id="btn-results-menu">MENU</button>
-        <button class="instr-btn" id="btn-results-again">PLAY AGAIN</button>
+        <button class="instr-btn" id="btn-results-menu" data-i18n="btn.menu">MENU</button>
+        <button class="instr-btn" id="btn-results-again" data-i18n="btn.playagain">PLAY AGAIN</button>
       </div>
     </div>
   </div>
@@ -584,16 +624,123 @@ html, body {
   <!-- ═══════════ MODAL — PAUSE / NEXT LEVEL ═══════════ -->
   <div class="modal" id="modal-pause">
     <div class="modal-card">
-      <div class="modal-title">PAUSED</div>
+      <div class="modal-title" data-i18n="modal.paused">PAUSED</div>
       <div class="modal-buttons">
-        <button class="instr-btn" id="btn-pause-menu">MENU</button>
-        <button class="instr-btn" id="btn-pause-resume">RESUME</button>
+        <button class="instr-btn" id="btn-pause-menu" data-i18n="btn.menu">MENU</button>
+        <button class="instr-btn" id="btn-pause-resume" data-i18n="btn.resume">RESUME</button>
       </div>
     </div>
   </div>
 
 </div>
 </div>
+
+<script>
+/* ════════════════ i18n (EN / ع) ════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'menu.title': 'MATH MAN',
+      'menu.subtitle': 'REDUCE THE FRACTION TO THE LOWEST TERM',
+      'menu.selectlevel': 'SELECT A LEVEL:',
+      'menu.level1': 'LEVEL 1',
+      'menu.level2': 'LEVEL 2',
+      'menu.level3': 'LEVEL 3',
+      'menu.level4': 'LEVEL 4',
+      'menu.examples': 'EXAMPLES:',
+      'ex.reduces': 'REDUCES TO',
+      'instr.title': 'INSTRUCTIONS',
+      'instr.body': 'USE THE ARROW KEYS TO MOVE MATH MAN TO EAT ALL THE GHOSTS.<br>YOU CAN ONLY EAT THE GHOST WITH A NUMBER THAT ANSWERS THE QUESTION.',
+      'instr.caption': 'EAT THE GHOST WITH THE FRACTION 2/4 IN SIMPLEST FORM',
+      'instr.tip1': 'TIP: THE SPACEBAR KEY WILL SCATTER THE GHOSTS, YOU HAVE LIMITED SCATTERS.',
+      'instr.tip2': 'TIP: IF YOU EAT A ★ THE GHOSTS WILL FREEZE FOR A FEW SECONDS.',
+      'btn.menu': 'MENU',
+      'btn.practice': 'PRACTICE GAME',
+      'btn.start': 'START',
+      'btn.playagain': 'PLAY AGAIN',
+      'btn.resume': 'RESUME',
+      'hud.score': 'SCORE',
+      'hud.lives': 'LIVES',
+      'hud.level': 'LEVEL {n}',
+      'scatter.label': 'PRESS THE SPACE BAR<br>TO SCATTER GHOSTS',
+      'game.mathreview': 'MATH REVIEW',
+      'modal.paused': 'PAUSED',
+      'q.text': 'Eat the ghost with the fraction {frac} in simplest form',
+      'res.complete': 'LEVEL COMPLETE!',
+      'res.gameover': 'GAME OVER',
+      'res.won.more': 'You crushed it! Try the next level.',
+      'res.won.all': 'You mastered all four levels!',
+      'res.lost': 'Out of lives — try again!',
+      'res.stats': 'Score: {s}   Rounds: {r}/{total}',
+    },
+    ar: {
+      'menu.title': 'رجل الرياضيات',
+      'menu.subtitle': 'بسّط الكسر إلى أبسط صورة',
+      'menu.selectlevel': 'اختر مستوى:',
+      'menu.level1': 'المستوى ١',
+      'menu.level2': 'المستوى ٢',
+      'menu.level3': 'المستوى ٣',
+      'menu.level4': 'المستوى ٤',
+      'menu.examples': 'أمثلة:',
+      'ex.reduces': 'يُبسَّط إلى',
+      'instr.title': 'التعليمات',
+      'instr.body': 'استخدم مفاتيح الأسهم لتحريك رجل الرياضيات لأكل كل الأشباح.<br>لا يمكنك أكل إلا الشبح الذي يحمل الرقم الذي يجيب عن السؤال.',
+      'instr.caption': 'كُل الشبح الذي يحمل الكسر ٢/٤ في أبسط صورة',
+      'instr.tip1': 'نصيحة: مفتاح المسافة يبعثر الأشباح، ولديك عدد محدود من البعثرات.',
+      'instr.tip2': 'نصيحة: إذا أكلت ★ ستتجمّد الأشباح لبضع ثوانٍ.',
+      'btn.menu': 'القائمة',
+      'btn.practice': 'لعبة تدريبية',
+      'btn.start': 'ابدأ',
+      'btn.playagain': 'العب مجددًا',
+      'btn.resume': 'استئناف',
+      'hud.score': 'النقاط',
+      'hud.lives': 'الأرواح',
+      'hud.level': 'المستوى {n}',
+      'scatter.label': 'اضغط مفتاح المسافة<br>لبعثرة الأشباح',
+      'game.mathreview': 'مراجعة رياضية',
+      'modal.paused': 'متوقّف مؤقتًا',
+      'q.text': 'كُل الشبح الذي يحمل الكسر {frac} في أبسط صورة',
+      'res.complete': 'اكتمل المستوى!',
+      'res.gameover': 'انتهت اللعبة',
+      'res.won.more': 'رائع! جرّب المستوى التالي.',
+      'res.won.all': 'لقد أتقنت المستويات الأربعة كلّها!',
+      'res.lost': 'نفدت الأرواح — حاول مجددًا!',
+      'res.stats': 'النقاط: {s}   الجولات: {r}/{total}',
+    },
+  };
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  window.SGLANG = lang;
+  window.t = function (k, vars) {
+    let s = (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : (I18N.en[k] != null ? I18N.en[k] : k);
+    if (vars) for (const n in vars) s = s.split('{' + n + '}').join(vars[n]);
+    return s;
+  };
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = window.t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('#lang-toggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  }
+  window.setLang = function (l) {
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    if (typeof window.refreshDynamic === 'function') window.refreshDynamic();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-lang]'); if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 
 <script>
 'use strict';
@@ -864,7 +1011,7 @@ function startNewRound(refillDots) {
 //  HUD / DOM UPDATES
 // ════════════════════════════════════════════════════════════
 function updateHUD() {
-  document.getElementById('hud-level').textContent = 'LEVEL ' + state.level;
+  document.getElementById('hud-level').textContent = window.t('hud.level', { n: state.level });
   document.getElementById('hud-score').textContent = state.score;
   const livesEl = document.getElementById('hud-lives');
   livesEl.innerHTML = '';
@@ -890,10 +1037,11 @@ function updateHUD() {
 }
 
 function updateQuestionText() {
-  const t = state.target;
-  if (!t) return;
+  const tg = state.target;
+  if (!tg) return;
   const el = document.getElementById('question-text');
-  el.innerHTML = 'Eat the ghost with the fraction <span class="frac"><span class="num">' + t.num + '</span><span class="den">' + t.den + '</span></span> in simplest form';
+  const frac = '<span class="frac"><span class="num">' + tg.num + '</span><span class="den">' + tg.den + '</span></span>';
+  el.innerHTML = window.t('q.text', { frac });
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1166,19 +1314,36 @@ function handleGhostHit(ghost) {
 }
 
 function endLevel(won) {
+  state.lastResult = { won, level: state.level, score: state.score, rounds: state.roundsWon };
+  renderResults();
+  openModal('modal-results');
+}
+
+function renderResults() {
+  const r = state.lastResult;
+  if (!r) return;
   const title = document.getElementById('results-title');
   const body = document.getElementById('results-body');
   const stats = document.getElementById('results-stats');
-  if (won) {
-    title.textContent = 'LEVEL COMPLETE!';
-    body.textContent = state.level < 4 ? 'You crushed it! Try the next level.' : 'You mastered all four levels!';
+  if (r.won) {
+    title.textContent = window.t('res.complete');
+    body.textContent = r.level < 4 ? window.t('res.won.more') : window.t('res.won.all');
   } else {
-    title.textContent = 'GAME OVER';
-    body.textContent = 'Out of lives — try again!';
+    title.textContent = window.t('res.gameover');
+    body.textContent = window.t('res.lost');
   }
-  stats.textContent = 'Score: ' + state.score + '   Rounds: ' + state.roundsWon + '/' + ROUNDS_PER_LEVEL;
-  openModal('modal-results');
+  stats.textContent = window.t('res.stats', { s: r.score, r: r.rounds, total: ROUNDS_PER_LEVEL });
 }
+
+// Re-render visible dynamic text on language toggle
+window.refreshDynamic = function () {
+  if (document.getElementById('screen-game').classList.contains('active')) {
+    updateHUD();
+    updateQuestionText();
+  }
+  const resModal = document.getElementById('modal-results');
+  if (resModal && resModal.classList.contains('active') && state.lastResult) renderResults();
+};
 
 // ════════════════════════════════════════════════════════════
 //  RENDER

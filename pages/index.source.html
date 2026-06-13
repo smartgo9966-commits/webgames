@@ -312,6 +312,11 @@ body::before {
 .cc .tag        { background: #fce8c0; color: #8a5a18; }
 .cc .play-btn   { background: linear-gradient(135deg,#f0a830,#8a5a18); color: #ffffff; --btn-glow:rgba(138,90,24,.55); }
 
+/* ── TIMES TABLE BLASTER THEME ── */
+.ttb .card-title { color: #5a1aa8; }
+.ttb .tag        { background: #e8dcfc; color: #5a1aa8; }
+.ttb .play-btn   { background: linear-gradient(135deg,#9a5cf0,#5a1aa8); color: #ffe040; --btn-glow:rgba(90,26,168,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -1136,7 +1141,7 @@ footer {
         <rect width="380" height="210" fill="url(#mzBg)"/>
 
         <!-- Title -->
-        <text x="190" y="32" fill="#ffe030" font-family="'Fredoka One',Arial Black,Arial"
+        <text data-i18n="mz.svg.title" x="190" y="32" fill="#ffe030" font-family="'Fredoka One',Arial Black,Arial"
               font-size="26" font-weight="900" text-anchor="middle"
               paint-order="stroke fill" stroke="#003a36" stroke-width="3" stroke-linejoin="round">Maze</text>
 
@@ -1186,21 +1191,21 @@ footer {
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.3)"/>
         <text x="190" y="192" fill="rgba(255,255,255,.92)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
-              text-anchor="middle">Navigate the maze with arrow keys</text>
+              text-anchor="middle" data-i18n="mz.svg">Navigate the maze with arrow keys</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🌀 Maze</div>
-      <div class="card-desc">Steer the red ball through a winding green maze and reach the yellow star! Beat the clock for a 5-star rating, peek at the solution if you get stuck.</div>
+      <div class="card-title" data-i18n="mz.title">🌀 Maze</div>
+      <div class="card-desc" data-i18n="mz.desc">Steer the red ball through a winding green maze and reach the yellow star! Beat the clock for a 5-star rating, peek at the solution if you get stuck.</div>
       <div class="card-tags">
-        <span class="tag">Arrow Keys</span>
-        <span class="tag">Single Maze</span>
-        <span class="tag">Timed</span>
-        <span class="tag">Puzzle</span>
+        <span class="tag" data-i18n="mz.tag.keys">Arrow Keys</span>
+        <span class="tag" data-i18n="mz.tag.single">Single Maze</span>
+        <span class="tag" data-i18n="tag.timed">Timed</span>
+        <span class="tag" data-i18n="tag.puzzle">Puzzle</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="maze/">▶ Play Now!</a>
+      <a class="play-btn" href="maze/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1281,29 +1286,29 @@ footer {
         </g>
 
         <!-- Title -->
-        <text x="190" y="32" fill="#5db1ef" font-family="'Fredoka One',Arial Black,Arial"
+        <text data-i18n="cd.svg.title" x="190" y="32" fill="#5db1ef" font-family="'Fredoka One',Arial Black,Arial"
               font-size="28" font-weight="900" text-anchor="middle"
               paint-order="stroke fill" stroke="#0b3654" stroke-width="3" stroke-linejoin="round">CASTLE DEFENSE</text>
 
         <!-- Bottom label -->
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.3)"/>
-        <text x="190" y="192" fill="rgba(255,255,255,.92)"
+        <text data-i18n="cd.svg" x="190" y="192" fill="rgba(255,255,255,.92)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
               text-anchor="middle">Buy cannons, defend the castle gate</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🏰 Castle Defense</div>
-      <div class="card-desc">A tower-defense skirmish: buy cannons, place them along a winding path, and stop wooden-crate invaders before they breach the castle.</div>
+      <div class="card-title" data-i18n="cd.title">🏰 Castle Defense</div>
+      <div class="card-desc" data-i18n="cd.desc">A tower-defense skirmish: buy cannons, place them along a winding path, and stop wooden-crate invaders before they breach the castle.</div>
       <div class="card-tags">
-        <span class="tag">Tower Defense</span>
-        <span class="tag">Strategy</span>
-        <span class="tag">Waves</span>
-        <span class="tag">Mouse</span>
+        <span class="tag" data-i18n="cd.tag.td">Tower Defense</span>
+        <span class="tag" data-i18n="cd.tag.strategy">Strategy</span>
+        <span class="tag" data-i18n="cd.tag.waves">Waves</span>
+        <span class="tag" data-i18n="cd.tag.mouse">Mouse</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="castle_defense/">▶ Play Now!</a>
+      <a class="play-btn" href="castle_defense/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1323,7 +1328,7 @@ footer {
         <rect width="380" height="210" fill="url(#abBg)"/>
 
         <!-- Title -->
-        <text x="190" y="42" fill="#fff"
+        <text data-i18n="ab.svg.title" x="190" y="42" fill="#fff"
               font-family="'Patrick Hand',cursive" font-size="34" font-weight="400"
               text-anchor="middle"
               paint-order="stroke fill" stroke="rgba(0,0,0,0.3)" stroke-width="0.8">★ Alphabet Game ★</text>
@@ -1387,17 +1392,17 @@ footer {
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🔤 Alphabet Game</div>
-      <div class="card-desc">Press the letters in the correct order — A to Z or a to z — to complete the alphabet. Turn on Learning Level for star hints on the next letter.</div>
+      <div class="card-title" data-i18n="ab.title">🔤 Alphabet Game</div>
+      <div class="card-desc" data-i18n="ab.desc">Press the letters in the correct order — A to Z or a to z — to complete the alphabet. Turn on Learning Level for star hints on the next letter.</div>
       <div class="card-tags">
-        <span class="tag">Letters</span>
-        <span class="tag">Educational</span>
-        <span class="tag">Kids</span>
-        <span class="tag">Click</span>
+        <span class="tag" data-i18n="ab.tag.letters">Letters</span>
+        <span class="tag" data-i18n="ab.tag.edu">Educational</span>
+        <span class="tag" data-i18n="ab.tag.kids">Kids</span>
+        <span class="tag" data-i18n="ab.tag.click">Click</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="alphabet_game/">▶ Play Now!</a>
+      <a class="play-btn" href="alphabet_game/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1461,21 +1466,21 @@ footer {
 
         <!-- Label bar -->
         <rect x="0" y="172" width="380" height="38" fill="rgba(0,0,0,0.22)"/>
-        <text x="190" y="196" fill="rgba(255,255,255,0.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Tap the shape that matches the name!</text>
+        <text data-i18n="ss.svg" x="190" y="196" fill="rgba(255,255,255,0.92)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Tap the shape that matches the name!</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">Shapes Splat!</div>
-      <div class="card-desc">Identify 2D and 3D shapes before the clock runs out! Four levels covering basic shapes, rotations, extra shapes, and 3-D solids — with relaxed and timed modes.</div>
+      <div class="card-title" data-i18n="ss.title">Shapes Splat!</div>
+      <div class="card-desc" data-i18n="ss.desc">Identify 2D and 3D shapes before the clock runs out! Four levels covering basic shapes, rotations, extra shapes, and 3-D solids — with relaxed and timed modes.</div>
       <div class="card-tags">
-        <span class="tag">Shapes</span>
-        <span class="tag">4 Levels</span>
-        <span class="tag">Timed</span>
-        <span class="tag">Geometry</span>
+        <span class="tag" data-i18n="ss.tag.shapes">Shapes</span>
+        <span class="tag" data-i18n="ss.tag.levels">4 Levels</span>
+        <span class="tag" data-i18n="tag.timed">Timed</span>
+        <span class="tag" data-i18n="tag.geometry">Geometry</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="shapes_splat/">▶ Play Now!</a>
+      <a class="play-btn" href="shapes_splat/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1497,7 +1502,7 @@ footer {
 
         <!-- Navy header band evoking the game -->
         <rect x="0" y="0" width="380" height="42" fill="#0d2d6a"/>
-        <text x="190" y="28" fill="#ffffff" font-family="Georgia, serif" font-style="italic" font-size="20" font-weight="700" text-anchor="middle">Area Shape Game</text>
+        <text data-i18n="asg.svg.title" x="190" y="28" fill="#ffffff" font-family="Georgia, serif" font-style="italic" font-size="20" font-weight="700" text-anchor="middle">Area Shape Game</text>
 
         <!-- Mini grid #1 — green I-tetromino (area 4) -->
         <g transform="translate(28, 70)">
@@ -1563,21 +1568,21 @@ footer {
 
         <!-- Target prompt strip -->
         <rect x="0" y="180" width="380" height="30" fill="rgba(13,45,106,0.78)"/>
-        <text x="190" y="200" fill="#ffffff" font-family="'Patrick Hand', cursive, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Find shapes with an area of 4 squares!</text>
+        <text data-i18n="asg.svg" x="190" y="200" fill="#ffffff" font-family="'Patrick Hand', cursive, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Find shapes with an area of 4 squares!</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">Area Shape Game</div>
-      <div class="card-desc">Spot every shape that covers the target number of square units. Four rounds of counting practice — perfect for early geometry and area concepts.</div>
+      <div class="card-title" data-i18n="asg.title">Area Shape Game</div>
+      <div class="card-desc" data-i18n="asg.desc">Spot every shape that covers the target number of square units. Four rounds of counting practice — perfect for early geometry and area concepts.</div>
       <div class="card-tags">
-        <span class="tag">Area</span>
-        <span class="tag">4 Rounds</span>
-        <span class="tag">Counting</span>
-        <span class="tag">Geometry</span>
+        <span class="tag" data-i18n="asg.tag.area">Area</span>
+        <span class="tag" data-i18n="asg.tag.rounds">4 Rounds</span>
+        <span class="tag" data-i18n="tag.counting">Counting</span>
+        <span class="tag" data-i18n="tag.geometry">Geometry</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="area_shape_game/">▶ Play Now!</a>
+      <a class="play-btn" href="area_shape_game/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1654,21 +1659,21 @@ footer {
 
         <!-- Bottom label -->
         <rect x="0" y="178" width="380" height="32" fill="rgba(0,0,0,.32)"/>
-        <text x="190" y="200" fill="rgba(255,255,255,.95)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Fill the empty circles to solve every equation</text>
+        <text x="190" y="200" fill="rgba(255,255,255,.95)" font-family="Arial,sans-serif" font-size="13" font-weight="bold" text-anchor="middle" data-i18n="cg.svg">Fill the empty circles to solve every equation</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🧮 Calculator Puzzle</div>
-      <div class="card-desc">Each row and column makes a math equation — fill the empty circles so every one balances! Five levels from simple sums to a 5×5 cross-math grid.</div>
+      <div class="card-title" data-i18n="cg.title">🧮 Calculator Puzzle</div>
+      <div class="card-desc" data-i18n="cg.desc">Each row and column makes a math equation — fill the empty circles so every one balances! Five levels from simple sums to a 5×5 cross-math grid.</div>
       <div class="card-tags">
-        <span class="tag">Tap to Play</span>
-        <span class="tag">5 Levels</span>
-        <span class="tag">Mental Math</span>
-        <span class="tag">Logic</span>
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="tag.5levels">5 Levels</span>
+        <span class="tag" data-i18n="tag.mentalmath">Mental Math</span>
+        <span class="tag" data-i18n="tag.logic">Logic</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="calculator_game/">▶ Play Now!</a>
+      <a class="play-btn" href="calculator_game/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1747,28 +1752,28 @@ footer {
         <text x="190" y="35" text-anchor="middle"
               font-family="Arial Black,Arial" font-size="32" font-weight="900"
               fill="#cc2a2a" stroke="#f8e8c8" stroke-width="3"
-              paint-order="stroke fill">Number Twins</text>
+              paint-order="stroke fill" data-i18n="nt.svgtitle">Number Twins</text>
 
         <!-- "Add to 9" pill bottom-right -->
         <rect x="240" y="170" width="120" height="28" rx="14"
               fill="rgba(255,250,220,.85)" stroke="#5a6e28" stroke-width="2"/>
         <text x="300" y="190" text-anchor="middle"
               font-family="Arial Black,Arial" font-size="15" font-weight="900"
-              fill="#4a5a18">Add to 9</text>
+              fill="#4a5a18" data-i18n="nt.svglabel">Add to 9</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🔗 Number Twins</div>
-      <div class="card-desc">Tap pairs of numbered balls that add up to the target — but only if you can connect them with a line that turns at most twice. Twelve levels, sums 5 → 16.</div>
+      <div class="card-title" data-i18n="nt.title">🔗 Number Twins</div>
+      <div class="card-desc" data-i18n="nt.desc">Tap pairs of numbered balls that add up to the target — but only if you can connect them with a line that turns at most twice. Twelve levels, sums 5 → 16.</div>
       <div class="card-tags">
-        <span class="tag">Tap to Play</span>
-        <span class="tag">12 Levels</span>
-        <span class="tag">Mental Math</span>
-        <span class="tag">Logic</span>
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="tag.12levels">12 Levels</span>
+        <span class="tag" data-i18n="tag.mentalmath">Mental Math</span>
+        <span class="tag" data-i18n="tag.logic">Logic</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="number_twins/">▶ Play Now!</a>
+      <a class="play-btn" href="number_twins/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1796,7 +1801,7 @@ footer {
         <!-- Title -->
         <text x="190" y="32" fill="#ffffff" font-family="'Fredoka One',Arial Black,Arial"
               font-size="26" font-weight="900" text-anchor="middle"
-              paint-order="stroke fill" stroke="#04201a" stroke-width="3" stroke-linejoin="round">Math Man</text>
+              paint-order="stroke fill" stroke="#04201a" stroke-width="3" stroke-linejoin="round" data-i18n="mm.svgtitle">Math Man</text>
 
         <!-- Pac-Man maze walls (decorative green lines) -->
         <g stroke="#1bc04a" stroke-width="3" stroke-linecap="round" fill="none">
@@ -1871,21 +1876,21 @@ footer {
         <rect x="0" y="170" width="380" height="40" fill="rgba(0,0,0,.32)"/>
         <text x="190" y="192" fill="rgba(255,255,255,.92)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
-              text-anchor="middle">Eat the ghost whose fraction reduces to the target</text>
+              text-anchor="middle" data-i18n="mm.svg">Eat the ghost whose fraction reduces to the target</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">👻 Math Man</div>
-      <div class="card-desc">Steer Math Man through the maze and gobble only the ghost whose fraction reduces to the target. Spacebar scatters ghosts; stars freeze them. Four levels — halves to ninths.</div>
+      <div class="card-title" data-i18n="mm.title">👻 Math Man</div>
+      <div class="card-desc" data-i18n="mm.desc">Steer Math Man through the maze and gobble only the ghost whose fraction reduces to the target. Spacebar scatters ghosts; stars freeze them. Four levels — halves to ninths.</div>
       <div class="card-tags">
-        <span class="tag">Arrow Keys</span>
-        <span class="tag">4 Levels</span>
-        <span class="tag">Fractions</span>
-        <span class="tag">Pac-Man</span>
+        <span class="tag" data-i18n="tag.arrowkeys">Arrow Keys</span>
+        <span class="tag" data-i18n="tag.4levels">4 Levels</span>
+        <span class="tag" data-i18n="tag.fractions">Fractions</span>
+        <span class="tag" data-i18n="tag.pacman">Pac-Man</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="math_man/">▶ Play Now!</a>
+      <a class="play-btn" href="math_man/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1907,7 +1912,7 @@ footer {
         <!-- Title -->
         <text x="190" y="36" fill="#b13a08" font-family="'Fredoka One',Arial Black,Arial"
               font-size="26" font-weight="900" text-anchor="middle"
-              paint-order="stroke fill" stroke="#fff4c4" stroke-width="3" stroke-linejoin="round">Word Wizard</text>
+              paint-order="stroke fill" stroke="#fff4c4" stroke-width="3" stroke-linejoin="round" data-i18n="ww.svgtitle">Word Wizard</text>
 
         <!-- Magic wand emoji -->
         <text x="78" y="38" font-size="28" text-anchor="middle">🪄</text>
@@ -1955,21 +1960,21 @@ footer {
         <rect x="0" y="180" width="380" height="30" fill="rgba(0,0,0,.25)"/>
         <text x="190" y="200" fill="rgba(255,255,255,.95)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
-              text-anchor="middle">Spell the word from the picture clue!</text>
+              text-anchor="middle" data-i18n="ww.svg">Spell the word from the picture clue!</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🪄 Word Wizard</div>
-      <div class="card-desc">See the picture, tap the letter tiles to spell the word. Four levels from easy 3-letter words to tricky 7-letter ones. Hints help, but use them wisely!</div>
+      <div class="card-title" data-i18n="ww.title">🪄 Word Wizard</div>
+      <div class="card-desc" data-i18n="ww.desc">See the picture, tap the letter tiles to spell the word. Four levels from easy 3-letter words to tricky 7-letter ones. Hints help, but use them wisely!</div>
       <div class="card-tags">
-        <span class="tag">Tap to Play</span>
-        <span class="tag">4 Levels</span>
-        <span class="tag">Spelling</span>
-        <span class="tag">Phonics</span>
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="tag.4levels">4 Levels</span>
+        <span class="tag" data-i18n="tag.spelling">Spelling</span>
+        <span class="tag" data-i18n="tag.phonics">Phonics</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="word_wizard/">▶ Play Now!</a>
+      <a class="play-btn" href="word_wizard/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -1991,7 +1996,7 @@ footer {
         <!-- Title -->
         <text x="190" y="34" fill="#0a3a6a" font-family="'Fredoka One',Arial Black,Arial"
               font-size="26" font-weight="900" text-anchor="middle"
-              paint-order="stroke fill" stroke="#cef0ff" stroke-width="3" stroke-linejoin="round">Code Robot</text>
+              paint-order="stroke fill" stroke="#cef0ff" stroke-width="3" stroke-linejoin="round" data-i18n="cr.svgtitle">Code Robot</text>
         <text x="78" y="36" font-size="26" text-anchor="middle">🤖</text>
 
         <!-- Mini grid (5 cols x 4 rows) -->
@@ -2032,37 +2037,37 @@ footer {
         <!-- Block stack to the right -->
         <g transform="translate(244 56)" font-family="'Fredoka One',Arial Black,Arial" font-size="11" font-weight="900" text-anchor="middle">
           <rect x="0" y="0" width="106" height="26" rx="6" fill="#2c8fd6" stroke="#15466a" stroke-width="2.5"/>
-          <text x="53" y="17" fill="#fff">⬆ FORWARD</text>
+          <text x="53" y="17" fill="#fff" data-i18n="cr.blk.forward">⬆ FORWARD</text>
           <rect x="0" y="30" width="106" height="26" rx="6" fill="#a44acc" stroke="#5a1c66" stroke-width="2.5"/>
-          <text x="53" y="47" fill="#fff">↻ RIGHT</text>
+          <text x="53" y="47" fill="#fff" data-i18n="cr.blk.right">↻ RIGHT</text>
           <rect x="0" y="60" width="106" height="26" rx="6" fill="#2c8fd6" stroke="#15466a" stroke-width="2.5"/>
-          <text x="53" y="77" fill="#fff">⬆ FORWARD</text>
+          <text x="53" y="77" fill="#fff" data-i18n="cr.blk.forward">⬆ FORWARD</text>
           <rect x="0" y="90" width="106" height="26" rx="6" fill="#2c8fd6" stroke="#15466a" stroke-width="2.5"/>
-          <text x="53" y="107" fill="#fff">⬆ FORWARD</text>
+          <text x="53" y="107" fill="#fff" data-i18n="cr.blk.forward">⬆ FORWARD</text>
           <!-- run button below -->
           <rect x="20" y="124" width="66" height="22" rx="11" fill="#2bb04a" stroke="#155a18" stroke-width="2.5"/>
-          <text x="53" y="139" fill="#fff" font-size="11">▶ RUN</text>
+          <text x="53" y="139" fill="#fff" font-size="11" data-i18n="cr.blk.run">▶ RUN</text>
         </g>
 
         <!-- Bottom label -->
         <rect x="0" y="180" width="380" height="30" fill="rgba(0,0,0,.32)"/>
         <text x="190" y="200" fill="rgba(255,255,255,.95)"
               font-family="Arial,sans-serif" font-size="13" font-weight="bold"
-              text-anchor="middle">Stack blocks to program the robot's path!</text>
+              text-anchor="middle" data-i18n="cr.svg">Stack blocks to program the robot's path!</text>
       </svg>
     </div>
     <div class="card-body">
-      <div class="card-title">🤖 Code Robot</div>
-      <div class="card-desc">Tap blocks to build a program: Forward, Turn Left, Turn Right, Repeat. Steer the robot through 12 puzzles to collect coins and reach the flag. Coding without typing!</div>
+      <div class="card-title" data-i18n="cr.title">🤖 Code Robot</div>
+      <div class="card-desc" data-i18n="cr.desc">Tap blocks to build a program: Forward, Turn Left, Turn Right, Repeat. Steer the robot through 12 puzzles to collect coins and reach the flag. Coding without typing!</div>
       <div class="card-tags">
-        <span class="tag">Tap to Play</span>
-        <span class="tag">4 Levels</span>
-        <span class="tag">Coding</span>
-        <span class="tag">Logic</span>
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="tag.4levels">4 Levels</span>
+        <span class="tag" data-i18n="tag.coding">Coding</span>
+        <span class="tag" data-i18n="tag.logic">Logic</span>
       </div>
     </div>
     <div class="card-footer">
-      <a class="play-btn" href="code_robot/">▶ Play Now!</a>
+      <a class="play-btn" href="code_robot/" data-i18n="btn.play">▶ Play Now!</a>
     </div>
   </div>
 
@@ -2533,6 +2538,102 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       TIMES TABLE BLASTER CARD
+  ══════════════════════════════ -->
+  <div class="game-card ttb" onclick="location.href='times_table_blaster/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="ttbBg" cx="50%" cy="28%" r="95%">
+            <stop offset="0%" stop-color="#1c2c5a"/>
+            <stop offset="60%" stop-color="#0d1b35"/>
+            <stop offset="100%" stop-color="#060c1d"/>
+          </radialGradient>
+          <radialGradient id="ttbRock" cx="35%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#9aa7c4"/>
+            <stop offset="100%" stop-color="#3c4763"/>
+          </radialGradient>
+          <radialGradient id="ttbRockHL" cx="35%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#ffd97a"/>
+            <stop offset="100%" stop-color="#b07818"/>
+          </radialGradient>
+          <linearGradient id="ttbPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9a5cf0"/>
+            <stop offset="100%" stop-color="#5a1aa8"/>
+          </linearGradient>
+          <linearGradient id="ttbDome" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#9a5cf0"/>
+            <stop offset="100%" stop-color="#5a1aa8"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#ttbBg)"/>
+        <circle cx="30"  cy="30"  r="1.6" fill="rgba(255,255,255,.85)"/>
+        <circle cx="70"  cy="62"  r="1.1" fill="rgba(255,255,255,.6)"/>
+        <circle cx="120" cy="22"  r="1.4" fill="rgba(255,255,255,.75)"/>
+        <circle cx="255" cy="58"  r="1.2" fill="rgba(255,255,255,.6)"/>
+        <circle cx="295" cy="26"  r="1.6" fill="rgba(255,255,255,.85)"/>
+        <circle cx="345" cy="70"  r="1.2" fill="rgba(255,255,255,.6)"/>
+        <circle cx="350" cy="130" r="1.5" fill="rgba(255,255,255,.8)"/>
+        <circle cx="40"  cy="130" r="1.3" fill="rgba(255,255,255,.7)"/>
+        <circle cx="140" cy="160" r="1.1" fill="rgba(255,255,255,.55)"/>
+        <circle cx="250" cy="150" r="1.3" fill="rgba(255,255,255,.7)"/>
+        <text x="332" y="48" font-size="14" fill="#ffd840">✨</text>
+
+        <!-- Equation pill -->
+        <rect x="115" y="12" width="150" height="34" rx="17" fill="url(#ttbPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="35" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="18"
+              font-weight="900" text-anchor="middle">4 × 8 = ?</text>
+
+        <!-- Asteroids -->
+        <circle cx="75" cy="108" r="27" fill="url(#ttbRock)"/>
+        <circle cx="66" cy="99"  r="5" fill="rgba(0,0,0,.18)"/>
+        <circle cx="85" cy="117" r="4" fill="rgba(0,0,0,.18)"/>
+        <text x="75" y="115" fill="#fff" font-size="19" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">28</text>
+
+        <circle cx="190" cy="104" r="29" fill="url(#ttbRockHL)" stroke="#ffe040" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <text x="190" y="111" fill="#fff" font-size="21" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">32</text>
+
+        <circle cx="305" cy="96" r="27" fill="url(#ttbRock)"/>
+        <circle cx="296" cy="87" r="5" fill="rgba(0,0,0,.18)"/>
+        <circle cx="314" cy="106" r="4" fill="rgba(0,0,0,.18)"/>
+        <text x="305" y="103" fill="#fff" font-size="19" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">36</text>
+
+        <!-- Laser + ship -->
+        <line x1="190" y1="160" x2="190" y2="137" stroke="#7df9ff" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 172 170 A 18 18 0 0 1 208 170 Z" fill="url(#ttbDome)"/>
+        <rect x="162" y="168" width="56" height="9" rx="4.5" fill="#3d1175"/>
+        <circle cx="174" cy="172.5" r="2" fill="#7df9ff"/>
+        <circle cx="190" cy="172.5" r="2" fill="#ffe040"/>
+        <circle cx="206" cy="172.5" r="2" fill="#7df9ff"/>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(90,26,168,.92)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="ttb.svg">Blast the asteroid with the correct answer!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="ttb.title">🚀 Times Table Blaster</div>
+      <div class="card-desc" data-i18n="ttb.desc">Asteroids with answers are falling from space! Read the multiplication question and blast the rock with the correct product. Four missions cover the 2–10 times tables, plus an endless Mixed Mayhem mode.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="ttb.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="ttb.tag.tables">Times Tables</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="times_table_blaster/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -2616,6 +2717,96 @@ footer {
       'pb.svg.of': 'of',
       'pb.svg.balls': 'Balls',
       'pb.svg': 'Connect 4+ same-colour balls to pop them!',
+      // Shared tags (batch 3)
+      'tag.timed': 'Timed',
+      'tag.puzzle': 'Puzzle',
+      'tag.geometry': 'Geometry',
+      'tag.counting': 'Counting',
+      // Maze card
+      'mz.title': '🌀 Maze',
+      'mz.desc': 'Steer the red ball through a winding green maze and reach the yellow star! Beat the clock for a 5-star rating, peek at the solution if you get stuck.',
+      'mz.tag.keys': 'Arrow Keys',
+      'mz.tag.single': 'Single Maze',
+      'mz.svg.title': 'Maze',
+      'mz.svg': 'Navigate the maze with arrow keys',
+      // Castle Defense card
+      'cd.title': '🏰 Castle Defense',
+      'cd.desc': 'A tower-defense skirmish: buy cannons, place them along a winding path, and stop wooden-crate invaders before they breach the castle.',
+      'cd.tag.td': 'Tower Defense',
+      'cd.tag.strategy': 'Strategy',
+      'cd.tag.waves': 'Waves',
+      'cd.tag.mouse': 'Mouse',
+      'cd.svg.title': 'CASTLE DEFENSE',
+      'cd.svg': 'Buy cannons, defend the castle gate',
+      // Alphabet card (ABC strip + tiles stay Latin)
+      'ab.title': '🔤 Alphabet Game',
+      'ab.desc': 'Press the letters in the correct order — A to Z or a to z — to complete the alphabet. Turn on Learning Level for star hints on the next letter.',
+      'ab.tag.letters': 'Letters',
+      'ab.tag.edu': 'Educational',
+      'ab.tag.kids': 'Kids',
+      'ab.tag.click': 'Click',
+      'ab.svg.title': '★ Alphabet Game ★',
+      // Shapes Splat card
+      'ss.title': 'Shapes Splat!',
+      'ss.desc': 'Identify 2D and 3D shapes before the clock runs out! Four levels covering basic shapes, rotations, extra shapes, and 3-D solids — with relaxed and timed modes.',
+      'ss.tag.shapes': 'Shapes',
+      'ss.tag.levels': '4 Levels',
+      'ss.svg': 'Tap the shape that matches the name!',
+      // Area Shape Game card
+      'asg.title': 'Area Shape Game',
+      'asg.desc': 'Spot every shape that covers the target number of square units. Four rounds of counting practice — perfect for early geometry and area concepts.',
+      'asg.tag.area': 'Area',
+      'asg.tag.rounds': '4 Rounds',
+      'asg.svg.title': 'Area Shape Game',
+      'asg.svg': 'Find shapes with an area of 4 squares!',
+
+      // ── Batch 4 shared tags ──
+      'tag.taptoplay': 'Tap to Play',
+      'tag.mentalmath': 'Mental Math',
+      'tag.logic': 'Logic',
+      'tag.4levels': '4 Levels',
+      'tag.5levels': '5 Levels',
+      'tag.12levels': '12 Levels',
+      'tag.arrowkeys': 'Arrow Keys',
+      'tag.fractions': 'Fractions',
+      'tag.pacman': 'Pac-Man',
+      'tag.spelling': 'Spelling',
+      'tag.phonics': 'Phonics',
+      'tag.coding': 'Coding',
+
+      // ── Calculator Puzzle (cg) ──
+      'cg.title': '🧮 Calculator Puzzle',
+      'cg.desc': 'Each row and column makes a math equation — fill the empty circles so every one balances! Five levels from simple sums to a 5×5 cross-math grid.',
+      'cg.svg': 'Fill the empty circles to solve every equation',
+      // ── Number Twins (nt) ──
+      'nt.title': '🔗 Number Twins',
+      'nt.desc': 'Tap pairs of numbered balls that add up to the target — but only if you can connect them with a line that turns at most twice. Twelve levels, sums 5 → 16.',
+      'nt.svgtitle': 'Number Twins',
+      'nt.svglabel': 'Add to 9',
+      // ── Math Man (mm) ──
+      'mm.title': '👻 Math Man',
+      'mm.desc': 'Steer Math Man through the maze and gobble only the ghost whose fraction reduces to the target. Spacebar scatters ghosts; stars freeze them. Four levels — halves to ninths.',
+      'mm.svgtitle': 'Math Man',
+      'mm.svg': 'Eat the ghost whose fraction reduces to the target',
+      // ── Word Wizard (ww) ──
+      'ww.title': '🪄 Word Wizard',
+      'ww.desc': 'See the picture, tap the letter tiles to spell the word. Four levels from easy 3-letter words to tricky 7-letter ones. Hints help, but use them wisely!',
+      'ww.svgtitle': 'Word Wizard',
+      'ww.svg': 'Spell the word from the picture clue!',
+      // ── Code Robot (cr) ──
+      'cr.title': '🤖 Code Robot',
+      'cr.desc': 'Tap blocks to build a program: Forward, Turn Left, Turn Right, Repeat. Steer the robot through 12 puzzles to collect coins and reach the flag. Coding without typing!',
+      'cr.svgtitle': 'Code Robot',
+      'cr.svg': "Stack blocks to program the robot's path!",
+      'cr.blk.forward': '⬆ FORWARD',
+      'cr.blk.right': '↻ RIGHT',
+      'cr.blk.run': '▶ RUN',
+      // ── Times Table Blaster (ttb) ──
+      'ttb.title': '🚀 Times Table Blaster',
+      'ttb.desc': 'Asteroids with answers are falling from space! Read the multiplication question and blast the rock with the correct product. Four missions cover the 2–10 times tables, plus an endless Mixed Mayhem mode.',
+      'ttb.tag.levels': '4 Missions',
+      'ttb.tag.tables': 'Times Tables',
+      'ttb.svg': 'Blast the asteroid with the correct answer!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -2689,6 +2880,96 @@ footer {
       'pb.svg.of': 'من',
       'pb.svg.balls': 'الكرات',
       'pb.svg': 'وصّل ٤ كرات أو أكثر من نفس اللون لتفجيرها!',
+      // Shared tags (batch 3)
+      'tag.timed': 'موقوت',
+      'tag.puzzle': 'لغز',
+      'tag.geometry': 'هندسة',
+      'tag.counting': 'العدّ',
+      // Maze card
+      'mz.title': '🌀 المتاهة',
+      'mz.desc': 'وجّه الكرة الحمراء عبر متاهة خضراء متعرّجة لتصل إلى النجمة الصفراء! سابق الوقت لتحصل على تقييم ٥ نجوم، واطّلع على الحل إذا تعثّرت.',
+      'mz.tag.keys': 'مفاتيح الأسهم',
+      'mz.tag.single': 'متاهة واحدة',
+      'mz.svg.title': 'المتاهة',
+      'mz.svg': 'تنقّل في المتاهة بمفاتيح الأسهم',
+      // Castle Defense card
+      'cd.title': '🏰 الدفاع عن القلعة',
+      'cd.desc': 'معركة دفاع برجي: اشترِ المدافع، وضعها على طول مسار متعرّج، وأوقف الغزاة قبل أن يخترقوا القلعة.',
+      'cd.tag.td': 'دفاع برجي',
+      'cd.tag.strategy': 'استراتيجية',
+      'cd.tag.waves': 'موجات',
+      'cd.tag.mouse': 'الفأرة',
+      'cd.svg.title': 'الدفاع عن القلعة',
+      'cd.svg': 'اشترِ المدافع، ودافع عن بوابة القلعة',
+      // Alphabet card (ABC strip + tiles stay Latin)
+      'ab.title': '🔤 لعبة الأبجدية',
+      'ab.desc': 'اضغط الحروف بالترتيب الصحيح — من A إلى Z أو من a إلى z — لإكمال الأبجدية. فعّل مستوى التعلّم لتلميحات النجمة عن الحرف التالي.',
+      'ab.tag.letters': 'حروف',
+      'ab.tag.edu': 'تعليمي',
+      'ab.tag.kids': 'أطفال',
+      'ab.tag.click': 'نقر',
+      'ab.svg.title': '★ لعبة الأبجدية ★',
+      // Shapes Splat card
+      'ss.title': 'لطخة الأشكال!',
+      'ss.desc': 'تعرّف على الأشكال ثنائية وثلاثية الأبعاد قبل نفاد الوقت! أربعة مستويات تشمل الأشكال الأساسية والتدوير وأشكالًا إضافية ومجسمات ثلاثية الأبعاد — مع نمطين هادئ وموقوت.',
+      'ss.tag.shapes': 'أشكال',
+      'ss.tag.levels': '٤ مستويات',
+      'ss.svg': 'انقر على الشكل المطابق للاسم!',
+      // Area Shape Game card
+      'asg.title': 'لعبة مساحة الأشكال',
+      'asg.desc': 'اكتشف كل شكل يغطّي العدد المستهدف من الوحدات المربعة. أربع جولات من تدريب العدّ — مثالية لمفاهيم الهندسة والمساحة المبكرة.',
+      'asg.tag.area': 'المساحة',
+      'asg.tag.rounds': '٤ جولات',
+      'asg.svg.title': 'لعبة مساحة الأشكال',
+      'asg.svg': 'جِد الأشكال التي مساحتها ٤ مربعات!',
+
+      // ── Batch 4 shared tags ──
+      'tag.taptoplay': 'انقر للعب',
+      'tag.mentalmath': 'حساب ذهني',
+      'tag.logic': 'منطق',
+      'tag.4levels': '٤ مستويات',
+      'tag.5levels': '٥ مستويات',
+      'tag.12levels': '١٢ مستوى',
+      'tag.arrowkeys': 'مفاتيح الأسهم',
+      'tag.fractions': 'كسور',
+      'tag.pacman': 'باك مان',
+      'tag.spelling': 'تهجئة',
+      'tag.phonics': 'صوتيات',
+      'tag.coding': 'برمجة',
+
+      // ── Calculator Puzzle (cg) ──
+      'cg.title': '🧮 لغز الآلة الحاسبة',
+      'cg.desc': 'كل صفّ وعمود يكوّن معادلة حسابية — املأ الدوائر الفارغة لتتوازن كلها! خمسة مستويات من الجمع البسيط إلى شبكة تقاطع حسابي ٥×٥.',
+      'cg.svg': 'املأ الدوائر الفارغة لحل كل معادلة',
+      // ── Number Twins (nt) ──
+      'nt.title': '🔗 التوأم العددي',
+      'nt.desc': 'انقر أزواج الكرات المرقّمة التي مجموعها يساوي الهدف — لكن فقط إذا أمكن وصلها بخط ينعطف مرّتين على الأكثر. اثنا عشر مستوى، مجاميع من ٥ إلى ١٦.',
+      'nt.svgtitle': 'التوأم العددي',
+      'nt.svglabel': 'المجموع ٩',
+      // ── Math Man (mm) ──
+      'mm.title': '👻 رجل الرياضيات',
+      'mm.desc': 'وجّه رجل الرياضيات عبر المتاهة والتهم فقط الشبح الذي يُبسَّط كسره إلى الهدف. مفتاح المسافة يبعثر الأشباح؛ والنجوم تجمّدها. أربعة مستويات — من الأنصاف إلى الأتساع.',
+      'mm.svgtitle': 'رجل الرياضيات',
+      'mm.svg': 'كُل الشبح الذي يُبسَّط كسره إلى الهدف',
+      // ── Word Wizard (ww) ──
+      'ww.title': '🪄 ساحر الكلمات',
+      'ww.desc': 'انظر إلى الصورة، وانقر مربّعات الأحرف لتهجئة الكلمة. أربعة مستويات من كلمات سهلة من ٣ أحرف إلى كلمات صعبة من ٧ أحرف. التلميحات تساعد، لكن استخدمها بحكمة!',
+      'ww.svgtitle': 'ساحر الكلمات',
+      'ww.svg': 'تهجّأ الكلمة من دليل الصورة!',
+      // ── Code Robot (cr) ──
+      'cr.title': '🤖 الروبوت المبرمَج',
+      'cr.desc': 'انقر اللبنات لبناء برنامج: أمام، يسار، يمين، تكرار. وجّه الروبوت عبر ١٢ لغزًا لجمع العملات والوصول إلى العَلَم. برمجة بلا كتابة!',
+      'cr.svgtitle': 'الروبوت المبرمَج',
+      'cr.svg': 'كدّس اللبنات لبرمجة مسار الروبوت!',
+      'cr.blk.forward': '⬆ أمام',
+      'cr.blk.right': '↻ يمين',
+      'cr.blk.run': '▶ تشغيل',
+      // ── Times Table Blaster (ttb) ──
+      'ttb.title': '🚀 قاذف جدول الضرب',
+      'ttb.desc': 'كويكبات تحمل الإجابات تتساقط من الفضاء! اقرأ سؤال الضرب وفجّر الصخرة التي تحمل الناتج الصحيح. أربع مهمات تغطي جداول الضرب من ٢ إلى ١٠، بالإضافة إلى تحدٍّ لا نهائي.',
+      'ttb.tag.levels': '٤ مهمات',
+      'ttb.tag.tables': 'جداول الضرب',
+      'ttb.svg': 'فجّر الكويكب ذا الإجابة الصحيحة!',
     },
   };
 

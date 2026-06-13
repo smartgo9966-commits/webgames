@@ -492,37 +492,77 @@ html, body {
   background-clip: text;
   color: transparent;
 }
+
+/* ════════ LANGUAGE TOGGLE ════════ */
+.lang-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  gap: 3px;
+  padding: 4px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 36px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  color: #0d1b35;
+}
 </style>
 </head>
 <body>
 <a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
 
 <div class="fit-stage">
 <div class="game-wrap">
 
   <!-- ════════════ MAIN MENU ════════════ -->
   <div id="screen-menu" class="screen active">
-    <div class="menu-title">Maze</div>
+    <div class="menu-title" data-i18n="menu.title">Maze</div>
     <canvas id="preview-canvas" class="menu-preview" width="560" height="320"></canvas>
-    <button class="menu-start" id="btn-start">START</button>
+    <button class="menu-start" id="btn-start" data-i18n="btn.start">START</button>
   </div>
 
   <!-- ════════════ GAME ════════════ -->
   <div id="screen-game" class="screen">
     <div class="sidebar">
-      <div class="view-solution" id="btn-solution">View<br>Solution</div>
+      <div class="view-solution" id="btn-solution" data-i18n-html="btn.solution">View<br>Solution</div>
       <div class="sidebar-icons">
-        <button class="icon-btn" id="btn-help" title="Instructions">?</button>
-        <button class="icon-btn" id="btn-pause" title="Pause">
+        <button class="icon-btn" id="btn-help" title="Instructions" data-i18n-title="instr.title">?</button>
+        <button class="icon-btn" id="btn-pause" title="Pause" data-i18n-title="tip.pause">
           <div class="pause-bars"><span></span><span></span></div>
         </button>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Moves</div>
+        <div class="stat-label" data-i18n="stat.moves">Moves</div>
         <div class="stat-value" id="moves-val">0</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Time</div>
+        <div class="stat-label" data-i18n="stat.time">Time</div>
         <div class="stat-value" id="time-val">0</div>
       </div>
     </div>
@@ -533,27 +573,27 @@ html, body {
 
   <!-- ════════════ INSTRUCTIONS MODAL ════════════ -->
   <div id="modal-instructions" class="modal">
-    <div class="instr-title">Instructions</div>
-    <div class="instr-body">
+    <div class="instr-title" data-i18n="instr.title">Instructions</div>
+    <div class="instr-body" data-i18n="instr.body">
       Use the four arrow keys on your keyboard to move the red ball until it reaches the exit marked by a yellow star.
     </div>
-    <button class="instr-ok" id="btn-instr-ok">OK</button>
+    <button class="instr-ok" id="btn-instr-ok" data-i18n="btn.ok">OK</button>
   </div>
 
   <!-- ════════════ PAUSE OVERLAY ════════════ -->
   <div id="modal-pause" class="modal">
-    <div>Paused</div>
-    <button class="pause-resume" id="btn-resume">RESUME</button>
+    <div data-i18n="paused">Paused</div>
+    <button class="pause-resume" id="btn-resume" data-i18n="btn.resume">RESUME</button>
   </div>
 
   <!-- ════════════ RESULTS MODAL ════════════ -->
   <div id="modal-results" class="modal">
     <div class="results-card">
       <div class="results-rays"></div>
-      <button class="results-help" id="btn-show-mastery" title="What do the stars mean?">?</button>
-      <div class="results-title">Results</div>
+      <button class="results-help" id="btn-show-mastery" title="What do the stars mean?" data-i18n-title="tip.stars">?</button>
+      <div class="results-title" data-i18n="results.title">Results</div>
       <div class="time-panel">
-        <div class="time-panel-header">Time</div>
+        <div class="time-panel-header" data-i18n="stat.time">Time</div>
         <div class="time-panel-value" id="results-time">0.000s</div>
       </div>
       <div class="stars-row" id="results-stars"></div>
@@ -567,10 +607,10 @@ html, body {
   <div id="modal-mastery" class="modal">
     <div class="mastery-card">
       <button class="mastery-close" id="btn-mastery-close">✕</button>
-      <div class="mastery-title">Mastery Levels</div>
+      <div class="mastery-title" data-i18n="mastery.title">Mastery Levels</div>
       <div class="mastery-header">
-        <div>Mastery</div>
-        <div>Time</div>
+        <div data-i18n="mastery.col1">Mastery</div>
+        <div data-i18n="stat.time">Time</div>
       </div>
       <div class="mastery-row">
         <div class="mastery-stars" data-stars="5"></div>
@@ -598,6 +638,94 @@ html, body {
 </div>
 </div>
 
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'menu.title': 'Maze',
+      'btn.start': 'START',
+      'btn.solution': 'View<br>Solution',
+      'instr.title': 'Instructions',
+      'instr.body': 'Use the four arrow keys on your keyboard to move the red ball until it reaches the exit marked by a yellow star.',
+      'btn.ok': 'OK',
+      'tip.pause': 'Pause',
+      'tip.stars': 'What do the stars mean?',
+      'stat.moves': 'Moves',
+      'stat.time': 'Time',
+      'paused': 'Paused',
+      'btn.resume': 'RESUME',
+      'results.title': 'Results',
+      'mastery.title': 'Mastery Levels',
+      'mastery.col1': 'Mastery',
+    },
+    ar: {
+      'menu.title': 'المتاهة',
+      'btn.start': 'ابدأ',
+      'btn.solution': 'عرض<br>الحل',
+      'instr.title': 'التعليمات',
+      'instr.body': 'استخدم مفاتيح الأسهم الأربعة في لوحة المفاتيح لتحريك الكرة الحمراء حتى تصل إلى المخرج المحدد بنجمة صفراء.',
+      'btn.ok': 'حسنًا',
+      'tip.pause': 'إيقاف مؤقت',
+      'tip.stars': 'ماذا تعني النجوم؟',
+      'stat.moves': 'الحركات',
+      'stat.time': 'الوقت',
+      'paused': 'متوقّف مؤقتًا',
+      'btn.resume': 'استئناف',
+      'results.title': 'النتائج',
+      'mastery.title': 'مستويات الإتقان',
+      'mastery.col1': 'الإتقان',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = window.t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    // Only numeric counters change at runtime — nothing dynamic to re-render.
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
 <script>
 'use strict';
 
