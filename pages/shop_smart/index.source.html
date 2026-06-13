@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Shop Smart</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#6a4a08">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Nunito', sans-serif;
+  background: radial-gradient(ellipse at 50% 18%, #c89a30 0%, #6a4a08 58%, #3a2a06 100%);
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 960px;
+  height: 540px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 2;
+}
+.screen.active { display: flex; }
+#screen-game.active { display: flex; gap: 0; justify-content: flex-start; }
+
+/* ── MENU ── */
+.menu-icon { font-size: 50px; animation: ss-float 2.6s ease-in-out infinite; }
+@keyframes ss-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 52px; color: #fff0b0; letter-spacing: 1px; text-align: center;
+  text-shadow: 0 4px 0 #6a4a08, 0 10px 26px rgba(200,154,48,.5);
+}
+.menu-sub { font-family: 'Patrick Hand', cursive; font-size: 26px; color: #f4dca0; }
+.howto {
+  background: rgba(255,255,255,.07);
+  border: 2px solid rgba(230,190,90,.5);
+  border-radius: 18px; padding: 14px 28px;
+  display: flex; flex-direction: column; gap: 7px; max-width: 680px;
+}
+.howto p { color: #fff4dd; font-size: 17px; font-weight: 700; }
+
+.big-btn {
+  font-family: 'Fredoka One', cursive; font-size: 24px;
+  color: #4a3206; background: linear-gradient(135deg, #ffe07a, #e0a82e);
+  border: none; border-radius: 999px; padding: 14px 52px; cursor: pointer;
+  box-shadow: 0 7px 0 #9a6e16, 0 14px 30px rgba(0,0,0,.45);
+  transition: transform .12s, box-shadow .12s;
+}
+.big-btn:hover { transform: translateY(-2px); }
+.big-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #9a6e16, 0 8px 18px rgba(0,0,0,.4); }
+.big-btn.small { font-size: 18px; padding: 10px 28px; box-shadow: 0 5px 0 #9a6e16, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.small:active { box-shadow: 0 2px 0 #9a6e16, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.alt { background: linear-gradient(135deg, #2bb3a3, #0e6e63); color: #eafffc; box-shadow: 0 5px 0 #07473f, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.alt:active { box-shadow: 0 2px 0 #07473f, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.ghost { background: rgba(255,255,255,.12); color: #fff4dd; border: 2px solid rgba(255,255,255,.3); box-shadow: 0 5px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.35); }
+.big-btn.ghost:active { box-shadow: 0 2px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.3); }
+
+/* ── LEVEL SELECT ── */
+.lvl-title {
+  font-family: 'Fredoka One', cursive; font-size: 36px; color: #fff0b0;
+  text-shadow: 0 3px 0 #6a4a08;
+}
+.lvl-grid { display: flex; gap: 16px; }
+.lvl-card {
+  width: 184px;
+  background: rgba(255,255,255,.07);
+  border: 2.5px solid rgba(230,190,90,.55);
+  border-radius: 20px; padding: 16px 10px;
+  text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  transition: transform .15s, border-color .15s, background .15s;
+}
+.lvl-card:hover { transform: translateY(-5px); border-color: #ffe07a; background: rgba(255,255,255,.12); }
+.lvl-mission { font-size: 12px; font-weight: 800; color: #f4dca0; letter-spacing: 1.5px; text-transform: uppercase; }
+.lvl-name { font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff; }
+.lvl-tag { font-family: 'Fredoka One', cursive; font-size: 14px; color: #ffe07a; direction: ltr; }
+.lvl-stars { font-size: 18px; letter-spacing: 2px; }
+.star-off { color: rgba(255,255,255,.28); }
+.lvl-lock-hint { font-size: 12px; color: #ffc0a0; font-weight: 700; }
+.lvl-card.locked { opacity: .5; cursor: not-allowed; filter: grayscale(.55); }
+.lvl-card.locked:hover { transform: none; border-color: rgba(230,190,90,.55); background: rgba(255,255,255,.07); }
+
+/* ── GAME SCREEN ── */
+.hud {
+  width: 100%; height: 58px; flex: 0 0 58px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 16px;
+  background: rgba(58,42,6,.6);
+  border-bottom: 2px solid rgba(230,190,90,.4);
+  z-index: 5;
+}
+.hud-group { display: flex; align-items: center; gap: 12px; }
+.hud-q {
+  font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff;
+  background: linear-gradient(135deg, #e0a82e, #9a6e16);
+  padding: 6px 24px; border-radius: 999px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.45);
+  text-align: center; max-width: 600px;
+}
+.hud-q b { color: #fff0b0; }
+.hud-progress { font-family: 'Fredoka One', cursive; font-size: 17px; color: #f4dca0; direction: ltr; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid rgba(230,190,90,.6);
+  background: rgba(255,255,255,.08); color: #fff;
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: rgba(255,255,255,.18); }
+
+/* ── PLAY AREA ── */
+.play {
+  flex: 1 1 auto; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 8px 12px;
+}
+
+/* item / scenario card */
+.scenario {
+  display: flex; align-items: center; gap: 18px;
+  background: rgba(255,255,255,.08); border: 2px solid rgba(230,190,90,.4);
+  border-radius: 16px; padding: 8px 22px;
+}
+.scenario .emoji { font-size: 40px; }
+.scenario .price-tag {
+  font-family: 'Fredoka One', cursive; font-size: 26px; color: #fff0b0;
+}
+.scenario .sub { font-size: 14px; font-weight: 800; color: #f4dca0; direction: ltr; }
+
+/* tray total readout */
+.readout { display: flex; gap: 22px; align-items: center; }
+.readout .box {
+  font-family: 'Fredoka One', cursive; text-align: center;
+  background: rgba(0,0,0,.28); border-radius: 12px; padding: 5px 18px; direction: ltr;
+}
+.readout .box .lbl { font-size: 12px; color: #f4dca0; display: block; }
+.readout .box .val { font-size: 24px; color: #fff0b0; }
+.readout .box.ok .val { color: #8aff9a; }
+
+/* money buttons (palette) */
+.palette { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 760px; }
+.coin {
+  position: relative; cursor: pointer; border: none; background: none;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.coin .disc {
+  width: 58px; height: 58px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive; font-size: 15px; color: #3a2a06;
+  box-shadow: 0 4px 0 rgba(0,0,0,.35); border: 2px solid rgba(0,0,0,.15);
+}
+.coin:active .disc { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.disc.c5  { background: radial-gradient(circle at 35% 30%, #d8d8d8, #9a9a9a); }
+.disc.c10 { background: radial-gradient(circle at 35% 30%, #e0e0e0, #a8a8a8); }
+.disc.c25 { background: radial-gradient(circle at 35% 30%, #ececec, #b4b4b4); }
+/* notes */
+.note .disc {
+  width: 72px; height: 44px; border-radius: 8px; font-size: 16px; color: #fff;
+}
+.disc.n100 { background: linear-gradient(135deg, #4caf6a, #2e7d4a); }
+.disc.n200 { background: linear-gradient(135deg, #5a8ad0, #2e5aa0); }
+.disc.n500 { background: linear-gradient(135deg, #c06ad0, #8a3aa0); }
+.disc.n1000{ background: linear-gradient(135deg, #d08a3a, #a05e16); }
+
+/* tray of placed money */
+.tray {
+  min-height: 64px; width: 100%; max-width: 760px;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.18); border: 2px dashed rgba(230,190,90,.45);
+  border-radius: 14px; padding: 8px;
+}
+.tray:empty::before { content: ""; }
+.placed {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive; font-size: 13px; color: #3a2a06;
+  cursor: pointer;
+}
+.placed .disc { width: 44px; height: 44px; font-size: 12px; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
+.placed.note .disc { width: 56px; height: 34px; font-size: 13px; color: #fff; }
+
+.action-row { display: flex; gap: 12px; align-items: center; }
+.check-btn {
+  font-family: 'Fredoka One', cursive; font-size: 20px; color: #fff;
+  background: linear-gradient(135deg, #2ecc71, #1e8e4f);
+  border: none; border-radius: 999px; padding: 10px 34px; cursor: pointer;
+  box-shadow: 0 6px 0 #145e34, 0 10px 22px rgba(0,0,0,.4);
+}
+.check-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #145e34; }
+.undo-btn {
+  font-family: 'Fredoka One', cursive; font-size: 18px; color: #fff4dd;
+  background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.3);
+  border-radius: 999px; padding: 9px 24px; cursor: pointer;
+}
+.undo-btn:active { transform: translateY(2px); }
+
+/* choices (total / cheaper questions) */
+.choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.choice {
+  font-family: 'Fredoka One', cursive; font-size: 24px; color: #4a3206;
+  min-width: 130px; padding: 16px 18px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #ffe07a, #e0a82e); cursor: pointer;
+  box-shadow: 0 6px 0 #9a6e16; direction: ltr;
+}
+.choice:active { transform: translateY(3px); box-shadow: 0 3px 0 #9a6e16; }
+.choice.good { background: linear-gradient(135deg, #2ecc71, #1e8e4f); color: #fff; box-shadow: 0 6px 0 #145e34; }
+.choice.bad  { background: linear-gradient(135deg, #aaa, #777); color: #fff; box-shadow: 0 6px 0 #444; }
+.choice:disabled { cursor: default; }
+
+.toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive; font-size: 56px;
+  pointer-events: none; opacity: 0; z-index: 30;
+  text-shadow: 0 4px 0 rgba(0,0,0,.4); text-align: center;
+}
+.toast.show { animation: ss-toast 1s ease-out; }
+@keyframes ss-toast {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+/* ── WIN PANEL ── */
+.panel {
+  background: rgba(48,34,6,.93);
+  border: 3px solid rgba(230,190,90,.65);
+  border-radius: 26px; padding: 28px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 11px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+}
+.panel-title {
+  font-family: 'Fredoka One', cursive; font-size: 38px; color: #fff0b0;
+  text-shadow: 0 3px 0 #6a4a08;
+}
+.panel-stars { font-size: 46px; letter-spacing: 8px; }
+.panel-line { font-size: 19px; font-weight: 800; color: #fff4dd; }
+.panel-line.gold { color: #fff0b0; }
+.panel-btns { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* ── PAUSE MODAL ── */
+.modal {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  background: rgba(24,16,2,.66);
+  align-items: center; justify-content: center;
+}
+.modal.show { display: flex; }
+
+/* ── SMART GO BADGE ── */
+.sg-badge {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
+<div class="fit-stage"><div class="game-wrap">
+
+<!-- ══════════════════ MENU ══════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-icon">🛒</div>
+  <h1 class="menu-title" data-i18n="title">Shop Smart</h1>
+  <div class="menu-sub" data-i18n="subtitle">Pay the right amount!</div>
+  <div class="howto">
+    <p data-i18n="how.1">🏷️ Look at the price of the item.</p>
+    <p data-i18n="how.2">🪙 Tap coins and notes into the tray to pay exactly.</p>
+    <p data-i18n="how.3">💵 Later, give the right change — then press Pay!</p>
+  </div>
+  <button class="big-btn" onclick="goLevels()" data-i18n="btn.start">Start</button>
+</div>
+
+<!-- ══════════════════ LEVEL SELECT ══════════════════ -->
+<div id="screen-level" class="screen">
+  <h2 class="lvl-title" data-i18n="level.title">Choose a Mission</h2>
+  <div class="lvl-grid" id="lvl-grid"></div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-group">
+      <span class="hud-q" id="hud-q">Pay exactly $0.45</span>
+    </div>
+    <div class="hud-group">
+      <span class="hud-progress" id="hud-progress">0 / 6</span>
+      <button class="icon-btn" id="btn-sound" onclick="toggleSound()" data-i18n-title="sound.on" title="Sound on">🔊</button>
+      <button class="icon-btn" onclick="togglePause()" data-i18n-title="pause.title" title="Paused">⏸</button>
+    </div>
+  </div>
+  <div class="play" id="play"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ══════════════════ WIN ══════════════════ -->
+<div id="screen-win" class="screen">
+  <div class="panel">
+    <div class="panel-title" id="win-title">Mission Complete!</div>
+    <div class="panel-stars" id="win-stars">⭐⭐⭐</div>
+    <div class="panel-line" id="win-correct"></div>
+    <div class="panel-line gold" id="win-mistakes"></div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="replayLevel()" data-i18n="btn.replay">Play Again</button>
+      <button class="big-btn small alt" id="btn-next" onclick="nextMission()">Next Mission</button>
+      <button class="big-btn small ghost" onclick="toMenu()" data-i18n="btn.menu">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAUSE MODAL ══════════════════ -->
+<div id="pause-modal" class="modal">
+  <div class="panel">
+    <div class="panel-title" data-i18n="pause.title">Paused</div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="resumeGame()" data-i18n="btn.resume">Resume</button>
+      <button class="big-btn small ghost" onclick="quitToLevels()" data-i18n="btn.quit">Quit to Menu</button>
+    </div>
+  </div>
+</div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'Shop Smart',
+      'subtitle': 'Pay the right amount!',
+      'how.1': '🏷️ Look at the price of the item.',
+      'how.2': '🪙 Tap coins and notes into the tray to pay exactly.',
+      'how.3': '💵 Later, give the right change — then press Pay!',
+      'btn.start': 'Start',
+      'btn.replay': 'Play Again',
+      'btn.next': 'Next Mission',
+      'btn.menu': 'Menu',
+      'btn.resume': 'Resume',
+      'btn.quit': 'Quit to Menu',
+      'btn.pay': 'Pay!',
+      'btn.undo': 'Undo',
+      'level.title': 'Choose a Mission',
+      'level.mission': 'Mission {n}',
+      'level.name.1': 'Coins',
+      'level.name.2': 'Notes',
+      'level.name.3': 'Change',
+      'level.name.4': 'Big Shop',
+      'level.tag.1': 'Pay up to $1',
+      'level.tag.2': 'Pay up to $5',
+      'level.tag.3': 'Change from $5',
+      'level.tag.4': 'Totals & change',
+      'level.locked': 'Clear the previous mission!',
+      'q.pay': 'Pay exactly {amt}',
+      'q.change': 'Give the change from {paid} for a {price} item',
+      'q.total': "What's the total?",
+      'q.cheaper': 'Which is cheaper?',
+      'hud.due': 'Due',
+      'hud.tray': 'Tray',
+      'hud.total': 'Total',
+      'pause.title': 'Paused',
+      'win.title.3': 'Super Shopper!',
+      'win.title.2': 'Great Shopping!',
+      'win.title.1': 'Mission Complete!',
+      'win.correct': 'Correct: {n} / {g}',
+      'win.nomistakes': 'No mistakes — amazing!',
+      'win.mistakes': '{n} mistakes',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'fb.over': 'Too much!',
+      'fb.under': 'Not enough!',
+      'sound.on': 'Sound on',
+      'sound.off': 'Sound off',
+    },
+    ar: {
+      'title': 'تسوّق بذكاء',
+      'subtitle': 'ادفع المبلغ الصحيح!',
+      'how.1': '🏷️ انظر إلى سعر المنتج.',
+      'how.2': '🪙 اضغط العملات والأوراق في الصينية لتدفع بالضبط.',
+      'how.3': '💵 لاحقًا، أعطِ الباقي الصحيح — ثم اضغط ادفع!',
+      'btn.start': 'ابدأ',
+      'btn.replay': 'العب مرة أخرى',
+      'btn.next': 'المهمة التالية',
+      'btn.menu': 'القائمة',
+      'btn.resume': 'متابعة',
+      'btn.quit': 'الخروج إلى القائمة',
+      'btn.pay': 'ادفع!',
+      'btn.undo': 'تراجع',
+      'level.title': 'اختر مهمة',
+      'level.mission': 'المهمة {n}',
+      'level.name.1': 'العملات',
+      'level.name.2': 'الأوراق',
+      'level.name.3': 'الباقي',
+      'level.name.4': 'المتجر الكبير',
+      'level.tag.1': 'ادفع حتى ١$',
+      'level.tag.2': 'ادفع حتى ٥$',
+      'level.tag.3': 'الباقي من ٥$',
+      'level.tag.4': 'المجاميع والباقي',
+      'level.locked': 'أكمل المهمة السابقة!',
+      'q.pay': 'ادفع بالضبط {amt}',
+      'q.change': 'أعطِ الباقي من {paid} لمنتج بسعر {price}',
+      'q.total': 'ما المجموع؟',
+      'q.cheaper': 'أيّهما أرخص؟',
+      'hud.due': 'المطلوب',
+      'hud.tray': 'الصينية',
+      'hud.total': 'المجموع',
+      'pause.title': 'إيقاف مؤقت',
+      'win.title.3': 'متسوّق خارق!',
+      'win.title.2': 'تسوّق رائع!',
+      'win.title.1': 'اكتملت المهمة!',
+      'win.correct': 'الصحيح: {n} / {g}',
+      'win.nomistakes': 'بلا أخطاء — رائع!',
+      'win.mistakes': '{n} أخطاء',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'fb.over': 'أكثر من اللازم!',
+      'fb.under': 'غير كافٍ!',
+      'sound.on': 'الصوت مفعّل',
+      'sound.off': 'الصوت متوقف',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  function refreshDynamic() {
+    const active = id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    };
+    if (typeof buildLevelCards === 'function' && active('screen-level')) buildLevelCards();
+    if (typeof renderWin === 'function' && active('screen-win')) renderWin();
+    if (typeof rerenderQuestion === 'function' && active('screen-game')) rerenderQuestion();
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
+
+<script>
+// ── UTILS ─────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function rand(a, b) { return a + Math.random() * (b - a); }
+function randi(a, b) { return Math.floor(rand(a, b + 1)); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+// money is in CENTS (integers) everywhere; format only for display
+function fmt(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────
+let audioCtx = null, soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+}
+function playTone(freq, dur, type) {
+  if (!soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.16, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+function sfxClick()  { playTone(520, 0.05, 'sine'); }
+function sfxCoin()   { playTone(880, 0.05, 'triangle'); setTimeout(() => playTone(1180, 0.05, 'triangle'), 40); }
+function sfxRemove() { playTone(360, 0.05, 'sine'); }
+function sfxCorrect(){ playTone(660, 0.1, 'triangle'); setTimeout(() => playTone(990, 0.16, 'triangle'), 90); }
+function sfxWrong()  { playTone(240, 0.16, 'sawtooth'); setTimeout(() => playTone(160, 0.24, 'sawtooth'), 130); }
+function sfxWin()    { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'triangle'), i * 120)); }
+function toggleSound() {
+  soundOn = !soundOn;
+  const b = document.getElementById('btn-sound');
+  b.textContent = soundOn ? '🔊' : '🔇';
+  b.title = window.t(soundOn ? 'sound.on' : 'sound.off');
+  if (soundOn) sfxClick();
+}
+
+// ── MONEY ─────────────────────────────────────────────────────
+// denominations in cents, with display label + css class
+const MONEY = [
+  { v: 5,    cls: 'c5',   label: '5¢',  kind: 'coin' },
+  { v: 10,   cls: 'c10',  label: '10¢', kind: 'coin' },
+  { v: 25,   cls: 'c25',  label: '25¢', kind: 'coin' },
+  { v: 100,  cls: 'n100', label: '$1',  kind: 'note' },
+  { v: 200,  cls: 'n200', label: '$2',  kind: 'note' },
+  { v: 500,  cls: 'n500', label: '$5',  kind: 'note' },
+  { v: 1000, cls: 'n1000',label: '$10', kind: 'note' },
+];
+function moneyByVal(v) { return MONEY.find(m => m.v === v); }
+
+const ITEMS = ['🍎', '🍞', '🧀', '🍪', '🥤', '🍫', '🧸', '✏️', '📕', '🎈', '🍌', '🧃'];
+
+// ── CONFIG ────────────────────────────────────────────────────
+// mode: 'pay' | 'change' | 'total'.  denoms: available money values (cents).
+const C = { c5:5, c10:10, c25:25, n1:100, n2:200, n5:500, n10:1000 };
+const LEVELS = [
+  { modes: ['pay'],            maxPrice: 100,  step: 5,  denoms: [5,10,25,100],            goal: 6 },
+  { modes: ['pay'],            maxPrice: 500,  step: 5,  denoms: [5,10,25,100,200],        goal: 6 },
+  { modes: ['change'],         paid: 500,      step: 5,  denoms: [5,10,25,100,200],        goal: 6 },
+  { modes: ['pay','change','total'], maxPrice: 1000, paid: 1000, step: 5, denoms: [5,10,25,100,200,500], goal: 6 },
+];
+
+// ── PROGRESS ──────────────────────────────────────────────────
+const SAVE_KEY = 'shopSmart.progress';
+function loadProgress() {
+  try {
+    const p = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (p && typeof p === 'object') return Object.assign({ l1: 0, l2: 0, l3: 0, l4: 0 }, p);
+  } catch (e) {}
+  return { l1: 0, l2: 0, l3: 0, l4: 0 };
+}
+let PROG = loadProgress();
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(PROG)); } catch (e) {}
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  levelIdx: 0,
+  goal: 6, solved: 0, mistakes: 0,
+  q: null,            // { mode, target, ... }
+  tray: [],           // array of cent values placed
+  choices: [],
+  questionLocked: false,
+  running: false, paused: false,
+};
+
+// ── QUESTION GENERATION ───────────────────────────────────────
+const recentTargets = [];
+function snap(cents, step) { return Math.round(cents / step) * step; }
+
+function genPrice(lv) {
+  // a price that's payable with the available denoms and not zero
+  const minP = 15;
+  let p, guard = 0;
+  do {
+    p = snap(randi(minP, lv.maxPrice), lv.step);
+  } while ((p < minP || recentTargets.includes('p' + p)) && ++guard < 40);
+  recentTargets.push('p' + p);
+  if (recentTargets.length > 4) recentTargets.shift();
+  return p;
+}
+
+function nextQuestion() {
+  const lv = LEVELS[S.levelIdx];
+  const mode = lv.modes[randi(0, lv.modes.length - 1)];
+  S.tray = [];
+  S.questionLocked = false;
+  S.choices = [];
+
+  if (mode === 'pay') {
+    const price = genPrice(lv);
+    S.q = { mode, item: ITEMS[randi(0, ITEMS.length - 1)], price, target: price, denoms: lv.denoms };
+  } else if (mode === 'change') {
+    // price < paid, change = paid - price, payable in denoms
+    const paid = lv.paid;
+    let price, change, guard = 0;
+    do {
+      price = snap(randi(15, paid - 5), lv.step);
+      change = paid - price;
+    } while ((change <= 0 || !payable(change, lv.denoms) || recentTargets.includes('c' + price)) && ++guard < 60);
+    recentTargets.push('c' + price);
+    if (recentTargets.length > 4) recentTargets.shift();
+    S.q = { mode, item: ITEMS[randi(0, ITEMS.length - 1)], price, paid, target: change, denoms: lv.denoms };
+  } else { // total — multiple choice
+    const a = snap(randi(20, 300), lv.step);
+    const b = snap(randi(20, 300), lv.step);
+    const total = a + b;
+    S.q = { mode, a, b, target: total };
+    S.choices = makeMoneyChoices(total, lv.step);
+  }
+  rerenderQuestion();
+  updateHUD();
+}
+
+// can `amount` be made exactly with the given denom set (greedy works since denoms are canonical)?
+function payable(amount, denoms) {
+  const ds = denoms.slice().sort((x, y) => y - x);
+  let rem = amount;
+  for (const d of ds) { rem -= Math.floor(rem / d) * d; }
+  return rem === 0;
+}
+
+function makeMoneyChoices(total, step) {
+  const pool = [];
+  const push = v => { if (Number.isInteger(v) && v > 0 && v !== total && !pool.includes(v)) pool.push(v); };
+  shuffle([total + step, total - step, total + 2 * step, total - 2 * step, total + 100, total - 100]).forEach(push);
+  const picked = pool.slice(0, 3);
+  let guard = 0;
+  while (picked.length < 3 && guard++ < 50) {
+    const v = total + randi(-4, 4) * step;
+    if (v > 0 && v !== total && !picked.includes(v)) picked.push(v);
+  }
+  return shuffle([total].concat(picked));
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────
+function trayTotal() { return S.tray.reduce((s, v) => s + v, 0); }
+
+function questionPrompt(q) {
+  if (q.mode === 'pay') return window.t('q.pay', { amt: '<b>' + fmt(q.price) + '</b>' });
+  if (q.mode === 'change') return window.t('q.change', { paid: '<b>' + fmt(q.paid) + '</b>', price: '<b>' + fmt(q.price) + '</b>' });
+  if (q.mode === 'total') return window.t('q.total');
+  return '';
+}
+
+function discHTML(m, small) {
+  return '<span class="disc ' + m.cls + '">' + m.label + '</span>';
+}
+
+function rerenderQuestion() {
+  if (!S.running) return;
+  const lv = LEVELS[S.levelIdx];
+  const q = S.q;
+  const play = document.getElementById('play');
+  document.getElementById('hud-q').innerHTML = questionPrompt(q);
+
+  if (q.mode === 'total') {
+    let html =
+      '<div class="scenario">' +
+        '<span class="emoji">🛒</span>' +
+        '<span class="price-tag">' + fmt(q.a) + ' + ' + fmt(q.b) + '</span>' +
+      '</div>' +
+      '<div class="choices">';
+    S.choices.forEach(v => { html += '<button class="choice" data-v="' + v + '">' + fmt(v) + '</button>'; });
+    html += '</div>';
+    play.innerHTML = html;
+    play.querySelectorAll('.choice').forEach(b => {
+      b.addEventListener('click', () => onChoose(parseInt(b.dataset.v, 10), b));
+    });
+    return;
+  }
+
+  // pay / change: tray builder
+  const dueLabel = q.mode === 'pay' ? window.t('hud.due') : window.t('hud.due');
+  let html = '';
+  // scenario
+  if (q.mode === 'pay') {
+    html += '<div class="scenario"><span class="emoji">' + q.item + '</span>' +
+            '<span class="price-tag">' + fmt(q.price) + '</span></div>';
+  } else {
+    html += '<div class="scenario"><span class="emoji">' + q.item + '</span>' +
+            '<div><div class="price-tag">' + fmt(q.price) + '</div>' +
+            '<div class="sub">' + window.t('q.change', { paid: fmt(q.paid), price: fmt(q.price) }).replace(/<\/?b>/g, '') + '</div></div></div>';
+  }
+  // readout
+  const tot = trayTotal();
+  const okClass = tot === q.target ? ' ok' : '';
+  html += '<div class="readout">' +
+            '<div class="box"><span class="lbl">' + dueLabel + '</span><span class="val">' + fmt(q.target) + '</span></div>' +
+            '<div class="box' + okClass + '"><span class="lbl">' + window.t('hud.tray') + '</span><span class="val" id="tray-total">' + fmt(tot) + '</span></div>' +
+          '</div>';
+  // palette
+  html += '<div class="palette">';
+  for (const v of lv.denoms) {
+    const m = moneyByVal(v);
+    html += '<button class="coin ' + (m.kind === 'note' ? 'note' : '') + '" data-v="' + v + '">' + discHTML(m) + '</button>';
+  }
+  html += '</div>';
+  // tray
+  html += '<div class="tray" id="tray">' + trayHTML() + '</div>';
+  // actions
+  html += '<div class="action-row">' +
+            '<button class="undo-btn" id="undo-btn">↩ ' + window.t('btn.undo') + '</button>' +
+            '<button class="check-btn" id="pay-btn">' + window.t('btn.pay') + '</button>' +
+          '</div>';
+  play.innerHTML = html;
+
+  play.querySelectorAll('.coin').forEach(b => {
+    b.addEventListener('click', () => onAddMoney(parseInt(b.dataset.v, 10)));
+  });
+  document.getElementById('undo-btn').addEventListener('click', onUndo);
+  document.getElementById('pay-btn').addEventListener('click', onPay);
+}
+
+function trayHTML() {
+  let h = '';
+  S.tray.forEach((v, i) => {
+    const m = moneyByVal(v);
+    h += '<span class="placed ' + (m.kind === 'note' ? 'note' : '') + '" data-i="' + i + '">' + discHTML(m) + '</span>';
+  });
+  return h;
+}
+
+function refreshTray() {
+  const q = S.q;
+  document.getElementById('tray').innerHTML = trayHTML();
+  document.getElementById('tray').querySelectorAll('.placed').forEach(el => {
+    el.addEventListener('click', () => onRemoveAt(parseInt(el.dataset.i, 10)));
+  });
+  const tot = trayTotal();
+  const tt = document.getElementById('tray-total');
+  tt.textContent = fmt(tot);
+  tt.parentElement.classList.toggle('ok', tot === q.target);
+}
+
+// ── INTERACTION ───────────────────────────────────────────────
+function showToast(txt) {
+  const el = document.getElementById('toast');
+  el.textContent = txt;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+
+function onAddMoney(v) {
+  if (S.questionLocked) return;
+  S.tray.push(v);
+  sfxCoin();
+  refreshTray();
+}
+function onRemoveAt(i) {
+  if (S.questionLocked) return;
+  S.tray.splice(i, 1);
+  sfxRemove();
+  refreshTray();
+}
+function onUndo() {
+  if (S.questionLocked || S.tray.length === 0) return;
+  S.tray.pop();
+  sfxRemove();
+  refreshTray();
+}
+function onPay() {
+  if (S.questionLocked) return;
+  const tot = trayTotal();
+  if (tot === S.q.target) {
+    S.questionLocked = true;
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    sfxWrong();
+    showToast(tot > S.q.target ? window.t('fb.over') : window.t('fb.under'));
+    S.mistakes++;
+    // leave tray so they can adjust
+  }
+}
+function onChoose(v, btn) {
+  if (S.questionLocked) return;
+  if (v === S.q.target) {
+    S.questionLocked = true; btn.classList.add('good');
+    document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    btn.classList.add('bad'); btn.disabled = true;
+    sfxWrong(); showToast(window.t('fb.wrong')); S.mistakes++;
+  }
+}
+function advanceAfterCorrect() {
+  S.solved++;
+  updateHUD();
+  setTimeout(() => {
+    if (!S.running) return;
+    if (S.solved >= S.goal) winLevel();
+    else nextQuestion();
+  }, 850);
+}
+
+// ── GAME FLOW ─────────────────────────────────────────────────
+function goLevels() { ensureAudio(); sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+function toMenu()   { sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+
+function startLevel(idx) {
+  S.levelIdx = idx; S.goal = LEVELS[idx].goal;
+  S.solved = 0; S.mistakes = 0;
+  S.running = true; S.paused = false;
+  recentTargets.length = 0;
+  document.getElementById('pause-modal').classList.remove('show');
+  nextQuestion();
+  showScreen('screen-game');
+}
+function replayLevel() { sfxClick(); startLevel(S.levelIdx); }
+function nextMission() {
+  sfxClick();
+  if (S.lastWin && S.lastWin.levelIdx < 3) startLevel(S.lastWin.levelIdx + 1);
+  else { buildLevelCards(); showScreen('screen-level'); }
+}
+
+function winLevel() {
+  S.running = false;
+  const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
+  const key = 'l' + (S.levelIdx + 1);
+  if (stars > PROG[key]) { PROG[key] = stars; saveProgress(); }
+  S.lastWin = { stars, correct: S.solved, goal: S.goal, mistakes: S.mistakes, levelIdx: S.levelIdx };
+  renderWin();
+  showScreen('screen-win');
+  sfxWin();
+}
+function renderWin() {
+  const w = S.lastWin;
+  if (!w) return;
+  document.getElementById('win-title').textContent = window.t('win.title.' + w.stars);
+  document.getElementById('win-stars').innerHTML =
+    '⭐'.repeat(w.stars) + '<span class="star-off">' + '★'.repeat(3 - w.stars) + '</span>';
+  document.getElementById('win-correct').textContent = window.t('win.correct', { n: w.correct, g: w.goal });
+  document.getElementById('win-mistakes').textContent =
+    w.mistakes === 0 ? window.t('win.nomistakes') : window.t('win.mistakes', { n: w.mistakes });
+  const nextBtn = document.getElementById('btn-next');
+  if (w.levelIdx < 3) { nextBtn.style.display = ''; nextBtn.textContent = window.t('btn.next'); }
+  else nextBtn.style.display = 'none';
+}
+
+// ── LEVEL SELECT CARDS ────────────────────────────────────────
+function buildLevelCards() {
+  const grid = document.getElementById('lvl-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const stars = PROG['l' + (i + 1)];
+    const locked = i > 0 && PROG['l' + i] === 0;
+    const card = document.createElement('div');
+    card.className = 'lvl-card' + (locked ? ' locked' : '');
+    card.innerHTML =
+      '<div class="lvl-mission">' + window.t('level.mission', { n: i + 1 }) + '</div>' +
+      '<div class="lvl-name">' + window.t('level.name.' + (i + 1)) + '</div>' +
+      '<div class="lvl-tag">' + window.t('level.tag.' + (i + 1)) + '</div>' +
+      (locked
+        ? '<div class="lvl-stars">🔒</div><div class="lvl-lock-hint">' + window.t('level.locked') + '</div>'
+        : '<div class="lvl-stars">' + '⭐'.repeat(stars) + '<span class="star-off">' + '★'.repeat(3 - stars) + '</span></div>');
+    if (!locked) card.addEventListener('click', () => { ensureAudio(); sfxClick(); startLevel(i); });
+    grid.appendChild(card);
+  });
+}
+
+// ── HUD ───────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('hud-progress').textContent = S.solved + ' / ' + S.goal;
+}
+
+// ── PAUSE ─────────────────────────────────────────────────────
+function togglePause() {
+  if (!S.running || S.paused) return;
+  S.paused = true;
+  document.getElementById('pause-modal').classList.add('show');
+}
+function resumeGame() {
+  sfxClick();
+  S.paused = false;
+  document.getElementById('pause-modal').classList.remove('show');
+}
+function quitToLevels() {
+  sfxClick();
+  S.paused = false; S.running = false;
+  document.getElementById('pause-modal').classList.remove('show');
+  buildLevelCards();
+  showScreen('screen-level');
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateHUD();
+});
+
+// Scale-to-fit
+(function () {
+  const baseW = 960, baseH = 540;
+  function fitStage() {
+    const wrap = document.querySelector('.game-wrap');
+    if (!wrap) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  document.addEventListener('DOMContentLoaded', fitStage);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>

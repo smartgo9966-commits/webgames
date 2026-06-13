@@ -1,6 +1,6 @@
 # 🎮 Smart Go — Educational Games Gallery
 
-A collection of **28 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
+A collection of **29 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
 
 > Open `pages/` in a browser to launch the gallery. Each game tracks progress and awards stars.
 
@@ -40,6 +40,7 @@ Listed in gallery order. Folder names are under [`pages/`](pages/).
 | 26 | 🚀 **Rounding Rocket** — `rounding_rocket` | Math | A number sits between two landing pads on a number line — tap the pad it rounds to and land the rocket. Nearest 10, 100, and 1000. | 4 |
 | 27 | 🏯 **Place Value Towers** — `place_value_towers` | Math | Build a target number from base-ten blocks (tap + / − per column), or read a tower of blocks and pick the number. Ones to thousands. | 4 |
 | 28 | 📊 **Graph Garden** — `graph_garden` | Math | Read bar charts and pictographs of flowers — how many, which is most, how many more — or grow a bar to match the data. | 4 |
+| 29 | 🛒 **Shop Smart** — `shop_smart` | Math | Tap coins and notes into the tray to pay the exact price, then give the right change. Money, totals, and change up to $10. | 4 |
 
 ---
 

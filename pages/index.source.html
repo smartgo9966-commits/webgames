@@ -342,6 +342,11 @@ body::before {
 .gg .tag        { background: #d6f3e0; color: #1c6e3e; }
 .gg .play-btn   { background: linear-gradient(135deg,#2faa66,#1c6e3e); color: #ffe040; --btn-glow:rgba(28,110,62,.55); }
 
+/* ── SHOP SMART THEME ── */
+.ss .card-title { color: #9a6e16; }
+.ss .tag        { background: #f8ecca; color: #9a6e16; }
+.ss .play-btn   { background: linear-gradient(135deg,#ffe07a,#e0a82e); color: #4a3206; --btn-glow:rgba(224,168,46,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -3065,6 +3070,84 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       SHOP SMART CARD
+  ══════════════════════════════ -->
+  <div class="game-card ss" onclick="location.href='shop_smart/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="ssBg" cx="50%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#c89a30"/>
+            <stop offset="60%" stop-color="#6a4a08"/>
+            <stop offset="100%" stop-color="#3a2a06"/>
+          </radialGradient>
+          <linearGradient id="ssPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e0a82e"/>
+            <stop offset="100%" stop-color="#9a6e16"/>
+          </linearGradient>
+          <radialGradient id="ssCoin" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#ececec"/><stop offset="1" stop-color="#b4b4b4"/>
+          </radialGradient>
+          <linearGradient id="ssNote" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4caf6a"/><stop offset="1" stop-color="#2e7d4a"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#ssBg)"/>
+        <text x="338" y="44" font-size="14" fill="#fff0b0">✨</text>
+
+        <!-- Question pill -->
+        <rect x="108" y="10" width="164" height="30" rx="15" fill="url(#ssPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="31" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="15"
+              font-weight="900" text-anchor="middle">Pay exactly $0.45</text>
+
+        <!-- Item with price tag -->
+        <g>
+          <rect x="40" y="64" width="92" height="80" rx="12" fill="rgba(255,255,255,.1)" stroke="rgba(230,190,90,.5)" stroke-width="2"/>
+          <text x="86" y="112" font-size="40" text-anchor="middle">🍎</text>
+          <rect x="56" y="126" width="60" height="22" rx="6" fill="#9a6e16"/>
+          <text x="86" y="142" fill="#fff0b0" font-family="'Fredoka One',Arial" font-size="14" text-anchor="middle">$0.45</text>
+        </g>
+
+        <!-- Coins + a note -->
+        <g>
+          <circle cx="184" cy="96" r="20" fill="url(#ssCoin)" stroke="rgba(0,0,0,.2)" stroke-width="2"/>
+          <text x="184" y="101" fill="#3a2a06" font-family="'Fredoka One',Arial" font-size="13" text-anchor="middle">25¢</text>
+          <circle cx="230" cy="108" r="18" fill="url(#ssCoin)" stroke="rgba(0,0,0,.2)" stroke-width="2"/>
+          <text x="230" y="113" fill="#3a2a06" font-family="'Fredoka One',Arial" font-size="12" text-anchor="middle">10¢</text>
+          <circle cx="272" cy="96" r="18" fill="url(#ssCoin)" stroke="rgba(0,0,0,.2)" stroke-width="2"/>
+          <text x="272" y="101" fill="#3a2a06" font-family="'Fredoka One',Arial" font-size="12" text-anchor="middle">10¢</text>
+          <rect x="300" y="84" width="58" height="34" rx="6" fill="url(#ssNote)" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+          <text x="329" y="105" fill="#fff" font-family="'Fredoka One',Arial" font-size="15" text-anchor="middle">$1</text>
+        </g>
+
+        <!-- Tray hint -->
+        <rect x="40" y="156" width="300" height="18" rx="8" fill="rgba(0,0,0,.2)" stroke="rgba(230,190,90,.4)" stroke-width="1.5" stroke-dasharray="5 4"/>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(154,110,22,.95)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="ss.svg">Tap coins to pay the exact price!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="ss.title">🛒 Shop Smart</div>
+      <div class="card-desc" data-i18n="ss.desc">Run the till! Tap coins and notes into the tray to pay the exact price, then learn to give the right change. Four missions from paying with coins to totals and change from $10.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="ss.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="ss.tag.money">Money</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="shop_smart/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -3268,6 +3351,12 @@ footer {
       'gg.tag.levels': '4 Missions',
       'gg.tag.data': 'Data & Graphs',
       'gg.svg': 'Read the garden chart to answer!',
+      // ── Shop Smart (ss) ──
+      'ss.title': '🛒 Shop Smart',
+      'ss.desc': 'Run the till! Tap coins and notes into the tray to pay the exact price, then learn to give the right change. Four missions from paying with coins to totals and change from $10.',
+      'ss.tag.levels': '4 Missions',
+      'ss.tag.money': 'Money',
+      'ss.svg': 'Tap coins to pay the exact price!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -3461,6 +3550,12 @@ footer {
       'gg.tag.levels': '٤ مهمات',
       'gg.tag.data': 'البيانات والرسوم',
       'gg.svg': 'اقرأ مخطط الحديقة للإجابة!',
+      // ── Shop Smart (ss) ──
+      'ss.title': '🛒 تسوّق بذكاء',
+      'ss.desc': 'أدِر الصندوق! اضغط العملات والأوراق في الصينية لتدفع السعر بالضبط، ثم تعلّم إعطاء الباقي الصحيح. أربع مهمات من الدفع بالعملات إلى المجاميع والباقي من ١٠$.',
+      'ss.tag.levels': '٤ مهمات',
+      'ss.tag.money': 'النقود',
+      'ss.svg': 'اضغط العملات لتدفع السعر بالضبط!',
     },
   };
 
