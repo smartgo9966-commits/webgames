@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v23';
+const CACHE = 'games-v24';
 
 const PRECACHE = [
   './',
@@ -30,6 +30,8 @@ const PRECACHE = [
   // Game pages — cache BOTH the directory form (what the gallery links use,
   // e.g. "food_chain_game/") AND the explicit index.html form (what a direct
   // URL paste resolves to). Different cache keys; same bytes.
+  './add_subtract_race/',
+  './add_subtract_race/index.html',
   './alphabet_game/',
   './alphabet_game/index.html',
   './animal_cell/',

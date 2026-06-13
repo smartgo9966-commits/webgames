@@ -322,6 +322,11 @@ body::before {
 .dd .tag        { background: #d3f3ea; color: #0e7a5f; }
 .dd .play-btn   { background: linear-gradient(135deg,#19c39c,#0e7a5f); color: #ffe040; --btn-glow:rgba(14,122,95,.55); }
 
+/* ── ADD & SUBTRACT RACE THEME ── */
+.asr .card-title { color: #c0392b; }
+.asr .tag        { background: #fcdcd6; color: #c0392b; }
+.asr .play-btn   { background: linear-gradient(135deg,#ff6a48,#c0392b); color: #ffe040; --btn-glow:rgba(192,57,43,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -2726,6 +2731,92 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       ADD & SUBTRACT RACE CARD
+  ══════════════════════════════ -->
+  <div class="game-card asr" onclick="location.href='add_subtract_race/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="asrBg" cx="50%" cy="22%" r="95%">
+            <stop offset="0%" stop-color="#c0392b"/>
+            <stop offset="60%" stop-color="#7a1410"/>
+            <stop offset="100%" stop-color="#3d0a08"/>
+          </radialGradient>
+          <linearGradient id="asrPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff6a48"/>
+            <stop offset="100%" stop-color="#c0392b"/>
+          </linearGradient>
+          <linearGradient id="asrCar1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6a48"/>
+            <stop offset="100%" stop-color="#c0392b"/>
+          </linearGradient>
+          <linearGradient id="asrCar2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7bc0ff"/>
+            <stop offset="100%" stop-color="#1f5fb0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#asrBg)"/>
+        <text x="338" y="40" font-size="14" fill="#ffd840">✨</text>
+
+        <!-- Question pill -->
+        <rect x="118" y="10" width="144" height="32" rx="16" fill="url(#asrPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="32" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="17"
+              font-weight="900" text-anchor="middle">7 + 8 = ?</text>
+
+        <!-- Track -->
+        <rect x="0" y="78" width="380" height="84" fill="#2b2422"/>
+        <line x1="0" y1="120" x2="380" y2="120" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-dasharray="14 11"/>
+
+        <!-- Finish line -->
+        <g>
+          <rect x="320" y="70" width="8" height="9" fill="#fff"/><rect x="328" y="70" width="8" height="9" fill="#222"/>
+          <rect x="320" y="79" width="8" height="9" fill="#222"/><rect x="328" y="79" width="8" height="9" fill="#fff"/>
+          <rect x="320" y="88" width="8" height="9" fill="#fff"/><rect x="328" y="88" width="8" height="9" fill="#222"/>
+          <rect x="320" y="97" width="8" height="9" fill="#222"/><rect x="328" y="97" width="8" height="9" fill="#fff"/>
+          <rect x="320" y="106" width="8" height="9" fill="#fff"/><rect x="328" y="106" width="8" height="9" fill="#222"/>
+          <rect x="320" y="115" width="8" height="9" fill="#222"/><rect x="328" y="115" width="8" height="9" fill="#fff"/>
+          <rect x="320" y="124" width="8" height="9" fill="#fff"/><rect x="328" y="124" width="8" height="9" fill="#222"/>
+          <rect x="320" y="133" width="8" height="9" fill="#222"/><rect x="328" y="133" width="8" height="9" fill="#fff"/>
+        </g>
+
+        <!-- Player car (ahead) -->
+        <g transform="translate(250,100)">
+          <rect x="-30" y="-13" width="60" height="26" rx="10" fill="url(#asrCar1)"/>
+          <rect x="-6" y="-21" width="22" height="15" rx="6" fill="rgba(255,255,255,.85)"/>
+          <circle cx="-16" cy="14" r="7" fill="#111"/><circle cx="16" cy="14" r="7" fill="#111"/>
+        </g>
+        <!-- Rival car (behind) -->
+        <g transform="translate(120,138)">
+          <rect x="-30" y="-13" width="60" height="26" rx="10" fill="url(#asrCar2)"/>
+          <rect x="-6" y="-21" width="22" height="15" rx="6" fill="rgba(255,255,255,.85)"/>
+          <circle cx="-16" cy="14" r="7" fill="#111"/><circle cx="16" cy="14" r="7" fill="#111"/>
+        </g>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(192,57,43,.92)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="asr.svg">Answer fast to beat the rival racer!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="asr.title">🏎️ Add &amp; Subtract Race</div>
+      <div class="card-desc" data-i18n="asr.desc">Race a rival car down the track! Tap the answer to each addition or subtraction question to zoom ahead — every correct answer moves your car forward. Four races from + and − within 10 up to regrouping within 20, plus a Turbo Lap endless mode.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="asr.tag.levels">4 Races</span>
+        <span class="tag" data-i18n="asr.tag.addsub">Add &amp; Subtract</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="add_subtract_race/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -2905,6 +2996,12 @@ footer {
       'dd.tag.levels': '4 Missions',
       'dd.tag.div': 'Division',
       'dd.svg': 'Catch the pod with the correct answer!',
+      // ── Add & Subtract Race (asr) ──
+      'asr.title': '🏎️ Add & Subtract Race',
+      'asr.desc': 'Race a rival car down the track! Tap the answer to each addition or subtraction question to zoom ahead — every correct answer moves your car forward. Four races from + and − within 10 up to regrouping within 20, plus a Turbo Lap endless mode.',
+      'asr.tag.levels': '4 Races',
+      'asr.tag.addsub': 'Add & Subtract',
+      'asr.svg': 'Answer fast to beat the rival racer!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -3074,6 +3171,12 @@ footer {
       'dd.tag.levels': '٤ مهمات',
       'dd.tag.div': 'القسمة',
       'dd.svg': 'التقط الكبسولة ذات الإجابة الصحيحة!',
+      // ── Add & Subtract Race (asr) ──
+      'asr.title': '🏎️ سباق الجمع والطرح',
+      'asr.desc': 'تسابق مع سيارة منافسة على المضمار! اضغط على إجابة كل مسألة جمع أو طرح لتنطلق للأمام — كل إجابة صحيحة تحرّك سيارتك. أربعة سباقات من الجمع والطرح ضمن ١٠ إلى إعادة التجميع ضمن ٢٠، بالإضافة إلى نمط لفة التوربو اللانهائي.',
+      'asr.tag.levels': '٤ سباقات',
+      'asr.tag.addsub': 'جمع وطرح',
+      'asr.svg': 'أجب بسرعة لتسبق المنافس!',
     },
   };
 

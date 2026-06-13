@@ -1,6 +1,6 @@
 # 🎮 Smart Go — Educational Games Gallery
 
-A collection of **24 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
+A collection of **25 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
 
 > Open `pages/` in a browser to launch the gallery. Each game tracks progress and awards stars.
 
@@ -36,6 +36,7 @@ Listed in gallery order. Folder names are under [`pages/`](pages/).
 | 22 | 💰 **Coin Counter** — `coin_counter` | Math | Make the exact price by tapping coins into the cash register, from pennies to dollar coins. | 4 |
 | 23 | 🚀 **Times Table Blaster** — `times_table_blaster` | Math | A space shooter: blast the falling asteroid showing the correct product for the multiplication question. | 4 + endless |
 | 24 | ➗ **Division Dash** — `division_dash` | Math | A sliding-pod catcher: tap the pod showing the correct quotient for the division question before it dashes off-screen. | 4 + endless |
+| 25 | 🏎️ **Add & Subtract Race** — `add_subtract_race` | Math | Race a rival car: tap the right answer to each + or − question to zoom ahead and cross the finish line first. | 4 + endless |
 
 ---
 
