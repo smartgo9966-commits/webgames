@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Measure Up</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0e3d52">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Nunito', sans-serif;
+  background: radial-gradient(ellipse at 50% 18%, #1f6f8b 0%, #0e3d52 58%, #07232f 100%);
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 960px;
+  height: 540px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 2;
+}
+.screen.active { display: flex; }
+#screen-game.active { display: flex; gap: 0; justify-content: flex-start; }
+
+/* ── MENU ── */
+.menu-icon { font-size: 50px; animation: mu-float 2.6s ease-in-out infinite; }
+@keyframes mu-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 52px; color: #ffe040; letter-spacing: 1px; text-align: center;
+  text-shadow: 0 4px 0 #0e3d52, 0 10px 26px rgba(31,111,139,.5);
+}
+.menu-sub { font-family: 'Patrick Hand', cursive; font-size: 26px; color: #a8e0f0; }
+.howto {
+  background: rgba(255,255,255,.07);
+  border: 2px solid rgba(110,200,230,.5);
+  border-radius: 18px; padding: 14px 28px;
+  display: flex; flex-direction: column; gap: 7px; max-width: 680px;
+}
+.howto p { color: #dff4fb; font-size: 17px; font-weight: 700; }
+
+.big-btn {
+  font-family: 'Fredoka One', cursive; font-size: 24px;
+  color: #07232f; background: linear-gradient(135deg, #6fd0e8, #1f8fb0);
+  border: none; border-radius: 999px; padding: 14px 52px; cursor: pointer;
+  box-shadow: 0 7px 0 #135f78, 0 14px 30px rgba(0,0,0,.45);
+  transition: transform .12s, box-shadow .12s;
+}
+.big-btn:hover { transform: translateY(-2px); }
+.big-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #135f78, 0 8px 18px rgba(0,0,0,.4); }
+.big-btn.small { font-size: 18px; padding: 10px 28px; box-shadow: 0 5px 0 #135f78, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.small:active { box-shadow: 0 2px 0 #135f78, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.alt { background: linear-gradient(135deg, #ffd45a, #e0962e); color: #4a3110; box-shadow: 0 5px 0 #9a6a1e, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.alt:active { box-shadow: 0 2px 0 #9a6a1e, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.ghost { background: rgba(255,255,255,.12); color: #dff4fb; border: 2px solid rgba(255,255,255,.3); box-shadow: 0 5px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.35); }
+.big-btn.ghost:active { box-shadow: 0 2px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.3); }
+
+/* ── LEVEL SELECT ── */
+.lvl-title {
+  font-family: 'Fredoka One', cursive; font-size: 36px; color: #ffe040;
+  text-shadow: 0 3px 0 #0e3d52;
+}
+.lvl-grid { display: flex; gap: 16px; }
+.lvl-card {
+  width: 184px;
+  background: rgba(255,255,255,.07);
+  border: 2.5px solid rgba(110,200,230,.55);
+  border-radius: 20px; padding: 16px 10px;
+  text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  transition: transform .15s, border-color .15s, background .15s;
+}
+.lvl-card:hover { transform: translateY(-5px); border-color: #ffe040; background: rgba(255,255,255,.12); }
+.lvl-mission { font-size: 12px; font-weight: 800; color: #a8e0f0; letter-spacing: 1.5px; text-transform: uppercase; }
+.lvl-name { font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff; }
+.lvl-tag { font-family: 'Fredoka One', cursive; font-size: 14px; color: #ffe040; direction: ltr; }
+.lvl-stars { font-size: 18px; letter-spacing: 2px; }
+.star-off { color: rgba(255,255,255,.28); }
+.lvl-lock-hint { font-size: 12px; color: #ffc0a0; font-weight: 700; }
+.lvl-card.locked { opacity: .5; cursor: not-allowed; filter: grayscale(.55); }
+.lvl-card.locked:hover { transform: none; border-color: rgba(110,200,230,.55); background: rgba(255,255,255,.07); }
+
+/* ── GAME SCREEN ── */
+.hud {
+  width: 100%; height: 58px; flex: 0 0 58px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 16px;
+  background: rgba(7,35,47,.6);
+  border-bottom: 2px solid rgba(110,200,230,.4);
+  z-index: 5;
+}
+.hud-group { display: flex; align-items: center; gap: 12px; }
+.hud-q {
+  font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff;
+  background: linear-gradient(135deg, #1f8fb0, #135f78);
+  padding: 6px 24px; border-radius: 999px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.45);
+  text-align: center; max-width: 620px;
+}
+.hud-q b { color: #ffe040; }
+.hud-progress { font-family: 'Fredoka One', cursive; font-size: 17px; color: #a8e0f0; direction: ltr; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid rgba(110,200,230,.6);
+  background: rgba(255,255,255,.08); color: #fff;
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: rgba(255,255,255,.18); }
+
+/* ── PLAY AREA ── */
+.play {
+  flex: 1 1 auto; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; padding: 10px;
+}
+.instrument {
+  background: rgba(255,255,255,.06); border: 2px solid rgba(110,200,230,.4);
+  border-radius: 18px; padding: 12px 18px;
+}
+.instrument svg { display: block; }
+
+/* compare: two tappable objects */
+.compare-row { display: flex; gap: 26px; }
+.cmp-obj {
+  background: rgba(255,255,255,.06); border: 3px solid rgba(110,200,230,.4);
+  border-radius: 18px; padding: 14px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: transform .12s, border-color .12s, background .12s;
+}
+.cmp-obj:hover { transform: translateY(-4px); border-color: #ffe040; }
+.cmp-obj.good { border-color: #2ecc71; background: rgba(46,204,113,.15); }
+.cmp-obj.bad  { border-color: #c05050; background: rgba(192,80,80,.12); opacity: .6; }
+
+/* choices */
+.choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.choice {
+  font-family: 'Fredoka One', cursive; font-size: 26px; color: #07232f;
+  min-width: 130px; padding: 14px 18px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #6fd0e8, #1f8fb0); cursor: pointer;
+  box-shadow: 0 6px 0 #135f78; direction: ltr;
+}
+.choice:active { transform: translateY(3px); box-shadow: 0 3px 0 #135f78; }
+.choice.good { background: linear-gradient(135deg, #ffd45a, #e0962e); color: #4a3110; box-shadow: 0 6px 0 #9a6a1e; }
+.choice.bad  { background: linear-gradient(135deg, #aaa, #777); color: #fff; box-shadow: 0 6px 0 #444; }
+.choice:disabled { cursor: default; }
+
+.toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive; font-size: 60px;
+  pointer-events: none; opacity: 0; z-index: 30;
+  text-shadow: 0 4px 0 rgba(0,0,0,.4);
+}
+.toast.show { animation: mu-toast 0.9s ease-out; }
+@keyframes mu-toast {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+/* ── WIN PANEL ── */
+.panel {
+  background: rgba(7,35,47,.93);
+  border: 3px solid rgba(110,200,230,.65);
+  border-radius: 26px; padding: 28px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 11px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+}
+.panel-title {
+  font-family: 'Fredoka One', cursive; font-size: 38px; color: #ffe040;
+  text-shadow: 0 3px 0 #0e3d52;
+}
+.panel-stars { font-size: 46px; letter-spacing: 8px; }
+.panel-line { font-size: 19px; font-weight: 800; color: #dff4fb; }
+.panel-line.gold { color: #ffe040; }
+.panel-btns { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* ── PAUSE MODAL ── */
+.modal {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  background: rgba(3,16,22,.66);
+  align-items: center; justify-content: center;
+}
+.modal.show { display: flex; }
+
+/* ── SMART GO BADGE ── */
+.sg-badge {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
+<div class="fit-stage"><div class="game-wrap">
+
+<!-- ══════════════════ MENU ══════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-icon">📏</div>
+  <h1 class="menu-title" data-i18n="title">Measure Up</h1>
+  <div class="menu-sub" data-i18n="subtitle">Read the measuring tools!</div>
+  <div class="howto">
+    <p data-i18n="how.1">📏 Read the ruler, scale, or jug carefully.</p>
+    <p data-i18n="how.2">🔢 Tap the right measurement from the choices.</p>
+    <p data-i18n="how.3">⚖️ Later, compare two things and pick the best unit!</p>
+  </div>
+  <button class="big-btn" onclick="goLevels()" data-i18n="btn.start">Start</button>
+</div>
+
+<!-- ══════════════════ LEVEL SELECT ══════════════════ -->
+<div id="screen-level" class="screen">
+  <h2 class="lvl-title" data-i18n="level.title">Choose a Mission</h2>
+  <div class="lvl-grid" id="lvl-grid"></div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-group">
+      <span class="hud-q" id="hud-q">How long is the pencil?</span>
+    </div>
+    <div class="hud-group">
+      <span class="hud-progress" id="hud-progress">0 / 6</span>
+      <button class="icon-btn" id="btn-sound" onclick="toggleSound()" data-i18n-title="sound.on" title="Sound on">🔊</button>
+      <button class="icon-btn" onclick="togglePause()" data-i18n-title="pause.title" title="Paused">⏸</button>
+    </div>
+  </div>
+  <div class="play" id="play"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ══════════════════ WIN ══════════════════ -->
+<div id="screen-win" class="screen">
+  <div class="panel">
+    <div class="panel-title" id="win-title">Mission Complete!</div>
+    <div class="panel-stars" id="win-stars">⭐⭐⭐</div>
+    <div class="panel-line" id="win-correct"></div>
+    <div class="panel-line gold" id="win-mistakes"></div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="replayLevel()" data-i18n="btn.replay">Play Again</button>
+      <button class="big-btn small alt" id="btn-next" onclick="nextMission()">Next Mission</button>
+      <button class="big-btn small ghost" onclick="toMenu()" data-i18n="btn.menu">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAUSE MODAL ══════════════════ -->
+<div id="pause-modal" class="modal">
+  <div class="panel">
+    <div class="panel-title" data-i18n="pause.title">Paused</div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="resumeGame()" data-i18n="btn.resume">Resume</button>
+      <button class="big-btn small ghost" onclick="quitToLevels()" data-i18n="btn.quit">Quit to Menu</button>
+    </div>
+  </div>
+</div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'Measure Up',
+      'subtitle': 'Read the measuring tools!',
+      'how.1': '📏 Read the ruler, scale, or jug carefully.',
+      'how.2': '🔢 Tap the right measurement from the choices.',
+      'how.3': '⚖️ Later, compare two things and pick the best unit!',
+      'btn.start': 'Start',
+      'btn.replay': 'Play Again',
+      'btn.next': 'Next Mission',
+      'btn.menu': 'Menu',
+      'btn.resume': 'Resume',
+      'btn.quit': 'Quit to Menu',
+      'level.title': 'Choose a Mission',
+      'level.mission': 'Mission {n}',
+      'level.name.1': 'Length',
+      'level.name.2': 'Weight',
+      'level.name.3': 'Capacity',
+      'level.name.4': 'Mixed',
+      'level.tag.1': 'Read the ruler',
+      'level.tag.2': 'Read the scale',
+      'level.tag.3': 'Read the jug',
+      'level.tag.4': 'Compare & units',
+      'level.locked': 'Clear the previous mission!',
+      'q.length': 'How long is the {item}?',
+      'q.weight': 'How heavy is the {item}?',
+      'q.capacity': 'How much water is in the jug?',
+      'q.longer': 'Which is LONGER?',
+      'q.heavier': 'Which is HEAVIER?',
+      'q.more': 'Which holds MORE?',
+      'q.unit': 'Which unit best measures a {item}?',
+      'item.pencil': 'pencil',
+      'item.crayon': 'crayon',
+      'item.ribbon': 'ribbon',
+      'item.straw': 'straw',
+      'item.apple': 'apple',
+      'item.melon': 'melon',
+      'item.book': 'book',
+      'item.feather': 'feather',
+      'item.bug': 'bug',
+      'item.door': 'door',
+      'item.river': 'river',
+      'item.cup': 'cup',
+      'item.bottle': 'bottle',
+      'item.bucket': 'bucket',
+      'unit.cm': 'cm', 'unit.m': 'm', 'unit.km': 'km',
+      'unit.g': 'g', 'unit.kg': 'kg',
+      'unit.mL': 'mL', 'unit.L': 'L',
+      'pause.title': 'Paused',
+      'win.title.3': 'Measuring Master!',
+      'win.title.2': 'Great Reading!',
+      'win.title.1': 'Mission Complete!',
+      'win.correct': 'Correct: {n} / {g}',
+      'win.nomistakes': 'No mistakes — amazing!',
+      'win.mistakes': '{n} mistakes',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'sound.on': 'Sound on',
+      'sound.off': 'Sound off',
+    },
+    ar: {
+      'title': 'قِسْ بدقّة',
+      'subtitle': 'اقرأ أدوات القياس!',
+      'how.1': '📏 اقرأ المسطرة أو الميزان أو الإبريق بعناية.',
+      'how.2': '🔢 اضغط القياس الصحيح من الخيارات.',
+      'how.3': '⚖️ لاحقًا، قارن بين شيئين واختر الوحدة الأنسب!',
+      'btn.start': 'ابدأ',
+      'btn.replay': 'العب مرة أخرى',
+      'btn.next': 'المهمة التالية',
+      'btn.menu': 'القائمة',
+      'btn.resume': 'متابعة',
+      'btn.quit': 'الخروج إلى القائمة',
+      'level.title': 'اختر مهمة',
+      'level.mission': 'المهمة {n}',
+      'level.name.1': 'الطول',
+      'level.name.2': 'الوزن',
+      'level.name.3': 'السعة',
+      'level.name.4': 'مختلط',
+      'level.tag.1': 'اقرأ المسطرة',
+      'level.tag.2': 'اقرأ الميزان',
+      'level.tag.3': 'اقرأ الإبريق',
+      'level.tag.4': 'قارن والوحدات',
+      'level.locked': 'أكمل المهمة السابقة!',
+      'q.length': 'كم طول {item}؟',
+      'q.weight': 'كم وزن {item}؟',
+      'q.capacity': 'كم كمية الماء في الإبريق؟',
+      'q.longer': 'أيّهما أطول؟',
+      'q.heavier': 'أيّهما أثقل؟',
+      'q.more': 'أيّهما يسع أكثر؟',
+      'q.unit': 'أي وحدة تقيس {item} بأفضل شكل؟',
+      'item.pencil': 'القلم',
+      'item.crayon': 'قلم التلوين',
+      'item.ribbon': 'الشريط',
+      'item.straw': 'القشّة',
+      'item.apple': 'التفاحة',
+      'item.melon': 'البطيخة',
+      'item.book': 'الكتاب',
+      'item.feather': 'الريشة',
+      'item.bug': 'الحشرة',
+      'item.door': 'الباب',
+      'item.river': 'النهر',
+      'item.cup': 'الكوب',
+      'item.bottle': 'الزجاجة',
+      'item.bucket': 'الدلو',
+      'unit.cm': 'سم', 'unit.m': 'م', 'unit.km': 'كم',
+      'unit.g': 'غ', 'unit.kg': 'كغ',
+      'unit.mL': 'مل', 'unit.L': 'ل',
+      'pause.title': 'إيقاف مؤقت',
+      'win.title.3': 'خبير القياس!',
+      'win.title.2': 'قراءة رائعة!',
+      'win.title.1': 'اكتملت المهمة!',
+      'win.correct': 'الصحيح: {n} / {g}',
+      'win.nomistakes': 'بلا أخطاء — رائع!',
+      'win.mistakes': '{n} أخطاء',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'sound.on': 'الصوت مفعّل',
+      'sound.off': 'الصوت متوقف',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  function refreshDynamic() {
+    const active = id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    };
+    if (typeof buildLevelCards === 'function' && active('screen-level')) buildLevelCards();
+    if (typeof renderWin === 'function' && active('screen-win')) renderWin();
+    if (typeof rerenderQuestion === 'function' && active('screen-game')) rerenderQuestion();
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
+
+<script>
+// ── UTILS ─────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function rand(a, b) { return a + Math.random() * (b - a); }
+function randi(a, b) { return Math.floor(rand(a, b + 1)); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────
+let audioCtx = null, soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+}
+function playTone(freq, dur, type) {
+  if (!soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.16, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+function sfxClick()  { playTone(520, 0.05, 'sine'); }
+function sfxTick()   { playTone(700, 0.04, 'square'); }
+function sfxCorrect(){ playTone(660, 0.1, 'triangle'); setTimeout(() => playTone(990, 0.16, 'triangle'), 90); }
+function sfxWrong()  { playTone(240, 0.16, 'sawtooth'); setTimeout(() => playTone(160, 0.24, 'sawtooth'), 130); }
+function sfxWin()    { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'triangle'), i * 120)); }
+function toggleSound() {
+  soundOn = !soundOn;
+  const b = document.getElementById('btn-sound');
+  b.textContent = soundOn ? '🔊' : '🔇';
+  b.title = window.t(soundOn ? 'sound.on' : 'sound.off');
+  if (soundOn) sfxClick();
+}
+
+// ── CONFIG ────────────────────────────────────────────────────
+// kinds: 'length' | 'weight' | 'capacity' | 'compare' | 'unit'
+const LEVELS = [
+  { kinds: ['length'],                          goal: 6 },
+  { kinds: ['weight'],                           goal: 6 },
+  { kinds: ['capacity'],                         goal: 6 },
+  { kinds: ['compare', 'unit', 'length', 'weight'], goal: 6 },
+];
+const LEN_ITEMS = ['pencil', 'crayon', 'ribbon', 'straw'];
+const LEN_EMOJI = { pencil: '✏️', crayon: '🖍️', ribbon: '🎀', straw: '🥤' };
+const WT_ITEMS  = ['apple', 'book', 'feather', 'melon'];
+const WT_EMOJI  = { apple: '🍎', book: '📕', feather: '🪶', melon: '🍈' };
+// choose-the-unit table: item → correct unit, with distractor units
+const UNIT_ITEMS = [
+  { key: 'pencil', emoji: '✏️', correct: 'cm', opts: ['cm', 'm', 'km'] },
+  { key: 'door',   emoji: '🚪', correct: 'm',  opts: ['cm', 'm', 'km'] },
+  { key: 'river',  emoji: '🏞️', correct: 'km', opts: ['cm', 'm', 'km'] },
+  { key: 'feather',emoji: '🪶', correct: 'g',  opts: ['g', 'kg'] },
+  { key: 'melon',  emoji: '🍈', correct: 'kg', opts: ['g', 'kg'] },
+  { key: 'cup',    emoji: '🥤', correct: 'mL', opts: ['mL', 'L'] },
+  { key: 'bucket', emoji: '🪣', correct: 'L',  opts: ['mL', 'L'] },
+];
+// compare pairs: each object has an emoji + a hidden magnitude
+const CMP_LENGTH = [
+  { key: 'crayon', emoji: '🖍️' }, { key: 'ribbon', emoji: '🎀' },
+  { key: 'straw', emoji: '🥤' }, { key: 'pencil', emoji: '✏️' },
+];
+const CMP_WEIGHT = [
+  { key: 'feather', emoji: '🪶' }, { key: 'apple', emoji: '🍎' },
+  { key: 'book', emoji: '📕' }, { key: 'melon', emoji: '🍈' },
+];
+
+// ── PROGRESS ──────────────────────────────────────────────────
+const SAVE_KEY = 'measureUp.progress';
+function loadProgress() {
+  try {
+    const p = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (p && typeof p === 'object') return Object.assign({ l1: 0, l2: 0, l3: 0, l4: 0 }, p);
+  } catch (e) {}
+  return { l1: 0, l2: 0, l3: 0, l4: 0 };
+}
+let PROG = loadProgress();
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(PROG)); } catch (e) {}
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  levelIdx: 0,
+  goal: 6, solved: 0, mistakes: 0,
+  q: null,            // { kind, answer, ... }
+  choices: [],
+  questionLocked: false,
+  running: false, paused: false,
+};
+
+// ── QUESTION GENERATION ───────────────────────────────────────
+const recent = [];
+function notRecent(sig) { return !recent.includes(sig); }
+function pushRecent(sig) { recent.push(sig); if (recent.length > 4) recent.shift(); }
+
+function nextQuestion() {
+  const lv = LEVELS[S.levelIdx];
+  const kind = lv.kinds[randi(0, lv.kinds.length - 1)];
+  S.questionLocked = false;
+  S.choices = [];
+  if (kind === 'length') genLength();
+  else if (kind === 'weight') genWeight();
+  else if (kind === 'capacity') genCapacity();
+  else if (kind === 'compare') genCompare();
+  else genUnit();
+  rerenderQuestion();
+  updateHUD();
+}
+
+function numChoices(answer, lo, hi, step) {
+  const pool = [];
+  const push = v => { if (v >= lo && v <= hi && v !== answer && !pool.includes(v)) pool.push(v); };
+  push(answer + step); push(answer - step); push(answer + 2 * step); push(answer - 2 * step);
+  shuffle(pool);
+  const picked = pool.slice(0, 3);
+  let guard = 0;
+  while (picked.length < 3 && guard++ < 40) {
+    const v = answer + (randi(-3, 3)) * step;
+    if (v >= lo && v <= hi && v !== answer && !picked.includes(v)) picked.push(v);
+  }
+  return shuffle([answer].concat(picked));
+}
+
+function genLength() {
+  let item, val, guard = 0;
+  do {
+    item = LEN_ITEMS[randi(0, LEN_ITEMS.length - 1)];
+    val = randi(2, 15);             // whole cm on the ruler
+    guard++;
+  } while (!notRecent('len' + item + val) && guard < 30);
+  pushRecent('len' + item + val);
+  S.q = { kind: 'length', item, value: val, unit: 'cm', answer: val };
+  S.choices = numChoices(val, 1, 18, 1);
+}
+
+function genWeight() {
+  let val, guard = 0;
+  do { val = randi(1, 9); guard++; } while (!notRecent('wt' + val) && guard < 30);
+  pushRecent('wt' + val);
+  const item = WT_ITEMS[randi(0, WT_ITEMS.length - 1)];
+  S.q = { kind: 'weight', item, value: val, unit: 'kg', answer: val, maxScale: 10 };
+  S.choices = numChoices(val, 0, 10, 1);
+}
+
+function genCapacity() {
+  // jug max 1000 mL, marks every 100 → value is a multiple of 100
+  let val, guard = 0;
+  do { val = randi(1, 9) * 100; guard++; } while (!notRecent('cap' + val) && guard < 30);
+  pushRecent('cap' + val);
+  S.q = { kind: 'capacity', value: val, unit: 'mL', answer: val, maxScale: 1000 };
+  S.choices = numChoices(val, 100, 1000, 100);
+}
+
+function genCompare() {
+  const isLen = Math.random() < 0.5;
+  const pool = isLen ? CMP_LENGTH : CMP_WEIGHT;
+  const two = shuffle(pool.slice()).slice(0, 2);
+  // assign distinct magnitudes
+  let a = randi(2, 9), b = randi(2, 9);
+  while (a === b) b = randi(2, 9);
+  const objs = [
+    { key: two[0].key, emoji: two[0].emoji, mag: a },
+    { key: two[1].key, emoji: two[1].emoji, mag: b },
+  ];
+  const bigger = objs[0].mag > objs[1].mag ? two[0].key : two[1].key;
+  S.q = { kind: 'compare', sub: isLen ? 'longer' : 'heavier', objs, answer: bigger };
+}
+
+function genUnit() {
+  let it, guard = 0;
+  do { it = UNIT_ITEMS[randi(0, UNIT_ITEMS.length - 1)]; guard++; } while (!notRecent('u' + it.key) && guard < 20);
+  pushRecent('u' + it.key);
+  S.q = { kind: 'unit', item: it.key, emoji: it.emoji, answer: it.correct };
+  S.choices = shuffle(it.opts.slice());
+}
+
+// ── SVG INSTRUMENTS ───────────────────────────────────────────
+function svgRuler(item, valCm) {
+  const x0 = 40, x1 = 660, span = x1 - x0, maxCm = 16;
+  const px = cm => x0 + (cm / maxCm) * span;
+  let ticks = '';
+  for (let c = 0; c <= maxCm; c++) {
+    const x = px(c), big = (c % 5 === 0);
+    ticks += '<line x1="' + x + '" y1="70" x2="' + x + '" y2="' + (big ? 40 : 54) + '" stroke="#0e3d52" stroke-width="' + (big ? 2.5 : 1.5) + '"/>';
+    if (big) ticks += '<text x="' + x + '" y="32" fill="#07232f" font-family="Nunito,Arial" font-size="13" font-weight="800" text-anchor="middle">' + c + '</text>';
+  }
+  const emoji = LEN_EMOJI[item] || '✏️';
+  // object lies from 0 to valCm, just above the ruler
+  const ox0 = px(0), ox1 = px(valCm);
+  const obj =
+    '<rect x="' + ox0 + '" y="86" width="' + (ox1 - ox0) + '" height="22" rx="6" fill="#1f8fb0" stroke="#0e3d52" stroke-width="2"/>' +
+    '<text x="' + (ox1 + 14) + '" y="103" font-size="22" text-anchor="middle">' + emoji + '</text>';
+  return '<svg width="700" height="124" viewBox="0 0 700 124">' +
+    '<rect x="' + x0 + '" y="70" width="' + span + '" height="16" fill="#ffe9b0" stroke="#0e3d52" stroke-width="2"/>' +
+    ticks + obj + '</svg>';
+}
+
+function svgScale(item, valKg, maxKg) {
+  // dial scale: needle rotates from -120° (0) to +120° (max)
+  const cx = 150, cy = 150, r = 110;
+  const a0 = -210, a1 = 30;             // sweep across the bottom dial
+  const ang = a0 + (valKg / maxKg) * (a1 - a0);
+  const rad = ang * Math.PI / 180;
+  const nx = cx + Math.cos(rad) * (r - 24), ny = cy + Math.sin(rad) * (r - 24);
+  let marks = '';
+  for (let k = 0; k <= maxKg; k++) {
+    const ma = (a0 + (k / maxKg) * (a1 - a0)) * Math.PI / 180;
+    const mx0 = cx + Math.cos(ma) * (r - 6), my0 = cy + Math.sin(ma) * (r - 6);
+    const mx1 = cx + Math.cos(ma) * (r - 18), my1 = cy + Math.sin(ma) * (r - 18);
+    marks += '<line x1="' + mx0 + '" y1="' + my0 + '" x2="' + mx1 + '" y2="' + my1 + '" stroke="#0e3d52" stroke-width="2"/>';
+    const lx = cx + Math.cos(ma) * (r - 34), ly = cy + Math.sin(ma) * (r - 34);
+    marks += '<text x="' + lx + '" y="' + (ly + 4) + '" fill="#07232f" font-family="Nunito,Arial" font-size="12" font-weight="800" text-anchor="middle">' + k + '</text>';
+  }
+  const emoji = WT_EMOJI[item] || '🍎';
+  return '<svg width="300" height="240" viewBox="0 0 300 240">' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#eef6f9" stroke="#0e3d52" stroke-width="3"/>' +
+    marks +
+    '<line x1="' + cx + '" y1="' + cy + '" x2="' + nx + '" y2="' + ny + '" stroke="#c0392b" stroke-width="4" stroke-linecap="round"/>' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="#0e3d52"/>' +
+    '<rect x="' + (cx - 34) + '" y="18" width="68" height="44" rx="10" fill="#1f8fb0" stroke="#0e3d52" stroke-width="2"/>' +
+    '<text x="' + cx + '" y="46" font-size="26" text-anchor="middle">' + emoji + '</text>' +
+    '</svg>';
+}
+
+function svgJug(valMl, maxMl) {
+  const x = 30, w = 150, top = 20, bottom = 250, h = bottom - top;
+  const fillH = (valMl / maxMl) * h;
+  const fy = bottom - fillH;
+  let marks = '';
+  for (let ml = 0; ml <= maxMl; ml += 100) {
+    const y = bottom - (ml / maxMl) * h;
+    const big = (ml % 500 === 0);
+    marks += '<line x1="' + x + '" y1="' + y + '" x2="' + (x + (big ? 30 : 18)) + '" y2="' + y + '" stroke="#0e3d52" stroke-width="2"/>';
+    if (big) marks += '<text x="' + (x + 40) + '" y="' + (y + 4) + '" fill="#07232f" font-family="Nunito,Arial" font-size="12" font-weight="800">' + ml + '</text>';
+  }
+  return '<svg width="220" height="270" viewBox="0 0 220 270">' +
+    '<rect x="' + x + '" y="' + fy + '" width="' + w + '" height="' + fillH + '" fill="#5ac8e8" opacity="0.85"/>' +
+    '<rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + h + '" fill="none" stroke="#0e3d52" stroke-width="3" rx="6"/>' +
+    marks +
+    '<text x="' + (x + w + 18) + '" y="' + (top + 30) + '" font-size="26">💧</text>' +
+    '</svg>';
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────
+function itemName(key) { return window.t('item.' + key); }
+function unitName(u) { return window.t('unit.' + u); }
+
+function questionPrompt(q) {
+  if (q.kind === 'length') return window.t('q.length', { item: '<b>' + itemName(q.item) + '</b>' });
+  if (q.kind === 'weight') return window.t('q.weight', { item: '<b>' + itemName(q.item) + '</b>' });
+  if (q.kind === 'capacity') return window.t('q.capacity');
+  if (q.kind === 'compare') return window.t(q.sub === 'longer' ? 'q.longer' : 'q.heavier');
+  if (q.kind === 'unit') return window.t('q.unit', { item: '<b>' + itemName(q.item) + '</b>' });
+  return '';
+}
+
+function rerenderQuestion() {
+  if (!S.running) return;
+  const q = S.q;
+  const play = document.getElementById('play');
+  document.getElementById('hud-q').innerHTML = questionPrompt(q);
+
+  if (q.kind === 'compare') {
+    let html = '<div class="compare-row">';
+    q.objs.forEach(o => {
+      // bigger magnitude → render visibly bigger emoji
+      const size = 40 + o.mag * 6;
+      html += '<button class="cmp-obj" data-k="' + o.key + '">' +
+                '<span style="font-size:' + size + 'px">' + o.emoji + '</span>' +
+                '<span class="lvl-tag">' + itemName(o.key) + '</span>' +
+              '</button>';
+    });
+    html += '</div>';
+    play.innerHTML = html;
+    play.querySelectorAll('.cmp-obj').forEach(b => {
+      b.addEventListener('click', () => onChooseKey(b.dataset.k, b));
+    });
+    return;
+  }
+
+  if (q.kind === 'unit') {
+    let html = '<div class="instrument" style="font-size:80px;padding:16px 40px">' + q.emoji + '</div>';
+    html += '<div class="choices">';
+    S.choices.forEach(u => { html += '<button class="choice" data-u="' + u + '">' + unitName(u) + '</button>'; });
+    html += '</div>';
+    play.innerHTML = html;
+    play.querySelectorAll('.choice').forEach(b => {
+      b.addEventListener('click', () => onChooseKey(b.dataset.u, b));
+    });
+    return;
+  }
+
+  // instrument read questions (length / weight / capacity)
+  let svg = '';
+  if (q.kind === 'length') svg = svgRuler(q.item, q.value);
+  else if (q.kind === 'weight') svg = svgScale(q.item, q.value, q.maxScale);
+  else svg = svgJug(q.value, q.maxScale);
+  let html = '<div class="instrument">' + svg + '</div><div class="choices">';
+  S.choices.forEach(v => {
+    html += '<button class="choice" data-v="' + v + '">' + v + ' ' + unitName(q.unit) + '</button>';
+  });
+  html += '</div>';
+  play.innerHTML = html;
+  play.querySelectorAll('.choice').forEach(b => {
+    b.addEventListener('click', () => onChoose(parseInt(b.dataset.v, 10), b));
+  });
+}
+
+// ── INTERACTION ───────────────────────────────────────────────
+function showToast(txt) {
+  const el = document.getElementById('toast');
+  el.textContent = txt;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+function onChoose(v, btn) {
+  if (S.questionLocked) return;
+  if (v === S.q.answer) {
+    S.questionLocked = true; btn.classList.add('good');
+    document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    btn.classList.add('bad'); btn.disabled = true;
+    sfxWrong(); showToast(window.t('fb.wrong')); S.mistakes++;
+  }
+}
+function onChooseKey(k, btn) {
+  if (S.questionLocked) return;
+  if (k === S.q.answer) {
+    S.questionLocked = true; btn.classList.add('good');
+    document.querySelectorAll('.choice, .cmp-obj').forEach(b => { b.disabled = true; });
+    sfxCorrect(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    btn.classList.add('bad');
+    sfxWrong(); showToast(window.t('fb.wrong')); S.mistakes++;
+  }
+}
+function advanceAfterCorrect() {
+  S.solved++;
+  updateHUD();
+  setTimeout(() => {
+    if (!S.running) return;
+    if (S.solved >= S.goal) winLevel();
+    else nextQuestion();
+  }, 850);
+}
+
+// ── GAME FLOW ─────────────────────────────────────────────────
+function goLevels() { ensureAudio(); sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+function toMenu()   { sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+
+function startLevel(idx) {
+  S.levelIdx = idx; S.goal = LEVELS[idx].goal;
+  S.solved = 0; S.mistakes = 0;
+  S.running = true; S.paused = false;
+  recent.length = 0;
+  document.getElementById('pause-modal').classList.remove('show');
+  nextQuestion();
+  showScreen('screen-game');
+}
+function replayLevel() { sfxClick(); startLevel(S.levelIdx); }
+function nextMission() {
+  sfxClick();
+  if (S.lastWin && S.lastWin.levelIdx < 3) startLevel(S.lastWin.levelIdx + 1);
+  else { buildLevelCards(); showScreen('screen-level'); }
+}
+
+function winLevel() {
+  S.running = false;
+  const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
+  const key = 'l' + (S.levelIdx + 1);
+  if (stars > PROG[key]) { PROG[key] = stars; saveProgress(); }
+  S.lastWin = { stars, correct: S.solved, goal: S.goal, mistakes: S.mistakes, levelIdx: S.levelIdx };
+  renderWin();
+  showScreen('screen-win');
+  sfxWin();
+}
+function renderWin() {
+  const w = S.lastWin;
+  if (!w) return;
+  document.getElementById('win-title').textContent = window.t('win.title.' + w.stars);
+  document.getElementById('win-stars').innerHTML =
+    '⭐'.repeat(w.stars) + '<span class="star-off">' + '★'.repeat(3 - w.stars) + '</span>';
+  document.getElementById('win-correct').textContent = window.t('win.correct', { n: w.correct, g: w.goal });
+  document.getElementById('win-mistakes').textContent =
+    w.mistakes === 0 ? window.t('win.nomistakes') : window.t('win.mistakes', { n: w.mistakes });
+  const nextBtn = document.getElementById('btn-next');
+  if (w.levelIdx < 3) { nextBtn.style.display = ''; nextBtn.textContent = window.t('btn.next'); }
+  else nextBtn.style.display = 'none';
+}
+
+// ── LEVEL SELECT CARDS ────────────────────────────────────────
+function buildLevelCards() {
+  const grid = document.getElementById('lvl-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const stars = PROG['l' + (i + 1)];
+    const locked = i > 0 && PROG['l' + i] === 0;
+    const card = document.createElement('div');
+    card.className = 'lvl-card' + (locked ? ' locked' : '');
+    card.innerHTML =
+      '<div class="lvl-mission">' + window.t('level.mission', { n: i + 1 }) + '</div>' +
+      '<div class="lvl-name">' + window.t('level.name.' + (i + 1)) + '</div>' +
+      '<div class="lvl-tag">' + window.t('level.tag.' + (i + 1)) + '</div>' +
+      (locked
+        ? '<div class="lvl-stars">🔒</div><div class="lvl-lock-hint">' + window.t('level.locked') + '</div>'
+        : '<div class="lvl-stars">' + '⭐'.repeat(stars) + '<span class="star-off">' + '★'.repeat(3 - stars) + '</span></div>');
+    if (!locked) card.addEventListener('click', () => { ensureAudio(); sfxClick(); startLevel(i); });
+    grid.appendChild(card);
+  });
+}
+
+// ── HUD ───────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('hud-progress').textContent = S.solved + ' / ' + S.goal;
+}
+
+// ── PAUSE ─────────────────────────────────────────────────────
+function togglePause() {
+  if (!S.running || S.paused) return;
+  S.paused = true;
+  document.getElementById('pause-modal').classList.add('show');
+}
+function resumeGame() {
+  sfxClick();
+  S.paused = false;
+  document.getElementById('pause-modal').classList.remove('show');
+}
+function quitToLevels() {
+  sfxClick();
+  S.paused = false; S.running = false;
+  document.getElementById('pause-modal').classList.remove('show');
+  buildLevelCards();
+  showScreen('screen-level');
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateHUD();
+});
+
+// Scale-to-fit
+(function () {
+  const baseW = 960, baseH = 540;
+  function fitStage() {
+    const wrap = document.querySelector('.game-wrap');
+    if (!wrap) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  document.addEventListener('DOMContentLoaded', fitStage);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
