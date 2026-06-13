@@ -337,6 +337,11 @@ body::before {
 .pvt .tag        { background: #f6e6c8; color: #9a6a1e; }
 .pvt .play-btn   { background: linear-gradient(135deg,#ffd45a,#e0962e); color: #4a3110; --btn-glow:rgba(224,150,46,.55); }
 
+/* ── GRAPH GARDEN THEME ── */
+.gg .card-title { color: #1c6e3e; }
+.gg .tag        { background: #d6f3e0; color: #1c6e3e; }
+.gg .play-btn   { background: linear-gradient(135deg,#2faa66,#1c6e3e); color: #ffe040; --btn-glow:rgba(28,110,62,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -2992,6 +2997,74 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       GRAPH GARDEN CARD
+  ══════════════════════════════ -->
+  <div class="game-card gg" onclick="location.href='graph_garden/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="ggBg" cx="50%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#2e8b57"/>
+            <stop offset="60%" stop-color="#14532d"/>
+            <stop offset="100%" stop-color="#0a2e19"/>
+          </radialGradient>
+          <linearGradient id="ggPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2faa66"/>
+            <stop offset="100%" stop-color="#1c6e3e"/>
+          </linearGradient>
+          <linearGradient id="ggBar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7ee0a0"/><stop offset="1" stop-color="#2faa66"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#ggBg)"/>
+        <text x="338" y="44" font-size="14" fill="#ffd840">✨</text>
+
+        <!-- Question pill -->
+        <rect x="96" y="10" width="188" height="30" rx="15" fill="url(#ggPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="31" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="14"
+              font-weight="900" text-anchor="middle">Which has the most?</text>
+
+        <!-- Chart baseline -->
+        <line x1="56" y1="150" x2="324" y2="150" stroke="rgba(120,210,150,.7)" stroke-width="3"/>
+
+        <!-- Bars: sunflower (tallest, highlighted), rose, tulip -->
+        <rect x="78"  y="74"  width="44" height="76" rx="6" fill="url(#ggBar)" stroke="#ffe040" stroke-width="2.5"/>
+        <text x="100" y="68"  fill="#ffe040" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">6</text>
+        <text x="100" y="170" font-size="22" text-anchor="middle">🌻</text>
+
+        <rect x="158" y="104" width="44" height="46" rx="6" fill="url(#ggBar)"/>
+        <text x="180" y="98"  fill="#b7f0c4" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">4</text>
+        <text x="180" y="170" font-size="22" text-anchor="middle">🌹</text>
+
+        <rect x="238" y="120" width="44" height="30" rx="6" fill="url(#ggBar)"/>
+        <text x="260" y="114" fill="#b7f0c4" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">3</text>
+        <text x="260" y="170" font-size="22" text-anchor="middle">🌷</text>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(28,110,62,.95)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="gg.svg">Read the garden chart to answer!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="gg.title">📊 Graph Garden</div>
+      <div class="card-desc" data-i18n="gg.desc">Read bar charts and pictographs of flowers and fruit! Answer how many, which has the most, and how many more — or grow a bar to match the data. Four missions, including scaled picture keys where one icon means two.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="gg.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="gg.tag.data">Data &amp; Graphs</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="graph_garden/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -3189,6 +3262,12 @@ footer {
       'pvt.tag.levels': '4 Missions',
       'pvt.tag.place': 'Place Value',
       'pvt.svg': 'Build the number with base-ten blocks!',
+      // ── Graph Garden (gg) ──
+      'gg.title': '📊 Graph Garden',
+      'gg.desc': 'Read bar charts and pictographs of flowers and fruit! Answer how many, which has the most, and how many more — or grow a bar to match the data. Four missions, including scaled picture keys where one icon means two.',
+      'gg.tag.levels': '4 Missions',
+      'gg.tag.data': 'Data & Graphs',
+      'gg.svg': 'Read the garden chart to answer!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -3376,6 +3455,12 @@ footer {
       'pvt.tag.levels': '٤ مهمات',
       'pvt.tag.place': 'القيمة المكانية',
       'pvt.svg': 'ابنِ العدد بمكعبات الأساس عشرة!',
+      // ── Graph Garden (gg) ──
+      'gg.title': '📊 حديقة الرسوم البيانية',
+      'gg.desc': 'اقرأ المخططات الشريطية والرسوم التصويرية للأزهار والفواكه! أجب عن كم العدد، وأيّها الأكثر، وكم أكثر — أو نمِّ عمودًا ليطابق البيانات. أربع مهمات، منها مفاتيح مصوّرة بمقياس حيث يعني الرمز الواحد اثنين.',
+      'gg.tag.levels': '٤ مهمات',
+      'gg.tag.data': 'البيانات والرسوم',
+      'gg.svg': 'اقرأ مخطط الحديقة للإجابة!',
     },
   };
 

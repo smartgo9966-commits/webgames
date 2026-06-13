@@ -3,7 +3,7 @@
 // Runtime: cache-first for precached entries, network-first-then-cache for
 // anything else; offline fallback to the landing page for navigations.
 
-const CACHE = 'games-v26';
+const CACHE = 'games-v27';
 
 const PRECACHE = [
   './',
@@ -56,6 +56,8 @@ const PRECACHE = [
   './cosmic_quest/index.html',
   './food_chain_game/',
   './food_chain_game/index.html',
+  './graph_garden/',
+  './graph_garden/index.html',
   './math_man/',
   './math_man/index.html',
   './maze/',
