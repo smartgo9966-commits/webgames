@@ -317,6 +317,11 @@ body::before {
 .ttb .tag        { background: #e8dcfc; color: #5a1aa8; }
 .ttb .play-btn   { background: linear-gradient(135deg,#9a5cf0,#5a1aa8); color: #ffe040; --btn-glow:rgba(90,26,168,.55); }
 
+/* ── DIVISION DASH THEME ── */
+.dd .card-title { color: #0e7a5f; }
+.dd .tag        { background: #d3f3ea; color: #0e7a5f; }
+.dd .play-btn   { background: linear-gradient(135deg,#19c39c,#0e7a5f); color: #ffe040; --btn-glow:rgba(14,122,95,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -2634,6 +2639,93 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       DIVISION DASH CARD
+  ══════════════════════════════ -->
+  <div class="game-card dd" onclick="location.href='division_dash/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="ddBg" cx="50%" cy="24%" r="95%">
+            <stop offset="0%" stop-color="#0e7a5f"/>
+            <stop offset="60%" stop-color="#06342a"/>
+            <stop offset="100%" stop-color="#021a14"/>
+          </radialGradient>
+          <radialGradient id="ddPod" cx="35%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#39d6b0"/>
+            <stop offset="100%" stop-color="#0e7a5f"/>
+          </radialGradient>
+          <radialGradient id="ddPodHL" cx="35%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#ffd97a"/>
+            <stop offset="100%" stop-color="#c98a10"/>
+          </radialGradient>
+          <radialGradient id="ddPodB" cx="35%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#7bc0ff"/>
+            <stop offset="100%" stop-color="#1f5fb0"/>
+          </radialGradient>
+          <linearGradient id="ddPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#19c39c"/>
+            <stop offset="100%" stop-color="#0e7a5f"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#ddBg)"/>
+        <circle cx="40"  cy="150" r="6" fill="rgba(90,244,230,.18)"/>
+        <circle cx="330" cy="60"  r="9" fill="rgba(90,244,230,.15)"/>
+        <circle cx="300" cy="160" r="5" fill="rgba(90,244,230,.18)"/>
+        <text x="338" y="44" font-size="14" fill="#ffd840">✨</text>
+
+        <!-- Question pill -->
+        <rect x="112" y="12" width="156" height="34" rx="17" fill="url(#ddPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="35" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="18"
+              font-weight="900" text-anchor="middle">24 ÷ 6 = ?</text>
+
+        <!-- Lane -->
+        <rect x="0" y="92" width="380" height="62" fill="rgba(255,255,255,.05)"/>
+        <line x1="0" y1="123" x2="380" y2="123" stroke="rgba(43,179,163,.4)" stroke-width="2" stroke-dasharray="12 9"/>
+
+        <!-- Pods sliding (4 = correct answer, highlighted) -->
+        <circle cx="70" cy="122" r="26" fill="url(#ddPodB)"/>
+        <text x="70" y="130" fill="#fff" font-size="22" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">5</text>
+
+        <circle cx="190" cy="122" r="29" fill="url(#ddPodHL)" stroke="#ffe040" stroke-width="2.5"/>
+        <text x="190" y="131" fill="#fff" font-size="24" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">4</text>
+
+        <circle cx="310" cy="122" r="26" fill="url(#ddPod)"/>
+        <text x="310" y="130" fill="#fff" font-size="22" font-weight="900"
+              text-anchor="middle" font-family="'Fredoka One','Arial Black',Arial">3</text>
+
+        <!-- Catcher robot -->
+        <rect x="160" y="172" width="60" height="20" rx="8" fill="#0e7a5f" stroke="#5af4e6" stroke-width="2"/>
+        <path d="M 172 172 A 18 18 0 0 1 208 172 Z" fill="#39d6b0"/>
+        <circle cx="183" cy="166" r="2.4" fill="#04201c"/>
+        <circle cx="197" cy="166" r="2.4" fill="#04201c"/>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(14,122,95,.92)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="dd.svg">Catch the pod with the correct answer!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="dd.title">➗ Division Dash</div>
+      <div class="card-desc" data-i18n="dd.desc">Answer pods slide across the screen — read the division question and tap the one with the right answer before it dashes away! Four missions cover the ÷2–10 facts, plus an endless Division Storm mode.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="dd.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="dd.tag.div">Division</span>
+        <span class="tag" data-i18n="tag.math">Math</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="division_dash/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -2807,6 +2899,12 @@ footer {
       'ttb.tag.levels': '4 Missions',
       'ttb.tag.tables': 'Times Tables',
       'ttb.svg': 'Blast the asteroid with the correct answer!',
+      // ── Division Dash (dd) ──
+      'dd.title': '➗ Division Dash',
+      'dd.desc': 'Answer pods slide across the screen — read the division question and tap the one with the right answer before it dashes away! Four missions cover the ÷2–10 facts, plus an endless Division Storm mode.',
+      'dd.tag.levels': '4 Missions',
+      'dd.tag.div': 'Division',
+      'dd.svg': 'Catch the pod with the correct answer!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -2970,6 +3068,12 @@ footer {
       'ttb.tag.levels': '٤ مهمات',
       'ttb.tag.tables': 'جداول الضرب',
       'ttb.svg': 'فجّر الكويكب ذا الإجابة الصحيحة!',
+      // ── Division Dash (dd) ──
+      'dd.title': '➗ سباق القسمة',
+      'dd.desc': 'كبسولات الإجابات تنزلق عبر الشاشة — اقرأ سؤال القسمة واضغط على الكبسولة ذات الإجابة الصحيحة قبل أن تفلت! أربع مهمات تغطي حقائق القسمة من ÷٢ إلى ÷١٠، بالإضافة إلى نمط عاصفة القسمة اللانهائي.',
+      'dd.tag.levels': '٤ مهمات',
+      'dd.tag.div': 'القسمة',
+      'dd.svg': 'التقط الكبسولة ذات الإجابة الصحيحة!',
     },
   };
 
