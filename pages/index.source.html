@@ -352,6 +352,11 @@ body::before {
 .mu .tag        { background: #d4eef6; color: #135f78; }
 .mu .play-btn   { background: linear-gradient(135deg,#6fd0e8,#1f8fb0); color: #07232f; --btn-glow:rgba(31,143,176,.55); }
 
+/* ── RHYME TIME THEME ── */
+.rt .card-title { color: #5a2aa0; }
+.rt .tag        { background: #e8dcfa; color: #5a2aa0; }
+.rt .play-btn   { background: linear-gradient(135deg,#b07cf0,#7a3ad0); color: #ffe040; --btn-glow:rgba(122,58,208,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -3222,6 +3227,83 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       RHYME TIME CARD
+  ══════════════════════════════ -->
+  <div class="game-card rt" onclick="location.href='rhyme_time/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rtBg" cx="50%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#7a3ad0"/>
+            <stop offset="60%" stop-color="#3a1a6e"/>
+            <stop offset="100%" stop-color="#1e0d3a"/>
+          </radialGradient>
+          <linearGradient id="rtPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9a5cf0"/>
+            <stop offset="100%" stop-color="#5a2aa0"/>
+          </linearGradient>
+          <linearGradient id="rtCard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#b07cf0"/><stop offset="1" stop-color="#7a3ad0"/>
+          </linearGradient>
+          <linearGradient id="rtGood" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2ecc71"/><stop offset="1" stop-color="#1e8e4f"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#rtBg)"/>
+        <text x="338" y="44" font-size="14" fill="#ffe040">✨</text>
+
+        <!-- Prompt pill -->
+        <rect x="96" y="10" width="188" height="30" rx="15" fill="url(#rtPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="31" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="14"
+              font-weight="900" text-anchor="middle">Rhymes with cat?</text>
+
+        <!-- Target word -->
+        <g>
+          <rect x="150" y="52" width="80" height="44" rx="12" fill="rgba(255,255,255,.1)" stroke="#ffe040" stroke-width="2.5"/>
+          <text x="190" y="74" font-size="22" text-anchor="middle">🐱</text>
+          <text x="190" y="90" fill="#ffe040" font-family="'Fredoka One',Arial" font-size="15" text-anchor="middle">cat</text>
+        </g>
+
+        <!-- Choice cards: hat (correct, green), dog, sun -->
+        <g>
+          <rect x="40"  y="116" width="92" height="50" rx="12" fill="url(#rtGood)" stroke="#8aff9a" stroke-width="2.5"/>
+          <text x="86" y="138" font-size="20" text-anchor="middle">🎩</text>
+          <text x="86" y="158" fill="#fff" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">hat</text>
+
+          <rect x="144" y="116" width="92" height="50" rx="12" fill="url(#rtCard)" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+          <text x="190" y="138" font-size="20" text-anchor="middle">🐶</text>
+          <text x="190" y="158" fill="#fff" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">dog</text>
+
+          <rect x="248" y="116" width="92" height="50" rx="12" fill="url(#rtCard)" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+          <text x="294" y="138" font-size="20" text-anchor="middle">☀️</text>
+          <text x="294" y="158" fill="#fff" font-family="'Fredoka One',Arial" font-size="16" text-anchor="middle">sun</text>
+        </g>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(90,42,160,.95)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="rt.svg">Tap the words that rhyme!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="rt.title">🎭 Rhyme Time</div>
+      <div class="card-desc" data-i18n="rt.desc">Cat, hat, bat — which words rhyme? Look at the word and tap the ones that sound the same at the end. Four missions through word families, from picking one rhyme to spotting them all.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="rt.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="rt.tag.rhyme">Rhyming</span>
+        <span class="tag" data-i18n="tag.reading">Reading</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="rhyme_time/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -3240,6 +3322,7 @@ footer {
       'tag.dragdrop': 'Drag & Drop',
       'tag.math': 'Math',
       'tag.science': 'Science',
+      'tag.reading': 'Reading',
       // Food Chain card
       'fc.title': '🌿 Food Chain Game',
       'fc.desc': 'Place the animals in the correct order — from producer to top predator! Build 5 different food chains across forest, ocean, grassland ecosystems and more.',
@@ -3437,6 +3520,12 @@ footer {
       'mu.tag.levels': '4 Missions',
       'mu.tag.measure': 'Measurement',
       'mu.svg': 'Read the ruler, scale, or jug!',
+      // ── Rhyme Time (rt) ──
+      'rt.title': '🎭 Rhyme Time',
+      'rt.desc': 'Cat, hat, bat — which words rhyme? Look at the word and tap the ones that sound the same at the end. Four missions through word families, from picking one rhyme to spotting them all.',
+      'rt.tag.levels': '4 Missions',
+      'rt.tag.rhyme': 'Rhyming',
+      'rt.svg': 'Tap the words that rhyme!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -3445,6 +3534,7 @@ footer {
       'tag.dragdrop': 'سحب وإفلات',
       'tag.math': 'رياضيات',
       'tag.science': 'علوم',
+      'tag.reading': 'القراءة',
       // Food Chain card
       'fc.title': '🌿 لعبة السلسلة الغذائية',
       'fc.desc': 'رتّب الحيوانات بالترتيب الصحيح — من المُنتِج إلى المفترس الأعلى! ابنِ ٥ سلاسل غذائية مختلفة عبر بيئات الغابة والمحيط والمراعي وأكثر.',
@@ -3642,6 +3732,12 @@ footer {
       'mu.tag.levels': '٤ مهمات',
       'mu.tag.measure': 'القياس',
       'mu.svg': 'اقرأ المسطرة أو الميزان أو الإبريق!',
+      // ── Rhyme Time (rt) ──
+      'rt.title': '🎭 وقت القافية',
+      'rt.desc': 'cat، hat، bat — أي الكلمات تتقافى؟ انظر إلى الكلمة واضغط على ما ينتهي بالصوت نفسه. أربع مهمات عبر عائلات الكلمات، من اختيار قافية واحدة إلى إيجادها كلها.',
+      'rt.tag.levels': '٤ مهمات',
+      'rt.tag.rhyme': 'التقافي',
+      'rt.svg': 'اضغط الكلمات المتقافية!',
     },
   };
 

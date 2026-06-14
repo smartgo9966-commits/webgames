@@ -1,6 +1,6 @@
 # 🎮 Smart Go — Educational Games Gallery
 
-A collection of **30 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
+A collection of **31 browser-based educational games** for kids, covering math, science, language, logic, coding, and creativity. Each game is a single self-contained HTML file, works on desktops, tablets, and interactive smart boards, is bilingual (English / العربية), and installs as an offline-capable web app.
 
 > Open `pages/` in a browser to launch the gallery. Each game tracks progress and awards stars.
 
@@ -42,6 +42,7 @@ Listed in gallery order. Folder names are under [`pages/`](pages/).
 | 28 | 📊 **Graph Garden** — `graph_garden` | Math | Read bar charts and pictographs of flowers — how many, which is most, how many more — or grow a bar to match the data. | 4 |
 | 29 | 🛒 **Shop Smart** — `shop_smart` | Math | Tap coins and notes into the tray to pay the exact price, then give the right change. Money, totals, and change up to $10. | 4 |
 | 30 | 📏 **Measure Up** — `measure_up` | Math | Read a ruler, dial scale, or measuring jug and tap the right value — then compare objects and choose the best unit. | 4 |
+| 31 | 🎭 **Rhyme Time** — `rhyme_time` | Reading | Look at a word and tap the ones that rhyme with it. Word families from cat/hat to -ake and -ight, with pick-one and find-them-all rounds. | 4 |
 
 ---
 

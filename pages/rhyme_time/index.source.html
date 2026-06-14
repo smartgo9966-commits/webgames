@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rhyme Time</title>
+<link rel="icon" type="image/jpeg" href="../../assets/images/logo-blue.jpeg">
+<link rel="apple-touch-icon" href="../../assets/images/icon-192.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#3a1a6e">
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Nunito', sans-serif;
+  background: radial-gradient(ellipse at 50% 18%, #7a3ad0 0%, #3a1a6e 58%, #1e0d3a 100%);
+}
+
+.fit-stage { position: fixed; inset: 0; overflow: hidden; }
+.game-wrap {
+  width: 960px;
+  height: 540px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 2;
+}
+.screen.active { display: flex; }
+#screen-game.active { display: flex; gap: 0; justify-content: flex-start; }
+
+/* ── MENU ── */
+.menu-icon { font-size: 50px; animation: rt-float 2.6s ease-in-out infinite; }
+@keyframes rt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.menu-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 52px; color: #ffe040; letter-spacing: 1px; text-align: center;
+  text-shadow: 0 4px 0 #3a1a6e, 0 10px 26px rgba(122,58,208,.5);
+}
+.menu-sub { font-family: 'Patrick Hand', cursive; font-size: 26px; color: #d8b8ff; }
+.howto {
+  background: rgba(255,255,255,.07);
+  border: 2px solid rgba(170,120,240,.5);
+  border-radius: 18px; padding: 14px 28px;
+  display: flex; flex-direction: column; gap: 7px; max-width: 680px;
+}
+.howto p { color: #efe6ff; font-size: 17px; font-weight: 700; }
+
+.big-btn {
+  font-family: 'Fredoka One', cursive; font-size: 24px;
+  color: #2a0d52; background: linear-gradient(135deg, #d8a0ff, #9a5cf0);
+  border: none; border-radius: 999px; padding: 14px 52px; cursor: pointer;
+  box-shadow: 0 7px 0 #5a2aa0, 0 14px 30px rgba(0,0,0,.45);
+  transition: transform .12s, box-shadow .12s;
+}
+.big-btn:hover { transform: translateY(-2px); }
+.big-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #5a2aa0, 0 8px 18px rgba(0,0,0,.4); }
+.big-btn.small { font-size: 18px; padding: 10px 28px; box-shadow: 0 5px 0 #5a2aa0, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.small:active { box-shadow: 0 2px 0 #5a2aa0, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.alt { background: linear-gradient(135deg, #ffd45a, #e0962e); color: #4a3110; box-shadow: 0 5px 0 #9a6a1e, 0 10px 22px rgba(0,0,0,.4); }
+.big-btn.alt:active { box-shadow: 0 2px 0 #9a6a1e, 0 6px 14px rgba(0,0,0,.35); }
+.big-btn.ghost { background: rgba(255,255,255,.12); color: #efe6ff; border: 2px solid rgba(255,255,255,.3); box-shadow: 0 5px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.35); }
+.big-btn.ghost:active { box-shadow: 0 2px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.3); }
+
+/* ── LEVEL SELECT ── */
+.lvl-title {
+  font-family: 'Fredoka One', cursive; font-size: 36px; color: #ffe040;
+  text-shadow: 0 3px 0 #3a1a6e;
+}
+.lvl-grid { display: flex; gap: 16px; }
+.lvl-card {
+  width: 184px;
+  background: rgba(255,255,255,.07);
+  border: 2.5px solid rgba(170,120,240,.55);
+  border-radius: 20px; padding: 16px 10px;
+  text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  transition: transform .15s, border-color .15s, background .15s;
+}
+.lvl-card:hover { transform: translateY(-5px); border-color: #ffe040; background: rgba(255,255,255,.12); }
+.lvl-mission { font-size: 12px; font-weight: 800; color: #d8b8ff; letter-spacing: 1.5px; text-transform: uppercase; }
+.lvl-name { font-family: 'Fredoka One', cursive; font-size: 21px; color: #fff; }
+.lvl-tag { font-family: 'Fredoka One', cursive; font-size: 14px; color: #ffe040; direction: ltr; }
+.lvl-stars { font-size: 18px; letter-spacing: 2px; }
+.star-off { color: rgba(255,255,255,.28); }
+.lvl-lock-hint { font-size: 12px; color: #ffc0c0; font-weight: 700; }
+.lvl-card.locked { opacity: .5; cursor: not-allowed; filter: grayscale(.55); }
+.lvl-card.locked:hover { transform: none; border-color: rgba(170,120,240,.55); background: rgba(255,255,255,.07); }
+
+/* ── GAME SCREEN ── */
+.hud {
+  width: 100%; height: 58px; flex: 0 0 58px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 16px;
+  background: rgba(30,13,58,.6);
+  border-bottom: 2px solid rgba(170,120,240,.4);
+  z-index: 5;
+}
+.hud-group { display: flex; align-items: center; gap: 12px; }
+.hud-q {
+  font-family: 'Fredoka One', cursive; font-size: 20px; color: #fff;
+  background: linear-gradient(135deg, #9a5cf0, #5a2aa0);
+  padding: 6px 24px; border-radius: 999px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.45);
+  text-align: center; max-width: 660px;
+}
+.hud-q b { color: #ffe040; }
+.hud-progress { font-family: 'Fredoka One', cursive; font-size: 17px; color: #d8b8ff; direction: ltr; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid rgba(170,120,240,.6);
+  background: rgba(255,255,255,.08); color: #fff;
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: rgba(255,255,255,.18); }
+
+/* ── PLAY AREA ── */
+.play {
+  flex: 1 1 auto; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; padding: 10px;
+}
+/* target word card */
+.target {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.1); border: 3px solid rgba(255,224,64,.6);
+  border-radius: 20px; padding: 10px 36px;
+}
+.target .emoji { font-size: 50px; }
+.target .word { font-family: 'Fredoka One', cursive; font-size: 34px; color: #ffe040; direction: ltr; }
+
+/* word cards (choices) */
+.cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 820px; }
+.wcard {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-width: 140px; padding: 14px 18px; border-radius: 18px; cursor: pointer;
+  background: linear-gradient(135deg, #b07cf0, #7a3ad0);
+  border: 3px solid transparent;
+  box-shadow: 0 6px 0 #4a2090;
+  transition: transform .1s, box-shadow .1s, border-color .15s, background .15s;
+}
+.wcard:active { transform: translateY(3px); box-shadow: 0 3px 0 #4a2090; }
+.wcard .emoji { font-size: 34px; min-height: 38px; }
+.wcard .word { font-family: 'Fredoka One', cursive; font-size: 26px; color: #fff; direction: ltr; }
+.wcard.sel { border-color: #ffe040; background: linear-gradient(135deg, #c89cff, #8a4ae0); }
+.wcard.good { background: linear-gradient(135deg, #2ecc71, #1e8e4f); box-shadow: 0 6px 0 #145e34; border-color: #8aff9a; }
+.wcard.bad  { background: linear-gradient(135deg, #999, #666); box-shadow: 0 6px 0 #444; opacity: .7; }
+.wcard.shake { animation: rt-shake 0.4s; }
+@keyframes rt-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+.wcard:disabled, .wcard.locked { cursor: default; }
+
+.done-btn {
+  font-family: 'Fredoka One', cursive; font-size: 20px; color: #fff;
+  background: linear-gradient(135deg, #2ecc71, #1e8e4f);
+  border: none; border-radius: 999px; padding: 10px 38px; cursor: pointer;
+  box-shadow: 0 6px 0 #145e34, 0 10px 22px rgba(0,0,0,.4);
+}
+.done-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #145e34; }
+
+.toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive; font-size: 60px;
+  pointer-events: none; opacity: 0; z-index: 30;
+  text-shadow: 0 4px 0 rgba(0,0,0,.4);
+}
+.toast.show { animation: rt-toast 0.9s ease-out; }
+@keyframes rt-toast {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+/* ── WIN PANEL ── */
+.panel {
+  background: rgba(26,11,52,.93);
+  border: 3px solid rgba(170,120,240,.65);
+  border-radius: 26px; padding: 28px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 11px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+}
+.panel-title {
+  font-family: 'Fredoka One', cursive; font-size: 38px; color: #ffe040;
+  text-shadow: 0 3px 0 #3a1a6e;
+}
+.panel-stars { font-size: 46px; letter-spacing: 8px; }
+.panel-line { font-size: 19px; font-weight: 800; color: #efe6ff; }
+.panel-line.gold { color: #ffe040; }
+.panel-btns { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* ── PAUSE MODAL ── */
+.modal {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  background: rgba(12,5,26,.66);
+  align-items: center; justify-content: center;
+}
+.modal.show { display: flex; }
+
+/* ── SMART GO BADGE ── */
+.sg-badge {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 228, 214, .3);
+  text-decoration: none;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.sg-badge:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  border-color: rgba(30, 228, 214, .6);
+}
+.sg-badge .sg-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #5af4e6, #18d0a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 9999;
+  display: inline-flex; gap: 2px;
+  background: rgba(10, 26, 56, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 228, 214, .3);
+  border-radius: 999px; padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+[dir="rtl"] .lang-toggle { right: auto; left: max(12px, env(safe-area-inset-left)); }
+[dir="rtl"] .sg-badge   { left: auto; right: max(12px, env(safe-area-inset-right)); }
+.lang-toggle button {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+  min-width: 34px; padding: 5px 11px; border: none; border-radius: 999px;
+  background: transparent; color: rgba(255,255,255,.6); cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.lang-toggle button.active {
+  background: linear-gradient(90deg, #5af4e6, #18d0a8); color: #0d1b35;
+}
+</style>
+</head>
+<body>
+<a href="../" class="sg-badge" aria-label="Smart Go — back to gallery"><span class="sg-name">SMART GO</span></a>
+<div class="lang-toggle" id="lang-toggle">
+  <button type="button" data-lang="en">EN</button><button type="button" data-lang="ar">ع</button>
+</div>
+<div class="fit-stage"><div class="game-wrap">
+
+<!-- ══════════════════ MENU ══════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-icon">🎭</div>
+  <h1 class="menu-title" data-i18n="title">Rhyme Time</h1>
+  <div class="menu-sub" data-i18n="subtitle">Find the words that rhyme!</div>
+  <div class="howto">
+    <p data-i18n="how.1">🔤 Look at the word at the top.</p>
+    <p data-i18n="how.2">👆 Tap the word (or words) that rhyme with it.</p>
+    <p data-i18n="how.3">⭐ Rhyming words sound the same at the end — like cat &amp; hat!</p>
+  </div>
+  <button class="big-btn" onclick="goLevels()" data-i18n="btn.start">Start</button>
+</div>
+
+<!-- ══════════════════ LEVEL SELECT ══════════════════ -->
+<div id="screen-level" class="screen">
+  <h2 class="lvl-title" data-i18n="level.title">Choose a Mission</h2>
+  <div class="lvl-grid" id="lvl-grid"></div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-group">
+      <span class="hud-q" id="hud-q">Which word rhymes with cat?</span>
+    </div>
+    <div class="hud-group">
+      <span class="hud-progress" id="hud-progress">0 / 6</span>
+      <button class="icon-btn" id="btn-sound" onclick="toggleSound()" data-i18n-title="sound.on" title="Sound on">🔊</button>
+      <button class="icon-btn" onclick="togglePause()" data-i18n-title="pause.title" title="Paused">⏸</button>
+    </div>
+  </div>
+  <div class="play" id="play"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ══════════════════ WIN ══════════════════ -->
+<div id="screen-win" class="screen">
+  <div class="panel">
+    <div class="panel-title" id="win-title">Mission Complete!</div>
+    <div class="panel-stars" id="win-stars">⭐⭐⭐</div>
+    <div class="panel-line" id="win-correct"></div>
+    <div class="panel-line gold" id="win-mistakes"></div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="replayLevel()" data-i18n="btn.replay">Play Again</button>
+      <button class="big-btn small alt" id="btn-next" onclick="nextMission()">Next Mission</button>
+      <button class="big-btn small ghost" onclick="toMenu()" data-i18n="btn.menu">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAUSE MODAL ══════════════════ -->
+<div id="pause-modal" class="modal">
+  <div class="panel">
+    <div class="panel-title" data-i18n="pause.title">Paused</div>
+    <div class="panel-btns">
+      <button class="big-btn small" onclick="resumeGame()" data-i18n="btn.resume">Resume</button>
+      <button class="big-btn small ghost" onclick="quitToLevels()" data-i18n="btn.quit">Quit to Menu</button>
+    </div>
+  </div>
+</div>
+
+</div></div><!-- /.game-wrap /.fit-stage -->
+
+<script>
+/* ══════════════════ LANGUAGE (EN / AR) — UI CHROME ONLY ══════════════════ */
+(function () {
+  const LANG_KEY = 'smartgo_lang';
+  const I18N = {
+    en: {
+      'title': 'Rhyme Time',
+      'subtitle': 'Find the words that rhyme!',
+      'how.1': '🔤 Look at the word at the top.',
+      'how.2': '👆 Tap the word (or words) that rhyme with it.',
+      'how.3': '⭐ Rhyming words sound the same at the end — like cat & hat!',
+      'btn.start': 'Start',
+      'btn.replay': 'Play Again',
+      'btn.next': 'Next Mission',
+      'btn.menu': 'Menu',
+      'btn.resume': 'Resume',
+      'btn.quit': 'Quit to Menu',
+      'btn.done': 'Done',
+      'level.title': 'Choose a Mission',
+      'level.mission': 'Mission {n}',
+      'level.name.1': 'Cat & Hat',
+      'level.name.2': 'More Families',
+      'level.name.3': 'Find Them All',
+      'level.name.4': 'Rhyme Master',
+      'level.tag.1': 'Pick the rhyme',
+      'level.tag.2': 'Pick the rhyme',
+      'level.tag.3': 'Tap ALL rhymes',
+      'level.tag.4': 'Mixed challenge',
+      'level.locked': 'Clear the previous mission!',
+      'prompt.pick': 'Which word rhymes with {w}?',
+      'prompt.all': 'Tap ALL the words that rhyme with {w}!',
+      'pause.title': 'Paused',
+      'win.title.3': 'Rhyme Master!',
+      'win.title.2': 'Great Rhyming!',
+      'win.title.1': 'Mission Complete!',
+      'win.correct': 'Correct: {n} / {g}',
+      'win.nomistakes': 'No mistakes — amazing!',
+      'win.mistakes': '{n} mistakes',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'sound.on': 'Sound on',
+      'sound.off': 'Sound off',
+    },
+    ar: {
+      'title': 'وقت القافية',
+      'subtitle': 'اعثر على الكلمات المتقافية!',
+      'how.1': '🔤 انظر إلى الكلمة في الأعلى.',
+      'how.2': '👆 اضغط على الكلمة (أو الكلمات) التي تتقافى معها.',
+      'how.3': '⭐ الكلمات المتقافية تنتهي بالصوت نفسه — مثل cat و hat!',
+      'btn.start': 'ابدأ',
+      'btn.replay': 'العب مرة أخرى',
+      'btn.next': 'المهمة التالية',
+      'btn.menu': 'القائمة',
+      'btn.resume': 'متابعة',
+      'btn.quit': 'الخروج إلى القائمة',
+      'btn.done': 'تم',
+      'level.title': 'اختر مهمة',
+      'level.mission': 'المهمة {n}',
+      'level.name.1': 'cat و hat',
+      'level.name.2': 'عائلات أكثر',
+      'level.name.3': 'اعثر عليها كلها',
+      'level.name.4': 'خبير القافية',
+      'level.tag.1': 'اختر القافية',
+      'level.tag.2': 'اختر القافية',
+      'level.tag.3': 'اضغط كل القوافي',
+      'level.tag.4': 'تحدٍّ مختلط',
+      'level.locked': 'أكمل المهمة السابقة!',
+      'prompt.pick': 'أي كلمة تتقافى مع {w}؟',
+      'prompt.all': 'اضغط كل الكلمات التي تتقافى مع {w}!',
+      'pause.title': 'إيقاف مؤقت',
+      'win.title.3': 'خبير القافية!',
+      'win.title.2': 'تقفية رائعة!',
+      'win.title.1': 'اكتملت المهمة!',
+      'win.correct': 'الصحيح: {n} / {g}',
+      'win.nomistakes': 'بلا أخطاء — رائع!',
+      'win.mistakes': '{n} أخطاء',
+      'fb.correct': '✅',
+      'fb.wrong': '❌',
+      'sound.on': 'الصوت مفعّل',
+      'sound.off': 'الصوت متوقف',
+    },
+  };
+
+  let lang = localStorage.getItem(LANG_KEY) || 'en';
+  if (lang !== 'en' && lang !== 'ar') lang = 'en';
+  window.SGLANG = lang;
+
+  window.t = function (key, vars) {
+    let s = (I18N[lang] && I18N[lang][key] != null) ? I18N[lang][key]
+          : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  };
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+    document.querySelectorAll('#lang-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  function refreshDynamic() {
+    const active = id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    };
+    if (typeof buildLevelCards === 'function' && active('screen-level')) buildLevelCards();
+    if (typeof renderWin === 'function' && active('screen-win')) renderWin();
+    if (typeof updatePrompt === 'function' && active('screen-game')) updatePrompt();
+  }
+
+  window.setLang = function (l) {
+    if (l !== 'en' && l !== 'ar') return;
+    lang = l; window.SGLANG = l;
+    localStorage.setItem(LANG_KEY, l);
+    applyStatic();
+    refreshDynamic();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tog = document.getElementById('lang-toggle');
+    if (tog) tog.addEventListener('click', e => {
+      const b = e.target.closest('button[data-lang]');
+      if (b) window.setLang(b.getAttribute('data-lang'));
+    });
+    applyStatic();
+  });
+  applyStatic();
+})();
+</script>
+
+<script>
+// ── UTILS ─────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function rand(a, b) { return a + Math.random() * (b - a); }
+function randi(a, b) { return Math.floor(rand(a, b + 1)); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────
+let audioCtx = null, soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+}
+function playTone(freq, dur, type) {
+  if (!soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.16, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+function sfxClick()  { playTone(520, 0.05, 'sine'); }
+function sfxDing()   { playTone(660, 0.09, 'triangle'); setTimeout(() => playTone(990, 0.14, 'triangle'), 80); }
+function sfxWrong()  { playTone(240, 0.16, 'sawtooth'); setTimeout(() => playTone(160, 0.24, 'sawtooth'), 130); }
+function sfxWin()    { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'triangle'), i * 120)); }
+function toggleSound() {
+  soundOn = !soundOn;
+  const b = document.getElementById('btn-sound');
+  b.textContent = soundOn ? '🔊' : '🔇';
+  b.title = window.t(soundOn ? 'sound.on' : 'sound.off');
+  if (soundOn) sfxClick();
+}
+
+// ── WORD FAMILIES (ENGLISH CONTENT — never translated) ────────
+// Words in the same family rhyme; words in different families do NOT.
+// emoji optional (only where a clean, child-friendly icon exists).
+const FAMILIES = {
+  at:  [['cat','🐱'],['hat','🎩'],['bat','🦇'],['mat'],['rat']],
+  an:  [['can','🥫'],['man'],['pan','🍳'],['fan','🪭'],['van','🚐']],
+  ap:  [['cap','🧢'],['map','🗺️'],['nap','😴'],['tap'],['lap']],
+  ig:  [['pig','🐷'],['wig'],['dig'],['fig'],['big']],
+  op:  [['top','🔝'],['mop'],['hop'],['pop'],['cop','👮']],
+  un:  [['sun','☀️'],['bun','🍞'],['run','🏃'],['fun'],['gun']],
+  ell: [['bell','🔔'],['well'],['shell','🐚'],['sell'],['yell']],
+  ake: [['cake','🍰'],['lake','🏞️'],['snake','🐍'],['rake'],['bake']],
+  ight:[['light','💡'],['night','🌙'],['kite','🪁'],['bite'],['white']],
+  ow:  [['cow','🐮'],['bow','🎀'],['plow'],['now'],['wow']],
+  og:  [['dog','🐶'],['frog','🐸'],['log','🪵'],['hog'],['jog']],
+  ed:  [['bed','🛏️'],['red','🟥'],['sled','🛷'],['fed']],
+};
+// emoji for the [ig] family 'kite' note: 'ight' uses long-i; kite/bite/white rhyme by sound.
+
+const LEVELS = [
+  { fams: ['at', 'an', 'ap'],                 mode: 'pick',  goal: 6 },
+  { fams: ['ig', 'op', 'un', 'ell'],          mode: 'pick',  goal: 6 },
+  { fams: ['at', 'an', 'ig', 'op', 'un', 'og'], mode: 'all', goal: 6 },
+  { fams: ['ake', 'ight', 'ow', 'ell', 'ed'], mode: 'mix',  goal: 6 },
+];
+
+// ── PROGRESS ──────────────────────────────────────────────────
+const SAVE_KEY = 'rhymeTime.progress';
+function loadProgress() {
+  try {
+    const p = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (p && typeof p === 'object') return Object.assign({ l1: 0, l2: 0, l3: 0, l4: 0 }, p);
+  } catch (e) {}
+  return { l1: 0, l2: 0, l3: 0, l4: 0 };
+}
+let PROG = loadProgress();
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(PROG)); } catch (e) {}
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  levelIdx: 0,
+  goal: 6, solved: 0, mistakes: 0,
+  mode: 'pick',          // 'pick' (1 correct) | 'all' (multi-correct)
+  target: null,          // { word, emoji, fam }
+  cards: [],             // [{ word, emoji, fam, ok, picked }]
+  found: 0, needed: 0,   // for 'all' mode
+  questionLocked: false,
+  running: false, paused: false,
+};
+
+// ── HELPERS ───────────────────────────────────────────────────
+function famWords(fam) { return FAMILIES[fam].map(e => ({ word: e[0], emoji: e[1] || null, fam })); }
+function pickFrom(arr, n, exclude) {
+  const pool = arr.filter(x => !exclude || !exclude.includes(x.word));
+  return shuffle(pool.slice()).slice(0, n);
+}
+
+// ── QUESTION GENERATION ───────────────────────────────────────
+const recentTargets = [];
+function nextQuestion() {
+  const lv = LEVELS[S.levelIdx];
+  let mode = lv.mode;
+  if (mode === 'mix') mode = Math.random() < 0.5 ? 'pick' : 'all';
+  S.mode = mode;
+  S.questionLocked = false;
+  S.found = 0;
+
+  // choose a target family + target word
+  let targetFam, guard = 0;
+  do { targetFam = lv.fams[randi(0, lv.fams.length - 1)]; guard++; }
+  while (recentTargets.includes(targetFam) && guard < 20);
+  recentTargets.push(targetFam);
+  if (recentTargets.length > 3) recentTargets.shift();
+
+  const famPool = famWords(targetFam);
+  const target = pickFrom(famPool, 1)[0];
+  S.target = target;
+
+  // other families for distractors
+  const otherFams = lv.fams.filter(f => f !== targetFam);
+  const distractorPool = [];
+  otherFams.forEach(f => famWords(f).forEach(w => distractorPool.push(w)));
+
+  if (mode === 'pick') {
+    // 1 correct rhyme (different word, same family) + 3 distractors
+    const correct = pickFrom(famPool, 1, [target.word])[0];
+    const distractors = pickFrom(distractorPool, 3);
+    S.cards = shuffle([correct, ...distractors].map(c => ({ ...c, ok: c.fam === targetFam })));
+    S.needed = 1;
+  } else {
+    // 'all': 2–3 correct rhymes + distractors to total 5
+    const nCorrect = randi(2, 3);
+    const correct = pickFrom(famPool, nCorrect, [target.word]);
+    const nDist = 5 - correct.length;
+    const distractors = pickFrom(distractorPool, nDist);
+    S.cards = shuffle([...correct, ...distractors].map(c => ({ ...c, ok: c.fam === targetFam })));
+    S.needed = correct.length;
+  }
+  S.cards.forEach(c => c.picked = false);
+  rerenderQuestion();
+  updateHUD();
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function updatePrompt() {
+  if (!S.target) return;
+  const key = S.mode === 'all' ? 'prompt.all' : 'prompt.pick';
+  // {w} stays English (LTR) inside the (possibly RTL) prompt
+  document.getElementById('hud-q').innerHTML = window.t(key, { w: '<b>' + S.target.word + '</b>' });
+}
+
+function cardHTML(c, i) {
+  return '<button class="wcard" data-i="' + i + '">' +
+           '<span class="emoji">' + (c.emoji || '') + '</span>' +
+           '<span class="word">' + c.word + '</span>' +
+         '</button>';
+}
+
+function rerenderQuestion() {
+  if (!S.running) return;
+  const play = document.getElementById('play');
+  let html =
+    '<div class="target">' +
+      '<span class="emoji">' + (S.target.emoji || '🔤') + '</span>' +
+      '<span class="word">' + S.target.word + '</span>' +
+    '</div>' +
+    '<div class="cards">';
+  S.cards.forEach((c, i) => { html += cardHTML(c, i); });
+  html += '</div>';
+  if (S.mode === 'all') {
+    html += '<button class="done-btn" id="done-btn">' + window.t('btn.done') + '</button>';
+  }
+  play.innerHTML = html;
+  updatePrompt();
+  play.querySelectorAll('.wcard').forEach(b => {
+    b.addEventListener('click', () => onCardTap(parseInt(b.dataset.i, 10), b));
+  });
+  if (S.mode === 'all') {
+    document.getElementById('done-btn').addEventListener('click', onDone);
+  }
+}
+
+// ── INTERACTION ───────────────────────────────────────────────
+function showToast(txt) {
+  const el = document.getElementById('toast');
+  el.textContent = txt;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+
+function onCardTap(i, btn) {
+  if (S.questionLocked) return;
+  const c = S.cards[i];
+
+  if (S.mode === 'pick') {
+    if (c.ok) {
+      S.questionLocked = true; btn.classList.add('good');
+      document.querySelectorAll('.wcard').forEach(b => b.classList.add('locked'));
+      sfxDing(); showToast(window.t('fb.correct'));
+      advanceAfterCorrect();
+    } else {
+      btn.classList.add('bad', 'shake');
+      sfxWrong(); showToast(window.t('fb.wrong'));
+      S.mistakes++;
+      setTimeout(() => btn.classList.remove('shake'), 400);
+    }
+    return;
+  }
+
+  // 'all' mode — toggle selection of correct cards; tapping a wrong card is an immediate mistake
+  if (c.picked) return;
+  if (c.ok) {
+    c.picked = true;
+    btn.classList.add('sel');
+    sfxClick();
+    S.found++;
+    if (S.found >= S.needed) {
+      // auto-complete when all rhymes found
+      onDone();
+    }
+  } else {
+    btn.classList.add('bad', 'shake');
+    btn.disabled = true;
+    sfxWrong(); showToast(window.t('fb.wrong'));
+    S.mistakes++;
+    setTimeout(() => btn.classList.remove('shake'), 400);
+  }
+}
+
+function onDone() {
+  if (S.questionLocked) return;
+  // success requires all needed rhymes selected (wrong taps already counted as mistakes)
+  if (S.found >= S.needed) {
+    S.questionLocked = true;
+    document.querySelectorAll('.wcard').forEach((b, i) => {
+      if (S.cards[i].ok) b.classList.add('good');
+      b.classList.add('locked');
+    });
+    sfxDing(); showToast(window.t('fb.correct'));
+    advanceAfterCorrect();
+  } else {
+    // not all found yet → count as a mistake, let them keep trying
+    sfxWrong(); showToast(window.t('fb.wrong'));
+    S.mistakes++;
+  }
+}
+
+function advanceAfterCorrect() {
+  S.solved++;
+  updateHUD();
+  setTimeout(() => {
+    if (!S.running) return;
+    if (S.solved >= S.goal) winLevel();
+    else nextQuestion();
+  }, 850);
+}
+
+// ── GAME FLOW ─────────────────────────────────────────────────
+function goLevels() { ensureAudio(); sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+function toMenu()   { sfxClick(); buildLevelCards(); showScreen('screen-level'); }
+
+function startLevel(idx) {
+  S.levelIdx = idx; S.goal = LEVELS[idx].goal;
+  S.solved = 0; S.mistakes = 0;
+  S.running = true; S.paused = false;
+  recentTargets.length = 0;
+  document.getElementById('pause-modal').classList.remove('show');
+  nextQuestion();
+  showScreen('screen-game');
+}
+function replayLevel() { sfxClick(); startLevel(S.levelIdx); }
+function nextMission() {
+  sfxClick();
+  if (S.lastWin && S.lastWin.levelIdx < 3) startLevel(S.lastWin.levelIdx + 1);
+  else { buildLevelCards(); showScreen('screen-level'); }
+}
+
+function winLevel() {
+  S.running = false;
+  const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
+  const key = 'l' + (S.levelIdx + 1);
+  if (stars > PROG[key]) { PROG[key] = stars; saveProgress(); }
+  S.lastWin = { stars, correct: S.solved, goal: S.goal, mistakes: S.mistakes, levelIdx: S.levelIdx };
+  renderWin();
+  showScreen('screen-win');
+  sfxWin();
+}
+function renderWin() {
+  const w = S.lastWin;
+  if (!w) return;
+  document.getElementById('win-title').textContent = window.t('win.title.' + w.stars);
+  document.getElementById('win-stars').innerHTML =
+    '⭐'.repeat(w.stars) + '<span class="star-off">' + '★'.repeat(3 - w.stars) + '</span>';
+  document.getElementById('win-correct').textContent = window.t('win.correct', { n: w.correct, g: w.goal });
+  document.getElementById('win-mistakes').textContent =
+    w.mistakes === 0 ? window.t('win.nomistakes') : window.t('win.mistakes', { n: w.mistakes });
+  const nextBtn = document.getElementById('btn-next');
+  if (w.levelIdx < 3) { nextBtn.style.display = ''; nextBtn.textContent = window.t('btn.next'); }
+  else nextBtn.style.display = 'none';
+}
+
+// ── LEVEL SELECT CARDS ────────────────────────────────────────
+function buildLevelCards() {
+  const grid = document.getElementById('lvl-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const stars = PROG['l' + (i + 1)];
+    const locked = i > 0 && PROG['l' + i] === 0;
+    const card = document.createElement('div');
+    card.className = 'lvl-card' + (locked ? ' locked' : '');
+    card.innerHTML =
+      '<div class="lvl-mission">' + window.t('level.mission', { n: i + 1 }) + '</div>' +
+      '<div class="lvl-name">' + window.t('level.name.' + (i + 1)) + '</div>' +
+      '<div class="lvl-tag">' + window.t('level.tag.' + (i + 1)) + '</div>' +
+      (locked
+        ? '<div class="lvl-stars">🔒</div><div class="lvl-lock-hint">' + window.t('level.locked') + '</div>'
+        : '<div class="lvl-stars">' + '⭐'.repeat(stars) + '<span class="star-off">' + '★'.repeat(3 - stars) + '</span></div>');
+    if (!locked) card.addEventListener('click', () => { ensureAudio(); sfxClick(); startLevel(i); });
+    grid.appendChild(card);
+  });
+}
+
+// ── HUD ───────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('hud-progress').textContent = S.solved + ' / ' + S.goal;
+}
+
+// ── PAUSE ─────────────────────────────────────────────────────
+function togglePause() {
+  if (!S.running || S.paused) return;
+  S.paused = true;
+  document.getElementById('pause-modal').classList.add('show');
+}
+function resumeGame() {
+  sfxClick();
+  S.paused = false;
+  document.getElementById('pause-modal').classList.remove('show');
+}
+function quitToLevels() {
+  sfxClick();
+  S.paused = false; S.running = false;
+  document.getElementById('pause-modal').classList.remove('show');
+  buildLevelCards();
+  showScreen('screen-level');
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateHUD();
+});
+
+// Scale-to-fit
+(function () {
+  const baseW = 960, baseH = 540;
+  function fitStage() {
+    const wrap = document.querySelector('.game-wrap');
+    if (!wrap) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const s = Math.min(vw / baseW, vh / baseH);
+    const x = (vw - baseW * s) / 2;
+    const y = (vh - baseH * s) / 2;
+    wrap.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  window.addEventListener('load', fitStage);
+  document.addEventListener('DOMContentLoaded', fitStage);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
