@@ -357,6 +357,11 @@ body::before {
 .rt .tag        { background: #e8dcfa; color: #5a2aa0; }
 .rt .play-btn   { background: linear-gradient(135deg,#b07cf0,#7a3ad0); color: #ffe040; --btn-glow:rgba(122,58,208,.55); }
 
+/* ── SIGHT WORD SAFARI THEME ── */
+.sws .card-title { color: #9a6a1e; }
+.sws .tag        { background: #f6e6c4; color: #9a6a1e; }
+.sws .play-btn   { background: linear-gradient(135deg,#ffe07a,#e0a82e); color: #4a3206; --btn-glow:rgba(224,168,46,.55); }
+
 /* ── LANGUAGE TOGGLE ── */
 .lang-toggle {
   position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 200;
@@ -3304,6 +3309,77 @@ footer {
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       SIGHT WORD SAFARI CARD
+  ══════════════════════════════ -->
+  <div class="game-card sws" onclick="location.href='sight_word_safari/'">
+    <div class="card-preview">
+      <svg viewBox="0 0 380 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="swsBg" cx="50%" cy="16%" r="95%">
+            <stop offset="0%" stop-color="#e0a830"/>
+            <stop offset="46%" stop-color="#9a6a18"/>
+            <stop offset="100%" stop-color="#6a4708"/>
+          </radialGradient>
+          <linearGradient id="swsPill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e0a82e"/>
+            <stop offset="100%" stop-color="#9a6a1e"/>
+          </linearGradient>
+          <linearGradient id="swsBush" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5aa83a"/><stop offset="1" stop-color="#3a7a24"/>
+          </linearGradient>
+          <linearGradient id="swsGood" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffd45a"/><stop offset="1" stop-color="#e0a82e"/>
+          </linearGradient>
+        </defs>
+
+        <!-- BG -->
+        <rect width="380" height="210" fill="url(#swsBg)"/>
+        <circle cx="320" cy="36" r="20" fill="rgba(255,255,255,.18)"/>
+        <text x="40" y="44" font-size="20">🌿</text>
+
+        <!-- Prompt pill -->
+        <rect x="108" y="10" width="164" height="30" rx="15" fill="url(#swsPill)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="190" y="31" fill="#ffffff" font-family="'Fredoka One','Arial Black',Arial" font-size="14"
+              font-weight="900" text-anchor="middle">Find the word: the</text>
+
+        <!-- Bushes: 'the' (correct, gold), 'was', 'saw' (lookalike) -->
+        <g>
+          <rect x="40"  y="92" width="92" height="68" rx="20" fill="url(#swsGood)" stroke="#fff0c0" stroke-width="2.5"/>
+          <text x="86" y="120" font-size="24" text-anchor="middle">🦁</text>
+          <text x="86" y="148" fill="#4a3206" font-family="'Fredoka One',Arial" font-size="18" text-anchor="middle">the</text>
+
+          <rect x="144" y="92" width="92" height="68" rx="20" fill="url(#swsBush)" stroke="rgba(0,0,0,.2)" stroke-width="2"/>
+          <text x="190" y="120" font-size="24" text-anchor="middle">🐘</text>
+          <text x="190" y="148" fill="#fff" font-family="'Fredoka One',Arial" font-size="18" text-anchor="middle">was</text>
+
+          <rect x="248" y="92" width="92" height="68" rx="20" fill="url(#swsBush)" stroke="rgba(0,0,0,.2)" stroke-width="2"/>
+          <text x="294" y="120" font-size="24" text-anchor="middle">🦒</text>
+          <text x="294" y="148" fill="#fff" font-family="'Fredoka One',Arial" font-size="18" text-anchor="middle">saw</text>
+        </g>
+
+        <!-- Bottom label -->
+        <rect x="0" y="180" width="380" height="30" fill="rgba(154,106,30,.95)"/>
+        <text x="190" y="200" fill="rgba(255,255,255,.98)"
+              font-family="Arial,sans-serif" font-size="13" font-weight="bold"
+              text-anchor="middle" data-i18n="sws.svg">Tap the bush with the right word!</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-title" data-i18n="sws.title">🦁 Sight Word Safari</div>
+      <div class="card-desc" data-i18n="sws.desc">Spot the everyday words readers must know by sight! Read the word and tap the bush that shows it. Four missions build from first words to tricky lookalikes like was and saw.</div>
+      <div class="card-tags">
+        <span class="tag" data-i18n="tag.taptoplay">Tap to Play</span>
+        <span class="tag" data-i18n="sws.tag.levels">4 Missions</span>
+        <span class="tag" data-i18n="sws.tag.sight">Sight Words</span>
+        <span class="tag" data-i18n="tag.reading">Reading</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="play-btn" href="sight_word_safari/" data-i18n="btn.play">▶ Play Now!</a>
+    </div>
+  </div>
+
 </div>
 
 <footer>
@@ -3526,6 +3602,12 @@ footer {
       'rt.tag.levels': '4 Missions',
       'rt.tag.rhyme': 'Rhyming',
       'rt.svg': 'Tap the words that rhyme!',
+      // ── Sight Word Safari (sws) ──
+      'sws.title': '🦁 Sight Word Safari',
+      'sws.desc': 'Spot the everyday words readers must know by sight! Read the word and tap the bush that shows it. Four missions build from first words to tricky lookalikes like was and saw.',
+      'sws.tag.levels': '4 Missions',
+      'sws.tag.sight': 'Sight Words',
+      'sws.svg': 'Tap the bush with the right word!',
     },
     ar: {
       'brand.sub': 'ألعاب تعليمية للعقول الفضولية',
@@ -3738,6 +3820,12 @@ footer {
       'rt.tag.levels': '٤ مهمات',
       'rt.tag.rhyme': 'التقافي',
       'rt.svg': 'اضغط الكلمات المتقافية!',
+      // ── Sight Word Safari (sws) ──
+      'sws.title': '🦁 سفاري الكلمات البصرية',
+      'sws.desc': 'اكتشف الكلمات اليومية التي يجب أن يعرفها القارئ بالنظر! اقرأ الكلمة واضغط على الشجيرة التي تحملها. أربع مهمات تتدرّج من الكلمات الأولى إلى المتشابهات الصعبة مثل was و saw.',
+      'sws.tag.levels': '٤ مهمات',
+      'sws.tag.sight': 'الكلمات البصرية',
+      'sws.svg': 'اضغط الشجيرة ذات الكلمة الصحيحة!',
     },
   };
 
